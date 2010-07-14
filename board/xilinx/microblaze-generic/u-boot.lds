@@ -22,6 +22,11 @@
  * MA 02111-1307 USA
  */
 
+/* Undefine the "microblaze" symbol, which will stomp on the 
+ * OUTPUT_ARCH() below when using the Xilinx toolchain
+ */
+#undef microblaze
+
 OUTPUT_ARCH(microblaze)
 ENTRY(_start)
 
