@@ -3546,6 +3546,10 @@ microblaze-generic_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze microblaze-generic xilinx
 
+labrinth-avb_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb biamp
+
 #========================================================================
 # Blackfin
 #========================================================================
