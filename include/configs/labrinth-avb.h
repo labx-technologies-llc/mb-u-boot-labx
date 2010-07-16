@@ -168,6 +168,7 @@
 #define	CONFIG_SYS_GBL_DATA_OFFSET	(CONFIG_SYS_SDRAM_BASE + CONFIG_SYS_SDRAM_SIZE - CONFIG_SYS_GBL_DATA_SIZE)
 
 /* monitor code */
+#define CONFIG_MONITOR_IS_IN_RAM        1
 #define	SIZE				0x40000
 #define	CONFIG_SYS_MONITOR_LEN		(SIZE - CONFIG_SYS_GBL_DATA_SIZE)
 #define	CONFIG_SYS_MONITOR_BASE		(CONFIG_SYS_GBL_DATA_OFFSET - CONFIG_SYS_MONITOR_LEN)
@@ -180,35 +181,28 @@
 
 /*#define	RAMENV */
 
-#ifdef FLASH
-	#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_MEM0_BASEADDR
-	#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_MEM0_HIGHADDR - XPAR_FLASH_MEM0_BASEADDR + 1)
-	#define	CONFIG_SYS_FLASH_CFI		1
-	#define	CONFIG_FLASH_CFI_DRIVER		1
-	#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
-	#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
-	#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
-	#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
+/* Flash memory is always present on this board */
 
-	#ifdef	RAMENV
-		#define	CONFIG_ENV_IS_NOWHERE	1
-		#define	CONFIG_ENV_SIZE		0x1000
-		#define	CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
+#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR
+#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)
+#define	CONFIG_SYS_FLASH_CFI		1
+#define	CONFIG_FLASH_CFI_DRIVER		1
+#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
+#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
+#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
+#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
 
-	#else	/* !RAMENV */
-		#define	CONFIG_ENV_IS_IN_FLASH	1
-		#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K(one sector) for env */
-		#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
-		#define	CONFIG_ENV_SIZE		0x20000
-	#endif /* !RAMBOOT */
-#else /* !FLASH */
-	/* ENV in RAM */
-	#define	CONFIG_SYS_NO_FLASH	1
-	#define	CONFIG_ENV_IS_NOWHERE	1
-	#define	CONFIG_ENV_SIZE		0x1000
-	#define	CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
-	#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
-#endif /* !FLASH */
+#ifdef	RAMENV
+#define	CONFIG_ENV_IS_NOWHERE	1
+#define	CONFIG_ENV_SIZE		0x1000
+#define	CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
+
+#else	/* !RAMENV */
+#define	CONFIG_ENV_IS_IN_FLASH	1
+#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K(one sector) for env */
+#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
+#define	CONFIG_ENV_SIZE		0x20000
+#endif /* !RAMBOOT */
 
 /* system ace */
 #ifdef XPAR_SYSACE_0_BASEADDR
@@ -271,23 +265,16 @@
 	#define CONFIG_CMD_FAT
 #endif
 
-#if defined(FLASH)
-	#define CONFIG_CMD_ECHO
-	#define CONFIG_CMD_FLASH
-	#define CONFIG_CMD_IMLS
-	#define CONFIG_CMD_JFFS2
+#define CONFIG_CMD_ECHO
+#define CONFIG_CMD_FLASH
+#define CONFIG_CMD_IMLS
+#define CONFIG_CMD_JFFS2
 
-	#if !defined(RAMENV)
-		#define CONFIG_CMD_SAVEENV
-		#define CONFIG_CMD_SAVES
-	#endif
-#else
-	#undef CONFIG_CMD_IMLS
-	#undef CONFIG_CMD_FLASH
-	#undef CONFIG_CMD_JFFS2
+#if !defined(RAMENV)
+#define CONFIG_CMD_SAVEENV
+#define CONFIG_CMD_SAVES
 #endif
 
-#if defined(CONFIG_CMD_JFFS2)
 /* JFFS2 partitions */
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
 #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
@@ -298,7 +285,6 @@
 #define MTDPARTS_DEFAULT	"mtdparts=ml401-0:256k(u-boot),"\
 				"256k(env),3m(kernel),1m(romfs),"\
 				"1m(cramfs),-(jffs2)"
-#endif
 
 /* Miscellaneous configurable options */
 #define	CONFIG_SYS_PROMPT	"U-Boot> "

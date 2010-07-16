@@ -27,5 +27,8 @@
 
 # Modified by hand for Biamp board; I don't think libgen
 # produces this particular file anymore...?
-TEXT_BASE = 0x89000000
+# This locates the execution location for U-Boot to be
+# half-way through the 512 Mib DDR2 device, leaving the
+# beginning of RAM open for Linux.
+TEXT_BASE = 0x88200000
 
