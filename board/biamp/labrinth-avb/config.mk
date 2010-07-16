@@ -25,5 +25,7 @@
 # Version: Xilinx EDK 6.3 EDK_Gmm.12.3
 #
 
-TEXT_BASE = 0x51000000
+# Modified by hand for Biamp board; I don't think libgen
+# produces this particular file anymore...?
+TEXT_BASE = 0x89000000
 
