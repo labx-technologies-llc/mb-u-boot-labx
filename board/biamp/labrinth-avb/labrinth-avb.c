@@ -29,6 +29,8 @@
 #include <config.h>
 #include <asm/microblaze_intc.h>
 #include <asm/asm.h>
+#include <net.h>
+#include <netdev.h>
 
 void do_reset (void)
 {
@@ -67,17 +69,11 @@ int fsl_init2 (void) {
 }
 #endif
 
+extern int labx_eth_initialize(bd_t *bis);
 int board_eth_init(bd_t *bis)
 {
-        /*
-         * This board either has PCI NICs or uses the CPU's TSECs
-         * pci_eth_init() will return 0 if no NICs found, so in that case
-         * returning -1 will force cpu_eth_init() to be called.
-         */
-#ifdef CONFIG_XILINX_EMACLITE
-        return xilinx_emaclite_initialize(bis);
-#endif
-#ifdef CONFIG_XILINX_LL_TEMAC
-        return xilinx_ll_temac_initialize(bis);
-#endif
+  /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
+   * the first one (AVB0) for use with U-Boot.
+   */
+  return(labx_eth_initialize(bis));
 }

@@ -164,9 +164,18 @@ void board_init (void)
 	}
 
 #if defined(CONFIG_CMD_NET)
+#if defined(CONFIG_NET_MULTI)
+	puts ("Net:   ");
+#endif
+	eth_initialize (bd);
+#endif
+
+#if 0 /* foo */
+#if defined(CONFIG_CMD_NET)
 	/* IP Address */
 	bd->bi_ip_addr = getenv_IPaddr ("ipaddr");
 	eth_init (bd);
+#endif
 #endif
 
 	/* main_loop */
