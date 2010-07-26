@@ -147,32 +147,6 @@
 #  define MDIO_DIVISOR_MASK  (0x0000003F)
 #  define MDIO_ENABLED       (0x00000040)
 
-/* XPS_LL_TEMAC indirect registers offset definition */
-
-#if 0 // Removing!
-#define RCW1	0x5200 /*0x240*/
-#define TC	0x5400 /*0x280*/
-#define FCC	0x5600 /*0x2c0*/
-#define PHYC	XXXXXX /*0x320*/
-#define MC	0x5A00 /*0x340*/
-#define UAW0	XXXXXX /*0x380*/
-#define UAW1	XXXXXX /*0x384*/
-#define MAW0	XXXXXX /*0x388*/
-#define MAW1	XXXXXX /*0x38c*/
-#define AFM	0x2008 /*0x390*/
-#define TIS	XXXXXX /*0x3a0*/
-#define TIE	XXXXXX /*0x3a4*/
-#define MIIMWD	XXXXXX /*0x3b0*/
-#define MIIMAI	XXXXXX /*0x3b4*/
-#define MIIBASE 0x6000
-
-
-#define MDIO_ENABLE_MASK	0x40
-#define MDIO_CLOCK_DIV_MASK	0x3F
-#define MDIO_CLOCK_DIV_100MHz	0x28
-
-#endif
-
 /* Maximum Ethernet MTU (with VLAN tag extension) */
 #define ETHER_MTU		1520
 
