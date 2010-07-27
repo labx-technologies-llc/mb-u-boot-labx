@@ -157,7 +157,7 @@
 				interrupt-parent = <&irq_Control>;
 				interrupts = < 2 2 >;
 				llink-connected = <&eth0_Fifo>;
-				local-mac-address = [ 00 0a 35 12 c2 00 ];
+				local-mac-address = [ 00 0a 35 04 1a 00 ];
 				phy-mdio-controller = <&eth0>;
 				reg = < 0x82050000 0x40 >;
 				xlnx,phy-addr = <0x1>;
@@ -184,7 +184,7 @@
 				interrupt-parent = <&irq_Control>;
 				interrupts = < 4 2 >;
 				llink-connected = <&eth1_Fifo>;
-				local-mac-address = [ 00 0a 35 12 0b 01 ];
+				local-mac-address = [ 00 0a 35 04 93 01 ];
 				phy-mdio-controller = <&eth0>;
 				reg = < 0x82070000 0x40 >;
 				xlnx,phy-addr = <0x2>;
@@ -334,7 +334,7 @@
 			xlnx,family = "spartan6";
 			xlnx,gen0-assert = <0x1>;
 			xlnx,gen1-assert = <0x1>;
-			xlnx,one-timer-only = <0x1>;
+			xlnx,one-timer-only = <0x0>;
 			xlnx,trig0-assert = <0x1>;
 			xlnx,trig1-assert = <0x1>;
 		} ;
