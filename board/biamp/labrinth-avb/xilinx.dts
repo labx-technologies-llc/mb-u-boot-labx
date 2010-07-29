@@ -39,7 +39,7 @@
 		serial0 = &serial_Console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 root=/dev/ram0";
+		bootargs = "console=ttyUL0 root=mtd1 rootfstype=romfs";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -157,7 +157,7 @@
 				interrupt-parent = <&irq_Control>;
 				interrupts = < 2 2 >;
 				llink-connected = <&eth0_Fifo>;
-				local-mac-address = [ 00 0a 35 04 1a 00 ];
+				local-mac-address = [ 00 0a 35 09 2a 00 ];
 				phy-mdio-controller = <&eth0>;
 				reg = < 0x82050000 0x40 >;
 				xlnx,phy-addr = <0x1>;
@@ -184,7 +184,7 @@
 				interrupt-parent = <&irq_Control>;
 				interrupts = < 4 2 >;
 				llink-connected = <&eth1_Fifo>;
-				local-mac-address = [ 00 0a 35 04 93 01 ];
+				local-mac-address = [ 00 0a 35 09 01 01 ];
 				phy-mdio-controller = <&eth0>;
 				reg = < 0x82070000 0x40 >;
 				xlnx,phy-addr = <0x2>;
