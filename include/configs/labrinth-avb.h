@@ -167,8 +167,6 @@
 /* stack */
 #define	CONFIG_SYS_INIT_SP_OFFSET	CONFIG_SYS_MALLOC_BASE
 
-/*#define	RAMENV */
-
 /* Flash memory is always present on this board */
 
 #define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR
@@ -180,17 +178,15 @@
 #define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
 #define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
 
-#ifdef	RAMENV
-#define	CONFIG_ENV_IS_NOWHERE	1
-#define	CONFIG_ENV_SIZE		0x1000
-#define	CONFIG_ENV_ADDR		(CONFIG_SYS_MONITOR_BASE - CONFIG_ENV_SIZE)
-
-#else	/* !RAMENV */
+/* NOTE - The configuration environment address must align with the environment
+ *        variables in ub.config.scr!
+ *        Why can't we read an environment variable to determine where the environment
+ *        should live?  We bootstrap with a script file this way...
+ */
 #define	CONFIG_ENV_IS_IN_FLASH	1
 #define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K(one sector) for env */
-#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + (2 * CONFIG_ENV_SECT_SIZE))
+#define	CONFIG_ENV_ADDR		0x87240000
 #define	CONFIG_ENV_SIZE		0x20000
-#endif /* !RAMBOOT */
 
 /* system ace */
 #ifdef XPAR_SYSACE_0_BASEADDR
