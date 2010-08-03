@@ -179,14 +179,14 @@
 #define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ub.config.scr!
- *        Why can't we read an environment variable to determine where the environment
- *        should live?  We bootstrap with a script file this way...
+ *        variables in ../../board/biamp/labrinth_avb/ub.config.scr!
+ *        These definitions locate the environment within the last, 32 KiB
+ *        top-boot parameter sector on the Flash.
  */
 #define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K(one sector) for env */
+#define	CONFIG_ENV_SECT_SIZE	0x08000	/* 32K(one sector) for env */
 #define	CONFIG_ENV_ADDR		0x87240000
-#define	CONFIG_ENV_SIZE		0x20000
+#define	CONFIG_ENV_SIZE		0x08000
 
 /* system ace */
 #ifdef XPAR_SYSACE_0_BASEADDR
@@ -278,6 +278,9 @@
 #define	CONFIG_SERVERIP		192.168.0.5
 #define	CONFIG_GATEWAYIP	192.168.0.1
 #define	CONFIG_ETHADDR		00:E0:0C:00:00:FD
+
+/* Permit a single-time overwrite of the ethaddr */
+#define CONFIG_OVERWRITE_ETHADDR_ONCE
 
 /* architecture dependent code */
 #define	CONFIG_SYS_USR_EXCEP	/* user exception */

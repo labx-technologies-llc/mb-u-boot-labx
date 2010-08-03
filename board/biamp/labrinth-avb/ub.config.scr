@@ -20,7 +20,7 @@ set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x20000
 set bootenvstart 0x87240000
-set eraseenv 'protect off $(bootenvstart) +$(bootenvsize); erase $(bootenvstart) +$(bootenvsize)'
+set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
@@ -35,7 +35,7 @@ set fpganame Labrinth_Fpga.bin
 echo Kernel Configuration:
 set kernsize 0x400000
 set kernstart 0x87280000
-set bootargs $(mtdkargs) $(netkargs)
+set bootargs ${mtdkargs} ${netkargs}
 
 echo ROM Filesystem Configuration:
 set romfssize 0x200000
@@ -46,31 +46,31 @@ set settingsfssize 0x200000
 set settingsfsstart 0x87980000
 
 echo Boot Configuration:
-set bootcmd bootm $(kernstart)
+set bootcmd bootm ${kernstart}
 set bootdelay 3
 
-set load_fpga 'tftp $(clobstart) $(fpganame)'
-set install_fpga 'protect off $(fpgastart) +$(fpgasize);erase $(fpgastart) +$(fpgasize);cp.b $(fileaddr) $(fpgastart) $(fpgasize)'
+set load_fpga 'tftp ${clobstart} ${fpganame}'
+set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
-set load_kernel 'tftp $(clobstart) image.ub'
-set install_kernel 'protect off $(kernstart) +$(kernsize);erase $(kernstart) +$(kernsize);cp.b $(fileaddr) $(kernstart) $(filesize)'
+set load_kernel 'tftp ${clobstart} image.ub'
+set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
 set update_kernel run load_kernel install_kernel
 
-set load_uboot 'tftp $(clobstart) u-boot.bin'
-set install_uboot 'protect off $(bootstart) +$(bootsize);erase $(bootstart) +$(bootsize);cp.b $(fileaddr) $(bootstart) $(filesize)'
+set load_uboot 'tftp ${clobstart} u-boot.bin'
+set install_uboot 'protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};cp.b ${fileaddr} ${bootstart} ${filesize}'
 set update_uboot run load_uboot install_uboot
 
-set load_romfs 'tftp $(clobstart) usr.romfs'
-set install_romfs 'protect off $(romfsstart) +$(romfssize);erase $(romfsstart) +$(romfssize);cp.b $(fileaddr) $(romfsstart) $(filesize)'
+set load_romfs 'tftp ${clobstart} usr.romfs'
+set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
 set update_romfs run load_romfs install_romfs
 
-set load_fdt 'tftp $(clobstart) $(fdtname)'
-set install_fdt 'protect off $(fdtstart) +$(fdtsize);erase $(fdtstart) +$(fdtsize);cp.b $(fileaddr) $(fdtstart) $(filesize)'
+set load_fdt 'tftp ${clobstart} ${fdtname}'
+set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
 set update_fdt run load_fdt install_fdt
 
-set load_settingsfs 'tftp $(clobstart) settings.jffs2'
-set install_settingsfs 'protect off $(settingsfsstart) +$(settingsfssize);erase $(settingsfsstart) +$(settingsfssize);cp.b $(fileaddr) $(settingsfsstart) $(filesize)'
+set load_settingsfs 'tftp ${clobstart} settings.jffs2'
+set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
 set update_settingsfs run load_settingsfs install_settingsfs
 
 echo Saving Configurations...
