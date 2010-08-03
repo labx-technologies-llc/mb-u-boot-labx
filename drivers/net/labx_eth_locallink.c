@@ -535,7 +535,8 @@ static int labx_eth_send_fifo(unsigned char *buffer, int length)
     unsigned int *buf = (unsigned int*) buffer;
 	unsigned int len, i, val;
 
-	len = length/4 +1;
+	len = length/4;
+	if((length % 4) != 0) len++;
 
 	for (i = 0; i < len; i++) {
 		val = *buf++;
@@ -558,7 +559,8 @@ static int labx_eth_recv_fifo(void)
 		ll_fifo->isr = 0xffffffff;
 
 		len = ll_fifo->rlf & 0x7FF;
-		len2 = (len/4) + 1;
+		len2 = (len/4);
+		if((len % 4) != 0) len2++;
 
 		for (i = 0; i < len2; i++) {
 			val = ll_fifo->rdfd;

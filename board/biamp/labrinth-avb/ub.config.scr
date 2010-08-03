@@ -9,7 +9,7 @@ set serverip 192.168.1.100
 set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x33,0x01
 
 echo MTD Configuration:
-set mtdparts physmap-flash.0:2048K(fpga),256K(boot),128K(bootenv),128K(fdt),5120K(image),2048K(romfs),2048K(settingsfs)
+set mtdparts physmap-flash.0:2048K(fpga),256K(boot),128K(fdt),5120K(image),6752K(romfs),2048K(settingsfs),32K(bootenv)
 set mtdkargs mtdparts=$(mtdparts)
 
 echo Clobber DRAM Configuration:
@@ -18,13 +18,13 @@ set clobstart 0x88000000
 echo Bootloader Configuration:
 set bootsize 0x40000
 set bootstart 0x87200000
-set bootenvsize 0x20000
-set bootenvstart 0x87240000
+set bootenvsize 0x08000
+set bootenvstart 0x87FF8000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
-set fdtstart 0x87260000
+set fdtstart 0x87240000
 set fdtname labrinth_avb.dtb
 
 echo FPGA Configuration:
@@ -34,16 +34,16 @@ set fpganame Labrinth_Fpga.bin
 
 echo Kernel Configuration:
 set kernsize 0x400000
-set kernstart 0x87280000
+set kernstart 0x87260000
 set bootargs ${mtdkargs} ${netkargs}
 
 echo ROM Filesystem Configuration:
 set romfssize 0x200000
-set romfsstart 0x87780000
+set romfsstart 0x87760000
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
-set settingsfsstart 0x87980000
+set settingsfsstart 0x87960000
 
 echo Boot Configuration:
 set bootcmd bootm ${kernstart}
