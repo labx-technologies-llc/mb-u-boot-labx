@@ -258,7 +258,8 @@ typedef struct ll_fifo_s {
 #define FIFO_ISR_TSE    0x02000000
 #define FIFO_ISR_TRC    0x01000000
 #define FIFO_ISR_RRC    0x00800000
-#  define FIFO_ISR_ALL  0xFF800000
+#  define FIFO_ISR_RESETS  (FIFO_ISR_TRC | FIFO_ISR_RRC)
+#  define FIFO_ISR_ALL     0xFF800000
 
 /* "Magic" value for FIFO reset operations, and timeout, in msec */
 #define FIFO_RESET_MAGIC    0x000000A5
@@ -575,7 +576,7 @@ static int labx_eth_recv_fifo(void)
   int *buf = (int*) &rx_buffer[0];
 
   if (ll_fifo->isr & FIFO_ISR_RC) {
-    /* One or more reads has completed.  Check the read occupancy register
+    /* One or more packets have been received.  Check the read occupancy register
      * to see how much data is ready to be processed.
      */
     len = ll_fifo->rlf & RLF_MASK;
@@ -611,6 +612,7 @@ static int labx_eth_recv_fifo(void)
 	break;
       }
     }	  
+    ll_fifo->isr = FIFO_ISR_RRC;
   }
 
     return 0;
@@ -678,6 +680,7 @@ static void labx_eth_restart(void)
 static void labx_eth_init(struct eth_device *dev, bd_t *bis)
 {
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;
+  ulong start;
 
   if(!first)
     {
@@ -691,11 +694,15 @@ static void labx_eth_init(struct eth_device *dev, bd_t *bis)
 #endif
 
 #ifdef LABX_ETH_LOCALLINK_FIFO_MODE
-  // Set fifo length
+  /* Clear ISR flags and reset both transmit and receive FIFO logic */
+  ll_fifo->isr = FIFO_ISR_ALL;
   ll_fifo->tdfr = FIFO_RESET_MAGIC;
   ll_fifo->rdfr = FIFO_RESET_MAGIC;
   //	printf ("fifo isr 0x%08x, fifo_ier 0x%08x, fifo_tdfv 0x%08x, fifo_rdfo 0x%08x fifo_rlf 0x%08x\n", ll_fifo->isr, ll_fifo->ier, ll_fifo->tdfv, ll_fifo->rdfo,ll_fifo->rlf);
 #endif
+
+  /* Issue a LocalLink reset to make sure nothing is "stuck" */
+  ll_fifo->llr = FIFO_RESET_MAGIC;
 
   /* Configure the MDIO divisor and enable the interface to the PHY */
   /* XILINX_HARD_MAC Note: The hard MDIO controller must be configured or */
