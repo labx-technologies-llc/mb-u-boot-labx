@@ -12,6 +12,8 @@
  * Copyright (C) 2008 Nissin Systems Co.,Ltd.
  * March 2008 created
  *
+ * Copyright (C) 2010 Lab X Technologies, LLC
+ *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
  * Free Software Foundation; either version 2 of the License, or (at your
@@ -37,7 +39,7 @@
 #    error "Missing board definition for either SDMA or FIFO mode"
 #  endif
 #else
-  /* SDMA mode, make certain the SDMA controller base address is defined */
+/* SDMA mode, make certain the SDMA controller base address is defined */
 #  ifndef LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR
 #    error "SDMA mode requires board definition of SDMA controller base address"
 #  endif
@@ -52,26 +54,26 @@
 #endif
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
-	/* SDMA registers definition */
-	#define TX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x00)
-	#define TX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x04)
-	#define TX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x08)
-	#define TX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x0c)
-	#define TX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x10)
-	#define TX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x14)
-	#define TX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x18)
-	#define TX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x1c)
+/* SDMA registers definition */
+#define TX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x00)
+#define TX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x04)
+#define TX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x08)
+#define TX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x0c)
+#define TX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x10)
+#define TX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x14)
+#define TX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x18)
+#define TX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x1c)
 
-	#define RX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x20)
-	#define RX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x24)
-	#define RX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x28)
-	#define RX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x2c)
-	#define RX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x30)
-	#define RX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x34)
-	#define RX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x38)
-	#define RX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x3c)
+#define RX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x20)
+#define RX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x24)
+#define RX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x28)
+#define RX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x2c)
+#define RX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x30)
+#define RX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x34)
+#define RX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x38)
+#define RX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x3c)
 
-	#define DMA_CONTROL_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x40)
+#define DMA_CONTROL_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x40)
 #endif
 
 /* 
@@ -191,9 +193,9 @@
 #define ADVERTISE_1000FULL      0x0200  /* Advertise 1000BASE-T full duplex */
 #define ADVERTISE_1000HALF      0x0100  /* Advertise 1000BASE-T half duplex */
 
-#define ADVERTISE_FULL (ADVERTISE_100FULL | ADVERTISE_10FULL | \
+#define ADVERTISE_FULL (ADVERTISE_100FULL | ADVERTISE_10FULL |	\
                         ADVERTISE_CSMA)
-#define ADVERTISE_ALL (ADVERTISE_10HALF | ADVERTISE_10FULL | \
+#define ADVERTISE_ALL (ADVERTISE_10HALF | ADVERTISE_10FULL |	\
                        ADVERTISE_100HALF | ADVERTISE_100FULL)
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
@@ -241,6 +243,26 @@ typedef struct ll_fifo_s {
   int rlf; /* Read Receive Length FIFO 0x24 */
   int llr; /* Read LocalLink reset 0x28 */
 } ll_fifo_s;
+
+/* Masks, etc. for use with the register file */
+#define RLF_MASK 0x000007FF
+
+/* Interrupt status register mnemonics */
+#define FIFO_ISR_RPURE  0x80000000
+#define FIFO_ISR_RPORE  0x40000000
+#define FIFO_ISR_RPUE   0x20000000
+#  define FIFO_ISR_RX_ERR (FIFO_ISR_RPURE | FIFO_ISR_RPORE | FIFO_ISR_RPUE)
+#define FIFO_ISR_TPOE   0x10000000
+#define FIFO_ISR_TC     0x08000000
+#define FIFO_ISR_RC     0x04000000
+#define FIFO_ISR_TSE    0x02000000
+#define FIFO_ISR_TRC    0x01000000
+#define FIFO_ISR_RRC    0x00800000
+#  define FIFO_ISR_ALL  0xFF800000
+
+/* "Magic" value for FIFO reset operations, and timeout, in msec */
+#define FIFO_RESET_MAGIC    0x000000A5
+#define FIFO_RESET_TIMEOUT  500
 
 ll_fifo_s *ll_fifo = (ll_fifo_s *) (XILINX_LLTEMAC_FIFO_BASEADDR);
 #endif
@@ -301,14 +323,14 @@ static void labx_eth_write_mac_reg(int emac, int reg_offset, int reg_data)
 /* Reads a value from a MAC register */
 int labx_eth_read_mac_reg(int emac, int reg_offset)
 {
-	unsigned int val = *(volatile unsigned int *)(LABX_PRIMARY_ETH_BASEADDR + reg_offset);
-	return(val);
+  unsigned int val = *(volatile unsigned int *)(LABX_PRIMARY_ETH_BASEADDR + reg_offset);
+  return(val);
 }
 
 void mdelay(unsigned int msec)
 {
-	while(msec--)
-		udelay(1000);
+  while(msec--)
+    udelay(1000);
 }
 
 static int phy_addr = LABX_ETH_LOCALLINK_PHY_ADDR;
@@ -383,141 +405,141 @@ static int labx_eth_phy_ctrl(void)
 /* bd init */
 static void labx_eth_bd_init()
 {
-	memset((void *)&tx_bd, 0, sizeof(cdmac_bd));
-	memset((void *)&rx_bd, 0, sizeof(cdmac_bd));
+  memset((void *)&tx_bd, 0, sizeof(cdmac_bd));
+  memset((void *)&rx_bd, 0, sizeof(cdmac_bd));
 
-	rx_bd.phys_buf_p = &rx_buffer[0];
-	rx_bd.next_p = &rx_bd;
-	rx_bd.buf_len = ETHER_MTU;
-	invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
-
-
-	*(unsigned int *)RX_CURDESC_PTR = &rx_bd;
-	*(unsigned int *)RX_TAILDESC_PTR = &rx_bd;
-
-	*(unsigned int *)RX_NXTDESC_PTR = &rx_bd; // setup first fd
+  rx_bd.phys_buf_p = &rx_buffer[0];
+  rx_bd.next_p = &rx_bd;
+  rx_bd.buf_len = ETHER_MTU;
+  invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
 
 
-	tx_bd.phys_buf_p = &tx_buffer[0];
-	tx_bd.next_p = &tx_bd;
-	invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
-	*(unsigned int *)TX_CURDESC_PTR = &tx_bd;
+  *(unsigned int *)RX_CURDESC_PTR = &rx_bd;
+  *(unsigned int *)RX_TAILDESC_PTR = &rx_bd;
+
+  *(unsigned int *)RX_NXTDESC_PTR = &rx_bd; // setup first fd
+
+
+  tx_bd.phys_buf_p = &tx_buffer[0];
+  tx_bd.next_p = &tx_bd;
+  invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
+  *(unsigned int *)TX_CURDESC_PTR = &tx_bd;
 }
 #endif
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
 static int labx_eth_send_sdma(unsigned char *buffer, int length)
 {
-	int i;
+  int i;
 
-	if(labx_eth_phy_ctrl() == 0)
-		return 0;
+  if(labx_eth_phy_ctrl() == 0)
+    return 0;
 
-	memcpy(tx_buffer, buffer, length);
-	invalidate_dcache_range(tx_buffer, length);
+  memcpy(tx_buffer, buffer, length);
+  invalidate_dcache_range(tx_buffer, length);
 
-	tx_bd.stat = BDSTAT_SOP_MASK | BDSTAT_EOP_MASK | BDSTAT_STOP_ON_END_MASK;
-	tx_bd.buf_len = length;
+  tx_bd.stat = BDSTAT_SOP_MASK | BDSTAT_EOP_MASK | BDSTAT_STOP_ON_END_MASK;
+  tx_bd.buf_len = length;
+  invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
+
+  // Wait for DMA to complete if one is active
+  while (*(volatile unsigned int*)(TX_CHNL_STS) & 0x00000002);
+
+  *(volatile unsigned int *)TX_CURDESC_PTR = &tx_bd;
+  *(volatile unsigned int *)TX_TAILDESC_PTR = &tx_bd;	// DMA start
+
+  do {
+    invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
+
+    if ((*(volatile unsigned int*)(TX_CHNL_STS)) & 0x00000080)
+      {
+	printf("TX DMA Error\n");
+	for (i=0; i<0x44; i+=4)
+	  {
+	    printf("SDMA REG %08X: %08x\n", (TX_NXTDESC_PTR+i),
+		   *(volatile unsigned int*)(TX_NXTDESC_PTR+i));
+	  }
+
+	// Reset and reinitialize the DMA engine
+	*(volatile unsigned int*)(DMA_CONTROL_REG) = 0x00000001;
+	while (*(volatile unsigned int*)(DMA_CONTROL_REG) & 0x00000001);
+
+	labx_eth_bd_init();
+	break;
+      }
+
+    if (((*(volatile unsigned int*)(TX_CHNL_STS)) & 0x00000002) == 0)
+      {
 	invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
+	//			printf("Exit loop %08X\n", (volatile int)tx_bd.stat);
+	break;
+      }
+  } while(!(((volatile unsigned int)tx_bd.stat) & BDSTAT_COMPLETED_MASK));
 
-	// Wait for DMA to complete if one is active
-	while (*(volatile unsigned int*)(TX_CHNL_STS) & 0x00000002);
-
-	*(volatile unsigned int *)TX_CURDESC_PTR = &tx_bd;
-	*(volatile unsigned int *)TX_TAILDESC_PTR = &tx_bd;	// DMA start
-
-	do {
-		invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
-
-		if ((*(volatile unsigned int*)(TX_CHNL_STS)) & 0x00000080)
-		{
-			printf("TX DMA Error\n");
-			for (i=0; i<0x44; i+=4)
-			{
-				printf("SDMA REG %08X: %08x\n", (TX_NXTDESC_PTR+i),
-					*(volatile unsigned int*)(TX_NXTDESC_PTR+i));
-			}
-
-			// Reset and reinitialize the DMA engine
-			*(volatile unsigned int*)(DMA_CONTROL_REG) = 0x00000001;
-			while (*(volatile unsigned int*)(DMA_CONTROL_REG) & 0x00000001);
-
-			labx_eth_bd_init();
-			break;
-		}
-
-		if (((*(volatile unsigned int*)(TX_CHNL_STS)) & 0x00000002) == 0)
-		{
-			invalidate_dcache_range(&tx_bd, sizeof(cdmac_bd));
-            //			printf("Exit loop %08X\n", (volatile int)tx_bd.stat);
-			break;
-		}
-	} while(!(((volatile unsigned int)tx_bd.stat) & BDSTAT_COMPLETED_MASK));
-
-	return length;
+  return length;
 }
 
 
 static int labx_eth_recv_sdma()
 {
-	int length;
-	int i;
+  int length;
+  int i;
 
-	invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
+  invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
 
-	if ((*(volatile unsigned int*)(RX_CHNL_STS)) & 0x00000080)
+  if ((*(volatile unsigned int*)(RX_CHNL_STS)) & 0x00000080)
+    {
+      printf("RX DMA Error\n");
+      for (i=0; i<0x44; i+=4)
 	{
-		printf("RX DMA Error\n");
-		for (i=0; i<0x44; i+=4)
-		{
-			printf("SDMA REG %08X: %08x\n", (TX_NXTDESC_PTR+i),
-				*(volatile unsigned int*)(TX_NXTDESC_PTR+i));
-		}
-
-		// Reset and reinitialize the DMA engine
-		*(volatile unsigned int*)(DMA_CONTROL_REG) = 0x00000001;
-		while (*(volatile unsigned int*)(DMA_CONTROL_REG) & 0x00000001);
-
-		labx_eth_bd_init();
+	  printf("SDMA REG %08X: %08x\n", (TX_NXTDESC_PTR+i),
+		 *(volatile unsigned int*)(TX_NXTDESC_PTR+i));
 	}
+
+      // Reset and reinitialize the DMA engine
+      *(volatile unsigned int*)(DMA_CONTROL_REG) = 0x00000001;
+      while (*(volatile unsigned int*)(DMA_CONTROL_REG) & 0x00000001);
+
+      labx_eth_bd_init();
+    }
 	
-//	if(!((volatile unsigned int)rx_bd.stat & BDSTAT_COMPLETED_MASK)) {
-	if (((*(volatile unsigned int*)(RX_CHNL_STS)) & 0x00000010) == 0) {
-		return 0;
-	}
+  //	if(!((volatile unsigned int)rx_bd.stat & BDSTAT_COMPLETED_MASK)) {
+  if (((*(volatile unsigned int*)(RX_CHNL_STS)) & 0x00000010) == 0) {
+    return 0;
+  }
 
-	invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
+  invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
 
-//	printf("RX CH STS: %08x, %08x, %08x, %08x, %08x\n", *(volatile unsigned int*)(RX_CHNL_STS), (int)rx_bd.stat, rx_bd.app2, rx_bd.app3, rx_bd.app4);
+  //	printf("RX CH STS: %08x, %08x, %08x, %08x, %08x\n", *(volatile unsigned int*)(RX_CHNL_STS), (int)rx_bd.stat, rx_bd.app2, rx_bd.app3, rx_bd.app4);
 
-	length = rx_bd.app5;
-	invalidate_dcache_range(rx_bd.phys_buf_p, length);
+  length = rx_bd.app5;
+  invalidate_dcache_range(rx_bd.phys_buf_p, length);
 
-//	*(volatile unsigned int*)&rx_bd.next_p = &rx_bd;
-	*(volatile unsigned int*)&rx_bd.buf_len = ETHER_MTU;
-	*(volatile unsigned int*)&rx_bd.stat = 0;
-	*(volatile unsigned int*)&rx_bd.app5 = 0;
+  //	*(volatile unsigned int*)&rx_bd.next_p = &rx_bd;
+  *(volatile unsigned int*)&rx_bd.buf_len = ETHER_MTU;
+  *(volatile unsigned int*)&rx_bd.stat = 0;
+  *(volatile unsigned int*)&rx_bd.app5 = 0;
 
-	invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
+  invalidate_dcache_range(&rx_bd, sizeof(cdmac_bd));
 #if 0	
-	if (length == 0) length = 1500;
-	printf("recv_sdma (%d)", length);
-	for (i = 0; i<length; i++)
-	{
-		if (i%8 == 0) printf("\n");
-		printf("%02X ", rx_bd.phys_buf_p[i]);
-	}
-	printf("\n");
+  if (length == 0) length = 1500;
+  printf("recv_sdma (%d)", length);
+  for (i = 0; i<length; i++)
+    {
+      if (i%8 == 0) printf("\n");
+      printf("%02X ", rx_bd.phys_buf_p[i]);
+    }
+  printf("\n");
 #endif
-	if(length > 0) {
-		NetReceive(rx_bd.phys_buf_p, length);
-	}
+  if(length > 0) {
+    NetReceive(rx_bd.phys_buf_p, length);
+  }
 
-	*(volatile unsigned int *)RX_CURDESC_PTR = &rx_bd;
-	*(volatile unsigned int *)RX_TAILDESC_PTR = &rx_bd;
-	*(volatile unsigned int *)RX_NXTDESC_PTR = &rx_bd;
+  *(volatile unsigned int *)RX_CURDESC_PTR = &rx_bd;
+  *(volatile unsigned int *)RX_TAILDESC_PTR = &rx_bd;
+  *(volatile unsigned int *)RX_NXTDESC_PTR = &rx_bd;
 
-	return length;
+  return length;
 }
 #endif
 
@@ -525,52 +547,73 @@ static int labx_eth_recv_sdma()
 #ifdef LABX_ETH_LOCALLINK_FIFO_MODE
 void debugll(int count)
 {
-  	printf ("%d fifo isr 0x%08x, fifo_ier 0x%08x, fifo_rdfr 0x%08x, fifo_rdfo 0x%08x fifo_rlr 0x%08x\n",count, ll_fifo->isr, \
-	ll_fifo->ier, ll_fifo->rdfr, ll_fifo->rdfo, ll_fifo->rlf);
+  printf ("%d fifo isr 0x%08x, fifo_ier 0x%08x, fifo_rdfr 0x%08x, fifo_rdfo 0x%08x fifo_rlr 0x%08x\n",count, ll_fifo->isr, \
+	  ll_fifo->ier, ll_fifo->rdfr, ll_fifo->rdfo, ll_fifo->rlf);
 }
 
 
 static int labx_eth_send_fifo(unsigned char *buffer, int length)
 {
-    unsigned int *buf = (unsigned int*) buffer;
-	unsigned int len, i, val;
+  unsigned int *buf = (unsigned int*) buffer;
+  unsigned int len, i, val;
 
-	len = length/4;
-	if((length % 4) != 0) len++;
+  len = ((length + 3) / 4);
 
-	for (i = 0; i < len; i++) {
-		val = *buf++;
-		ll_fifo->tdfd = val;
-	}
+  for (i = 0; i < len; i++) {
+    val = *buf++;
+    ll_fifo->tdfd = val;
+  }
 
-	ll_fifo->tlf = length;
+  ll_fifo->tlf = length;
 
-	return length;
+  return length;
 }
 
 static int labx_eth_recv_fifo(void)
 {
-	int len, len2, i, val;
-	int *buf = (int*) &rx_buffer[0];
+  int len, len2, i, val;
+  int *buf = (int*) &rx_buffer[0];
 
+  if (ll_fifo->isr & FIFO_ISR_RC) {
+    /* One or more reads has completed.  Check the read occupancy register
+     * to see how much data is ready to be processed.
+     */
+    len = ll_fifo->rlf & RLF_MASK;
+    len2 = ((len + 3) / 4);
 
-	if (ll_fifo->isr & 0x04000000 ) {
-		/* reset isr */
-		ll_fifo->isr = 0xffffffff;
+    for (i = 0; i < len2; i++) {
+      val = ll_fifo->rdfd;
+      *buf++ = val ;
+    }
 
-		len = ll_fifo->rlf & 0x7FF;
-		len2 = (len/4);
-		if((len % 4) != 0) len2++;
+    /* Re-check the occupancy register; if there are still FIFO contents
+     * remaining, they are for valid packets.  Not sure if it's okay to call
+     * NetReceive() more than once for each invocation, so we'll just leave
+     * the ISR flag set instead and let the NetLoop invoke us again.
+     */
+    if(ll_fifo->rdfo == 0) ll_fifo->isr = FIFO_ISR_RC;
 
-		for (i = 0; i < len2; i++) {
-			val = ll_fifo->rdfd;
-			*buf++ = val ;
-		}
+    /* Enqueue the received packet! */
+    NetReceive (&rx_buffer[0], len);
+  } else if(ll_fifo->isr & FIFO_ISR_RX_ERR) {
+    ulong start;
 
-		NetReceive (&rx_buffer[0], len);
-	}
+    printf("Rx error 0x%08X\n", ll_fifo->isr);
 
-	return 0;
+    /* A receiver error has occurred, reset the Rx logic */
+    ll_fifo->isr = FIFO_ISR_ALL;
+    reset_timer();
+    start = get_timer(0);
+    ll_fifo->rdfr = FIFO_RESET_MAGIC;
+    while((ll_fifo->isr & FIFO_ISR_RRC) == 0) {
+      if(get_timer(start) > FIFO_RESET_TIMEOUT) {
+	printf("Rx reset timeout\n");
+	break;
+      }
+    }	  
+  }
+
+    return 0;
 }
 #endif
 
@@ -617,7 +660,7 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
   labx_eth_write_mac_reg(0, FILTER_1_EN1, 0x0000FFFF);
 #endif
   
-	return(0);
+  return(0);
 }
 
 static void labx_eth_restart(void)
@@ -637,10 +680,10 @@ static void labx_eth_init(struct eth_device *dev, bd_t *bis)
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;
 
   if(!first)
-  {
-    labx_eth_restart();
-    return 0;
-  }
+    {
+      labx_eth_restart();
+      return 0;
+    }
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
   /* Initialize SDMA descriptors */
@@ -649,9 +692,9 @@ static void labx_eth_init(struct eth_device *dev, bd_t *bis)
 
 #ifdef LABX_ETH_LOCALLINK_FIFO_MODE
   // Set fifo length
-  ll_fifo->tdfr = 0x000000a5;
-  ll_fifo->rdfr = 0x000000a5;
-//	printf ("fifo isr 0x%08x, fifo_ier 0x%08x, fifo_tdfv 0x%08x, fifo_rdfo 0x%08x fifo_rlf 0x%08x\n", ll_fifo->isr, ll_fifo->ier, ll_fifo->tdfv, ll_fifo->rdfo,ll_fifo->rlf);
+  ll_fifo->tdfr = FIFO_RESET_MAGIC;
+  ll_fifo->rdfr = FIFO_RESET_MAGIC;
+  //	printf ("fifo isr 0x%08x, fifo_ier 0x%08x, fifo_tdfv 0x%08x, fifo_rdfo 0x%08x fifo_rlf 0x%08x\n", ll_fifo->isr, ll_fifo->ier, ll_fifo->tdfv, ll_fifo->rdfo,ll_fifo->rlf);
 #endif
 
   /* Configure the MDIO divisor and enable the interface to the PHY */
@@ -687,20 +730,20 @@ static int labx_eth_halt(void)
 int labx_eth_send(struct eth_device *dev, volatile void *packet, int length)
 {
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
-	return labx_eth_send_sdma((unsigned char *)packet, length);
+  return labx_eth_send_sdma((unsigned char *)packet, length);
 #endif
 #ifdef LABX_ETH_LOCALLINK_FIFO_MODE
-	return labx_eth_send_fifo((unsigned char *)packet, length);
+  return labx_eth_send_fifo((unsigned char *)packet, length);
 #endif
 }
 
 int labx_eth_recv(struct eth_device *dev)
 {
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
-	return labx_eth_recv_sdma();
+  return labx_eth_recv_sdma();
 #endif
 #ifdef LABX_ETH_LOCALLINK_FIFO_MODE
-	return labx_eth_recv_fifo();
+  return labx_eth_recv_fifo();
 #endif
 }
 
