@@ -46,7 +46,7 @@ set settingsfssize 0x200000
 set settingsfsstart 0x87A00000
 
 echo Boot Configuration:
-set bootcmd bootm ${kernstart}
+set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
 set load_fpga 'tftp ${clobstart} ${fpganame}'
