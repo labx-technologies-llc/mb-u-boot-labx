@@ -20,6 +20,7 @@ set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x08000
 set bootenvstart 0x87FF8000
+set boottextbase 0x88F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
@@ -53,7 +54,7 @@ set load_fpga 'tftp ${clobstart} ${fpganame}'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
-set load_kernel 'tftp ${clobstart} image.ub'
+set load_kernel 'tftp ${clobstart} uclinux.ub'
 set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
 set update_kernel run load_kernel install_kernel
 

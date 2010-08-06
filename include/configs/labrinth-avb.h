@@ -22,8 +22,8 @@
  * MA 02111-1307 USA
  */
 
-#ifndef __CONFIG_H
-#define __CONFIG_H
+#ifndef _LABRINTH_AVB_H_
+#define _LABRINTH_AVB_H_
 
 #include "../board/biamp/labrinth-avb/xparameters.h"
 
@@ -99,33 +99,6 @@
 /* FSL */
 /* #define	CONFIG_SYS_FSL_2 */
 /* #define	FSL_INTR_2	1 */
-
-/*
- * memory layout - Example
- * TEXT_BASE = 0x1200_0000;
- * CONFIG_SYS_SRAM_BASE = 0x1000_0000;
- * CONFIG_SYS_SRAM_SIZE = 0x0400_0000;
- *
- * CONFIG_SYS_GBL_DATA_OFFSET = 0x1000_0000 + 0x0400_0000 - 0x1000 = 0x13FF_F000
- * CONFIG_SYS_MONITOR_BASE = 0x13FF_F000 - 0x40000 = 0x13FB_F000
- * CONFIG_SYS_MALLOC_BASE = 0x13FB_F000 - 0x40000 = 0x13F7_F000
- *
- * 0x1000_0000	CONFIG_SYS_SDRAM_BASE
- *					FREE
- * 0x1200_0000	TEXT_BASE
- *		U-BOOT code
- * 0x1202_0000
- *					FREE
- *
- *					STACK
- * 0x13F7_F000	CONFIG_SYS_MALLOC_BASE
- *					MALLOC_AREA	256kB	Alloc
- * 0x11FB_F000	CONFIG_SYS_MONITOR_BASE
- *					MONITOR_CODE	256kB	Env
- * 0x13FF_F000	CONFIG_SYS_GBL_DATA_OFFSET
- *					GLOBAL_DATA	4kB	bd, gd
- * 0x1400_0000	CONFIG_SYS_SDRAM_BASE + CONFIG_SYS_SDRAM_SIZE
- */
 
 /* ddr sdram - main memory */
 #ifdef XPAR_DDR2_SDRAM_MPMC_BASEADDR
