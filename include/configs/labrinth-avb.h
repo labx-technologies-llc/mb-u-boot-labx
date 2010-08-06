@@ -1,7 +1,6 @@
 /*
- * (C) Copyright 2007-2008 Michal Simek
- *
- * Michal SIMEK <monstr@monstr.eu>
+ * (C) Copyright 2010 Eldridge M. Mount IV
+ *                    eldridge.mount@labxtechnologies.com
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -30,36 +29,12 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-/* uart, note 16550 is checked 1st as there can be a 16550 and a lite in the system
-   for the mdm
-*/
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
-#ifdef XPAR_UARTNS550_0_BASEADDR
-	#define CONFIG_SYS_NS16550	1
-	#define CONFIG_SYS_NS16550_SERIAL
-	#define CONFIG_SYS_NS16550_REG_SIZE	-4
-	#define CONFIG_CONS_INDEX	1
-	#define CONFIG_SYS_NS16550_COM1	(XPAR_UARTNS550_0_BASEADDR + 0x1000 + 0x3)
-	#define CONFIG_SYS_NS16550_CLK	XPAR_UARTNS550_0_CLOCK_FREQ_HZ
-	#define	CONFIG_BAUDRATE		9600
-
-	/* The following table includes the supported baudrates */
-	#define CONFIG_SYS_BAUDRATE_TABLE  \
-		{300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200, 230400}
-	#define CONSOLE_ARG	"console=console=ttyS0,115200\0"
-#elif XPAR_UARTLITE_1_BASEADDR
-	#define	CONFIG_XILINX_UARTLITE
-	#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_1_BASEADDR
-	#define	CONFIG_BAUDRATE		XPAR_UARTLITE_1_BAUDRATE
-	#define	CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
-	#define CONSOLE_ARG	"console=console=ttyUL0,115200\0"
-#else
-	#error Undefined uart
-#endif
-
-/* setting reset address */
-/*#define	CONFIG_SYS_RESET_ADDRESS	TEXT_BASE*/
+#define	CONFIG_XILINX_UARTLITE
+#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_1_BASEADDR
+#define	CONFIG_BAUDRATE		XPAR_UARTLITE_1_BAUDRATE
+#define	CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
 
 /* Ethernet port */
 #define CONFIG_SYS_ENET
@@ -76,46 +51,24 @@
 #endif
 
 /* interrupt controller */
-#ifdef XPAR_INTC_0_BASEADDR
-	#define	CONFIG_SYS_INTC_0		1
-	#define	CONFIG_SYS_INTC_0_ADDR		XPAR_INTC_0_BASEADDR
-	#define	CONFIG_SYS_INTC_0_NUM		32
-#endif
+#define	CONFIG_SYS_INTC_0		1
+#define	CONFIG_SYS_INTC_0_ADDR		XPAR_INTC_0_BASEADDR
+#define	CONFIG_SYS_INTC_0_NUM		32
 
 /* timer */
-#ifdef XPAR_TMRCTR_0_BASEADDR
-	#ifdef XPAR_INTC_0_TMRCTR_0_VEC_ID
-		#define	CONFIG_SYS_TIMER_0		1
-		#define	CONFIG_SYS_TIMER_0_ADDR	XPAR_TMRCTR_0_BASEADDR
-		#define	CONFIG_SYS_TIMER_0_IRQ	XPAR_INTC_0_TMRCTR_0_VEC_ID
-		#define	FREQUENCE		XPAR_PROC_BUS_0_FREQ_HZ
-		#define	CONFIG_SYS_TIMER_0_PRELOAD	( FREQUENCE/1000 )
-	#endif
-#elif XPAR_PROC_BUS_0_FREQ_HZ
-	#define	CONFIG_XILINX_CLOCK_FREQ	XPAR_PROC_BUS_0_FREQ_HZ
-#else
-	#error BAD CLOCK FREQ
-#endif
+#define	CONFIG_SYS_TIMER_0		1
+#define	CONFIG_SYS_TIMER_0_ADDR	XPAR_TMRCTR_0_BASEADDR
+#define	CONFIG_SYS_TIMER_0_IRQ	XPAR_INTC_0_TMRCTR_0_VEC_ID
+#define	FREQUENCE		XPAR_PROC_BUS_0_FREQ_HZ
+#define	CONFIG_SYS_TIMER_0_PRELOAD	( FREQUENCE/1000 )
+
 /* FSL */
 /* #define	CONFIG_SYS_FSL_2 */
 /* #define	FSL_INTR_2	1 */
 
-/* ddr sdram - main memory */
-#ifdef XPAR_DDR2_SDRAM_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_BASE		XPAR_DDR2_SDRAM_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_SIZE		(XPAR_DDR2_SDRAM_MPMC_HIGHADDR - \
-					 XPAR_DDR2_SDRAM_MPMC_BASEADDR + 1)
-#elif  XPAR_DDR3_SDRAM_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_BASE		XPAR_DDR3_SDRAM_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_SIZE		(XPAR_DDR3_SDRAM_MPMC_HIGHADDR - \
-					 XPAR_DDR3_SDRAM_MPMC_BASEADDR + 1)
-#elif  XPAR_MPMC_0_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_BASE		XPAR_MPMC_0_MPMC_BASEADDR
-	#define	CONFIG_SYS_SDRAM_SIZE		(XPAR_MPMC_0_MPMC_HIGHADDR - \
-					 XPAR_MPMC_0_MPMC_BASEADDR + 1)
-#else
-	#error "DDR is not included in the system"
-#endif
+/* DDR2 SDRAM, main memory */
+#define	CONFIG_SYS_SDRAM_BASE		XPAR_MPMC_0_MPMC_BASEADDR
+#define	CONFIG_SYS_SDRAM_SIZE		(XPAR_MPMC_0_MPMC_HIGHADDR - XPAR_MPMC_0_MPMC_BASEADDR + 1)
 
 #define XILINX_RAM_START		CONFIG_SYS_SDRAM_BASE
 #define XILINX_RAM_SIZE			CONFIG_SYS_SDRAM_SIZE
@@ -161,15 +114,8 @@
 #define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
 #define	CONFIG_ENV_SIZE		0x08000
 
-/* system ace */
-#ifdef XPAR_SYSACE_0_BASEADDR
-	#define	CONFIG_SYSTEMACE
-	/* #define DEBUG_SYSTEMACE */
-	#define	SYSTEMACE_CONFIG_FPGA
-	#define	CONFIG_SYS_SYSTEMACE_BASE	XPAR_SYSACE_0_BASEADDR
-	#define	CONFIG_SYS_SYSTEMACE_WIDTH	XPAR_SYSACE_0_MEM_WIDTH
-	#define	CONFIG_DOS_PARTITION
-#endif
+/* Perform the normal bootdelay checking */
+#define CONFIG_BOOTDELAY 1
 
 /* Data Cache */
 #ifdef XPAR_MICROBLAZE_0_USE_DCACHE
@@ -184,14 +130,6 @@
 #else
 	#undef CONFIG_ICACHE
 #endif
-
-/*
- * BOOTP options
- */
-#define CONFIG_BOOTP_BOOTFILESIZE
-#define CONFIG_BOOTP_BOOTPATH
-#define CONFIG_BOOTP_GATEWAY
-#define CONFIG_BOOTP_HOSTNAME
 
 /*
  * Command line configuration.
@@ -209,20 +147,13 @@
 	#undef CONFIG_CMD_CACHE
 #endif
 
-#if defined(CONFIG_SYSTEMACE)
-	#define CONFIG_CMD_EXT2
-	#define CONFIG_CMD_FAT
-#endif
-
 #define CONFIG_CMD_ECHO
 #define CONFIG_CMD_FLASH
 #define CONFIG_CMD_IMLS
 #define CONFIG_CMD_JFFS2
 
-#if !defined(RAMENV)
 #define CONFIG_CMD_SAVEENV
 #define CONFIG_CMD_SAVES
-#endif
 
 /* JFFS2 partitions */
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
@@ -243,14 +174,7 @@
 #define	CONFIG_SYS_LONGHELP
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
-#define	CONFIG_BOOTDELAY	-1	/* -1 disables auto-boot */
-#define	CONFIG_BOOTARGS		"root=romfs"
 #define CONFIG_HOSTNAME		labrinth-avb
-#define	CONFIG_BOOTCOMMAND	"base 0;tftp 11000000 image.img;bootm"
-#define	CONFIG_IPADDR		192.168.0.3
-#define	CONFIG_SERVERIP		192.168.0.5
-#define	CONFIG_GATEWAYIP	192.168.0.1
-#define	CONFIG_ETHADDR		00:E0:0C:00:00:FD
 
 /* Permit a single-time overwrite of the ethaddr */
 #define CONFIG_OVERWRITE_ETHADDR_ONCE
@@ -258,14 +182,6 @@
 /* architecture dependent code */
 #define	CONFIG_SYS_USR_EXCEP	/* user exception */
 #define CONFIG_SYS_HZ	1000
-
-#define	CONFIG_PREBOOT		"echo U-BOOT for $(hostname);setenv preboot;echo"
-
-#define	CONFIG_EXTRA_ENV_SETTINGS	"unlock=yes\0" /* hardware flash protection */\
-					"nor0=ml401-0\0"\
-					"mtdparts=mtdparts=ml401-0:"\
-					"256k(u-boot),256k(env),3m(kernel),"\
-					"1m(romfs),1m(cramfs),-(jffs2)\0"
 
 #define CONFIG_CMDLINE_EDITING
 
