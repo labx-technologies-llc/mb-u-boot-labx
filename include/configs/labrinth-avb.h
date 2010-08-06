@@ -106,13 +106,13 @@
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/biamp/labrinth_avb/ub.config.scr!
- *        These definitions locate the environment within the last, 32 KiB
- *        top-boot parameter sector on the Flash.
+ *        These definitions locate the environment within the last few
+ *        top-boot parameter sectors on the Flash.
  */
 #define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x08000	/* 32K(one sector) for env */
+#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
 #define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
-#define	CONFIG_ENV_SIZE		0x08000
+#define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
 
 /* Perform the normal bootdelay checking */
 #define CONFIG_BOOTDELAY 1
@@ -159,12 +159,6 @@
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
 #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
 #define CONFIG_FLASH_CFI_MTD
-#define MTDIDS_DEFAULT		"nor0=ml401-0"
-
-/* default mtd partition table */
-#define MTDPARTS_DEFAULT	"mtdparts=ml401-0:256k(u-boot),"\
-				"256k(env),3m(kernel),1m(romfs),"\
-				"1m(cramfs),-(jffs2)"
 
 /* Miscellaneous configurable options */
 #define	CONFIG_SYS_PROMPT	"U-Boot> "
@@ -174,7 +168,13 @@
 #define	CONFIG_SYS_LONGHELP
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
+/* Some appropriate defaults for network settings */
 #define CONFIG_HOSTNAME		labrinth-avb
+#define CONFIG_IPADDR           192.168.1.1
+#define CONFIG_SERVERIP         192.168.1.100
+
+/* TEMPORARY - This is a Xilinx OUI, need to replace with Biamp's */
+#define CONFIG_ETHADDR          00:0A:35:00:33:01
 
 /* Permit a single-time overwrite of the ethaddr */
 #define CONFIG_OVERWRITE_ETHADDR_ONCE

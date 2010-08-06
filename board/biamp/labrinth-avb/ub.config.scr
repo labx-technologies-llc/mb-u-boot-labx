@@ -8,10 +8,6 @@ set ipaddr 192.168.1.1
 set serverip 192.168.1.100
 set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x33,0x01
 
-echo MTD Configuration:
-set mtdparts physmap-flash.0:2048K(fpga),256K(boot),128K(fdt),5760K(image),6112K(romfs),2048K(settingsfs),32K(bootenv)
-set mtdkargs mtdparts=$(mtdparts)
-
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
@@ -19,7 +15,7 @@ echo Bootloader Configuration:
 set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x08000
-set bootenvstart 0x87FF8000
+set bootenvstart 0x87FE0000
 set boottextbase 0x88F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
@@ -36,15 +32,14 @@ set fpganame Labrinth_Fpga.bin
 echo Kernel Configuration:
 set kernsize 0x5A0000
 set kernstart 0x87260000
-set bootargs ${mtdkargs} ${netkargs}
 
 echo ROM Filesystem Configuration:
-set romfssize 0x5F8000
+set romfssize 0x5E0000
 set romfsstart 0x87800000
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
-set settingsfsstart 0x87A00000
+set settingsfsstart 0x87DE0000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
