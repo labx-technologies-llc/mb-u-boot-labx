@@ -49,7 +49,8 @@ set load_fpga 'tftp ${clobstart} ${fpganame}'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
-set load_kernel 'tftp ${clobstart} uclinux.ub'
+set kernname uclinux.ub
+set load_kernel 'tftp ${clobstart} ${kernname}'
 set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
 set update_kernel run load_kernel install_kernel
 
@@ -68,6 +69,11 @@ set update_fdt run load_fdt install_fdt
 set load_settingsfs 'tftp ${clobstart} settings.jffs2'
 set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
 set update_settingsfs run load_settingsfs install_settingsfs
+
+echo Shortcuts for Development:
+set tempkernstart 0x88800000
+set tempfdtstart 0x88700000
+set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 
 echo Saving Configurations...
 saveenv
