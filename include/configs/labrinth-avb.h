@@ -44,6 +44,40 @@
 
 #undef ET_DEBUG
 
+/* Use the Lab X Ethernet LocalLink driver */
+#define CONFIG_LABX_ETH_LOCALLINK  1
+
+/* Top-level configuration setting to determine whether AVB port 0 or 1
+ * is used by U-Boot.  AVB 0 is on top at the card edge, with AVB 1
+ * located underneath of it.
+ */
+#define WHICH_ETH_PORT  0
+
+/* The Ethernet hardware always operates in FIFO mode on this platform */
+#define LABX_ETH_LOCALLINK_FIFO_MODE  (1)
+
+/* The MDIO divisor is set to produce a 1.5 MHz interface */
+#define LABX_ETH_LOCALLINK_MDIO_DIV  (0x28)
+
+/* Port zero is used for all MDIO operations */
+#define LABX_MDIO_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
+
+#if (WHICH_ETH_PORT == 0)
+  /* Use port zero; the base address of the primary register file and the
+   * FIFO used for data are specified, as well as the corresponding PHY address.
+   */
+#  define LABX_PRIMARY_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
+#  define XILINX_LLTEMAC_FIFO_BASEADDR  (XPAR_ETH0_FIFO_BASEADDR)
+#  define LABX_ETH_LOCALLINK_PHY_ADDR  (0x01)
+
+#else
+  /* Use port one instead */
+#  define LABX_PRIMARY_ETH_BASEADDR  (XPAR_ETH1_BASEADDR)
+#  define XILINX_LLTEMAC_FIFO_BASEADDR  (XPAR_ETH1_FIFO_BASEADDR)
+#  define LABX_ETH_LOCALLINK_PHY_ADDR  (0x02)
+
+#endif /* if(U_BOOT_PORT = 0) */
+
 /* gpio */
 #ifdef XPAR_GPIO_0_BASEADDR
 	#define	CONFIG_SYS_GPIO_0		1

@@ -73,7 +73,7 @@ extern int labx_eth_initialize(bd_t *bis);
 int board_eth_init(bd_t *bis)
 {
   /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
-   * the first one (AVB0) for use with U-Boot.
+   * one of them for use with U-Boot.
    */
   return(labx_eth_initialize(bis));
 }

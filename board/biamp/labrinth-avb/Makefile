@@ -31,12 +31,6 @@ SRCS	:= $(SOBJS:.o=.S) $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))
 SOBJS	:= $(addprefix $(obj),$(SOBJS))
 
-# Compile and link in drivers specific to the board.
-# Make certain this directory is in the include path
-# so our definitions file is included
-CFLAGS	+= -I./
-OBJS	+= ../../../drivers/net/labx_eth_locallink.o
-
 $(LIB):	$(OBJS) $(SOBJS)
 	$(AR) $(ARFLAGS) $@ $^
 

@@ -27,10 +27,6 @@
 #include <malloc.h>
 #include <asm/processor.h>
 
-/* Include a board-specific header file to parameterize the hardware details
- * for the interface.  Ensure that it is providing all the necessary defines.
- */
-#include <labx_eth_locallink_defs.h>
 #ifndef LABX_PRIMARY_ETH_BASEADDR
 #  error "Missing board definition for Ethernet MAC base address"
 #endif
@@ -269,9 +265,6 @@ ll_fifo_s *ll_fifo = (ll_fifo_s *) (XILINX_LLTEMAC_FIFO_BASEADDR);
 #endif
 
 
-static unsigned char tx_buffer[ETHER_MTU] __attribute((aligned(32)));
-static unsigned char rx_buffer[ETHER_MTU] __attribute((aligned(32)));
-
 #if !defined(CONFIG_NET_MULTI)
 static struct eth_device *xps_ll_dev = NULL;
 #endif
@@ -282,14 +275,14 @@ struct labx_eth_private {
 };
 
 /* Performs a register write to a PHY */
-static void write_phy_register(int emac, int phy_addr, int reg_addr, int phy_data)
+static void write_phy_register(int phy_addr, int reg_addr, int phy_data)
 {
   unsigned int addr;
 
   /* Write the data first, then the control register */
-  addr = (LABX_PRIMARY_ETH_BASEADDR + MDIO_DATA_REG);
+  addr = (LABX_MDIO_ETH_BASEADDR + MDIO_DATA_REG);
   *((volatile unsigned int *) addr) = phy_data;
-  addr = (LABX_PRIMARY_ETH_BASEADDR + MDIO_CONTROL_REG);
+  addr = (LABX_MDIO_ETH_BASEADDR + MDIO_CONTROL_REG);
   *((volatile unsigned int *) addr) = 
     (PHY_MDIO_WRITE | ((phy_addr & PHY_ADDR_MASK) << PHY_ADDR_SHIFT) |
      (reg_addr & PHY_REG_ADDR_MASK));
@@ -297,32 +290,42 @@ static void write_phy_register(int emac, int phy_addr, int reg_addr, int phy_dat
 }
 
 /* Performs a register read from a PHY */
-static unsigned int read_phy_register(int emac, int phy_addr, int reg_addr)
+static unsigned int read_phy_register(int phy_addr, int reg_addr)
 {
   unsigned int addr;
   unsigned int readValue;
 
   /* Write to the MDIO control register to initiate the read */
-  addr = (LABX_PRIMARY_ETH_BASEADDR + MDIO_CONTROL_REG);
+  addr = (LABX_MDIO_ETH_BASEADDR + MDIO_CONTROL_REG);
   *((volatile unsigned int *) addr) = 
     (PHY_MDIO_READ | ((phy_addr & PHY_ADDR_MASK) << PHY_ADDR_SHIFT) |
      (reg_addr & PHY_REG_ADDR_MASK));
   while(*((volatile unsigned int *) addr) & PHY_MDIO_BUSY);
-  addr = (LABX_PRIMARY_ETH_BASEADDR + MDIO_DATA_REG);
+  addr = (LABX_MDIO_ETH_BASEADDR + MDIO_DATA_REG);
   readValue = *((volatile unsigned int *) addr);
   return(readValue);
 }
 
 /* Writes a value to a MAC register */
-static void labx_eth_write_mac_reg(int emac, int reg_offset, int reg_data)
+static void labx_eth_write_mac_reg(int reg_offset, int reg_data)
 {
   //printf("REG %04X = %08X (was %08X)\n", reg_offset, reg_data, *(volatile unsigned int *)(LABX_PRIMARY_ETH_BASEADDR + reg_offset));
   /* Apply the register offset to the base address */
   *(volatile unsigned int *)(LABX_PRIMARY_ETH_BASEADDR + reg_offset) = reg_data;
 }
 
+/* Writes a value to the MDIO configuration register within the register
+ * file of the controller being used for MDIO (may or may not be the same
+ * as the primary!
+ */
+static void labx_eth_write_mdio_config(int config_data)
+{
+  /* Apply the MDIO register offset to the base address */
+  *(volatile unsigned int *)(LABX_MDIO_ETH_BASEADDR + MAC_MDIO_CONFIG_REG) = config_data;
+}
+
 /* Reads a value from a MAC register */
-int labx_eth_read_mac_reg(int emac, int reg_offset)
+int labx_eth_read_mac_reg(int reg_offset)
 {
   unsigned int val = *(volatile unsigned int *)(LABX_PRIMARY_ETH_BASEADDR + reg_offset);
   return(val);
@@ -341,7 +344,6 @@ static int first = 1;
 /* setting ll_temac and phy to proper setting */
 static int labx_eth_phy_ctrl(void)
 {
-  int i;
   unsigned int result;
 
   if(first) {
@@ -349,9 +351,9 @@ static int labx_eth_phy_ctrl(void)
     unsigned id_low;
 
     /* Read and report the PHY */
-    id_high = read_phy_register(0, phy_addr, 2);
-    id_low = read_phy_register(0, phy_addr, 3);
-    printf("PHY ID: 0x%04X%04X\n", id_high, id_low);
+    id_high = read_phy_register(phy_addr, 2);
+    id_low = read_phy_register(phy_addr, 3);
+    printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
   }
 
   if(!link) {
@@ -359,7 +361,7 @@ static int labx_eth_phy_ctrl(void)
     /* Requery the PHY general status register */
     /* Wait up to 5 secs for a link */
     while(timeout--) {
-      result = read_phy_register(0, phy_addr, 1);
+      result = read_phy_register(phy_addr, 1);
       if(result & 0x24) {
         printf("Link up!\n");
         break;
@@ -368,7 +370,7 @@ static int labx_eth_phy_ctrl(void)
     }
   }
   
-  result = read_phy_register(0, phy_addr, 1);
+  result = read_phy_register(phy_addr, 1);
   if((result & 0x24) != 0x24) {
     printf("No link!\n");
     if(link) {
@@ -383,18 +385,18 @@ static int labx_eth_phy_ctrl(void)
     return 1;
   }
   
-  result = read_phy_register(0, phy_addr, 10);
+  result = read_phy_register(phy_addr, 10);
   if((result & 0x0800) == 0x0800) {
-    labx_eth_write_mac_reg(0, MAC_SPEED_SELECT_REG, MAC_SPEED_1_GBPS);
+    labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_1_GBPS);
     printf("1000BASE-T/FD\n");
     return 1;
   }
-  result = read_phy_register(0, phy_addr, 5);
+  result = read_phy_register(phy_addr, 5);
   if((result & 0x0100) == 0x0100) {
-    labx_eth_write_mac_reg(0, MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
+    labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
     printf("100BASE-T/FD\n");
   } else if((result & 0x0040) == 0x0040) {
-    labx_eth_write_mac_reg(0, MAC_SPEED_SELECT_REG, MAC_SPEED_10_MBPS);
+    labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_10_MBPS);
     printf("10BASE-T/FD\n");
   } else {
     printf("Half Duplex not supported\n");
@@ -402,7 +404,12 @@ static int labx_eth_phy_ctrl(void)
   return 1;
 }
 
+/* Rx buffer is also used by FIFO mode */
+static unsigned char rx_buffer[ETHER_MTU] __attribute((aligned(32)));
+
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
+static unsigned char tx_buffer[ETHER_MTU] __attribute((aligned(32)));
+
 /* bd init */
 static void labx_eth_bd_init()
 {
@@ -625,7 +632,7 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
 {
   char * env_p;
   char * end;
-  int i, val;
+  int i;
   
   env_p = getenv("ethaddr");
   if (env_p == NULL) {
@@ -649,17 +656,17 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
   /* set up unicast MAC address filter */
   val = ((lp->dev_addr[3] << 24) | (lp->dev_addr[2] << 16) |
          (lp->dev_addr[1] << 8) | (lp->dev_addr[0] ));
-  labx_eth_write_mac_reg(0, FILTER_0_AW0, val);
+  labx_eth_write_mac_reg(FILTER_0_AW0, val);
   val = (lp->dev_addr[5] << 8) | lp->dev_addr[4] ;
-  labx_eth_write_mac_reg(0, FILTER_0_AW1, val);
-  labx_eth_write_mac_reg(0, FILTER_0_EN0, 0xFFFFFFFF);
-  labx_eth_write_mac_reg(0, FILTER_0_EN1, 0x0000FFFF);
+  labx_eth_write_mac_reg(FILTER_0_AW1, val);
+  labx_eth_write_mac_reg(FILTER_0_EN0, 0xFFFFFFFF);
+  labx_eth_write_mac_reg(FILTER_0_EN1, 0x0000FFFF);
   
   /* setup broadcast MAC address filter */
-  labx_eth_write_mac_reg(0, FILTER_1_AW0, 0xFFFFFFFF);
-  labx_eth_write_mac_reg(0, FILTER_1_AW1, 0x0000FFFF);
-  labx_eth_write_mac_reg(0, FILTER_1_EN0, 0xFFFFFFFF);
-  labx_eth_write_mac_reg(0, FILTER_1_EN1, 0x0000FFFF);
+  labx_eth_write_mac_reg(FILTER_1_AW0, 0xFFFFFFFF);
+  labx_eth_write_mac_reg(FILTER_1_AW1, 0x0000FFFF);
+  labx_eth_write_mac_reg(FILTER_1_EN0, 0xFFFFFFFF);
+  labx_eth_write_mac_reg(FILTER_1_EN1, 0x0000FFFF);
 #endif
   
   return(0);
@@ -673,19 +680,18 @@ static void labx_eth_restart(void)
 #endif
 
   /* Enable the receiver and transmitter */
-  labx_eth_write_mac_reg(0, MAC_RX_CONFIG_REG, RX_ENABLE | RX_VLAN_TAGS_ENABLE);
-  labx_eth_write_mac_reg(0, MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
+  labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_ENABLE | RX_VLAN_TAGS_ENABLE);
+  labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
 }
 
-static void labx_eth_init(struct eth_device *dev, bd_t *bis)
+static int labx_eth_init(struct eth_device *dev, bd_t *bis)
 {
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;
-  ulong start;
 
   if(!first)
     {
       labx_eth_restart();
-      return 0;
+      return;
     }
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
@@ -704,29 +710,34 @@ static void labx_eth_init(struct eth_device *dev, bd_t *bis)
   /* Issue a LocalLink reset to make sure nothing is "stuck" */
   ll_fifo->llr = FIFO_RESET_MAGIC;
 
-  /* Configure the MDIO divisor and enable the interface to the PHY */
-  /* XILINX_HARD_MAC Note: The hard MDIO controller must be configured or */
-  /* the SGMII autonegotiation won't happen. Even if we never use that MDIO controller. */
-  labx_eth_write_mac_reg(0, MAC_MDIO_CONFIG_REG, 
-                         ((LABX_ETH_LOCALLINK_MDIO_DIV & MDIO_DIVISOR_MASK) |
-                          MDIO_ENABLED));
+  /* Configure the MDIO divisor and enable the interface to the PHY.
+   * XILINX_HARD_MAC Note: The hard MDIO controller must be configured or
+   * the SGMII autonegotiation won't happen. Even if we never use that MDIO controller.
+   * This operation must access the register file of the controller being used
+   * for MDIO access, which may or may not be the same as that used for the actual
+   * communications! 
+   */
+  labx_eth_write_mdio_config((LABX_ETH_LOCALLINK_MDIO_DIV & MDIO_DIVISOR_MASK) |
+			      MDIO_ENABLED);
   
   /* Set up the MAC address in the hardware */
   labx_eth_addr_setup(lp);
 
   /* Enable the receiver and transmitter */
-  labx_eth_write_mac_reg(0, MAC_RX_CONFIG_REG, RX_ENABLE | RX_VLAN_TAGS_ENABLE);
-  labx_eth_write_mac_reg(0, MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
+  labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_ENABLE | RX_VLAN_TAGS_ENABLE);
+  labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
 
   /* Configure the PHY */
   labx_eth_phy_ctrl();
   first = 0;
+
+  return(0);
 }
 
-static int labx_eth_halt(void)
+static void labx_eth_halt(void)
 {
-  labx_eth_write_mac_reg(0, MAC_RX_CONFIG_REG, RX_DISABLE);
-  labx_eth_write_mac_reg(0, MAC_TX_CONFIG_REG, TX_DISABLE);
+  labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_DISABLE);
+  labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_DISABLE);
 
 #ifdef LABX_ETH_LOCALLINK_SDMA_MODE
   *(unsigned int *)DMA_CONTROL_REG = 0x00000001;
@@ -774,5 +785,5 @@ int labx_eth_initialize(bd_t *bis)
   
   eth_register(dev);
   
-  return 0;
+  return(0);
 }
