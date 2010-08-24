@@ -77,6 +77,7 @@ COBJS-$(CONFIG_VSC7385_ENET) += vsc7385.o
 COBJS-$(CONFIG_XILINX_EMACLITE) += xilinx_emaclite.o
 COBJS-$(CONFIG_XILINX_LL_TEMAC) += xilinx_ll_temac.o
 COBJS-$(CONFIG_LABX_ETH_LOCALLINK) += labx_eth_locallink.o
+COBJS-$(CONFIG_LABX_ETHERNET) += labx_ethernet.o
 
 COBJS	:= $(COBJS-y)
 SRCS	:= $(COBJS:.o=.c)
