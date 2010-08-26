@@ -3550,6 +3550,10 @@ labrinth-avb_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb biamp
 
+aud8822-sp601_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze aud8822-sp601 labx
+
 #========================================================================
 # Blackfin
 #========================================================================

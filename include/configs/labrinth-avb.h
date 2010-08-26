@@ -54,7 +54,7 @@
 #define WHICH_ETH_PORT  0
 
 /* The MDIO divisor is set to produce a 1.5 MHz interface */
-#define LABX_ETH_LOCALLINK_MDIO_DIV  (0x28)
+#define LABX_ETHERNET_MDIO_DIV  (0x28)
 
 /* Port zero is used for all MDIO operations, regardless of which
  * port is used for communications.
@@ -66,12 +66,13 @@
    * FIFO used for data are specified, as well as the corresponding PHY address.
    */
 #  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
-#  define LABX_ETH_LOCALLINK_PHY_ADDR  (0x01)
+#  define LABX_ETHERNET_PHY_ADDR  (0x01)
 
 #else
+
   /* Use port one instead */
 #  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH1_BASEADDR)
-#  define LABX_ETH_LOCALLINK_PHY_ADDR  (0x02)
+#  define LABX_ETHERNET_PHY_ADDR  (0x02)
 
 #endif /* if(U_BOOT_PORT = 0) */
 

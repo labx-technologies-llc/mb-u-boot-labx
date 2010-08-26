@@ -37,34 +37,11 @@
 #endif
 
 /* Ensure that there is a definition for the PHY address and MDIO divisor */
-#ifndef LABX_ETH_LOCALLINK_PHY_ADDR
+#ifndef LABX_ETHERNET_PHY_ADDR
 #  error "Missing board definition of MDIO PHY address"
 #endif
-#ifndef LABX_ETH_LOCALLINK_MDIO_DIV
+#ifndef LABX_ETHERNET_MDIO_DIV
 #  error "Missing board definition of MDIO clock divisor"
-#endif
-
-#ifdef LABX_ETH_LOCALLINK_SDMA_MODE
-/* SDMA registers definition */
-#define TX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x00)
-#define TX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x04)
-#define TX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x08)
-#define TX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x0c)
-#define TX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x10)
-#define TX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x14)
-#define TX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x18)
-#define TX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x1c)
-
-#define RX_NXTDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x20)
-#define RX_CURBUF_ADDR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x24)
-#define RX_CURBUF_LENGTH	(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x28)
-#define RX_CURDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x2c)
-#define RX_TAILDESC_PTR		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x30)
-#define RX_CHNL_CTRL		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x34)
-#define RX_IRQ_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x38)
-#define RX_CHNL_STS		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x3c)
-
-#define DMA_CONTROL_REG		(LABX_ETH_LOCALLINK_SDMA_CTRL_BASEADDR + 0x40)
 #endif
 
 /* 
@@ -299,7 +276,7 @@ void mdelay(unsigned int msec)
     udelay(1000);
 }
 
-static int phy_addr = LABX_ETH_LOCALLINK_PHY_ADDR;
+static int phy_addr = LABX_ETHERNET_PHY_ADDR;
 static int link = 0;
 static int first = 1;
 
@@ -453,7 +430,7 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
   /* The following code is somewhat pointless, as the MAC operates without
    * any address filtering.  This allows each hardware module behind it to
    * determine which traffic it is concerned with.  What needs to be done is
-   * to equip the labx_eth_locallink EDK core with the ability to filter unicast
+   * to equip the labx_ethernet EDK core with the ability to filter unicast
    * and multicast traffic, at which point this code may be modified to do so.
    */
   
@@ -507,7 +484,7 @@ static int labx_eth_init(struct eth_device *dev, bd_t *bis)
    * for MDIO access, which may or may not be the same as that used for the actual
    * communications! 
    */
-  labx_eth_write_mdio_config((LABX_ETH_LOCALLINK_MDIO_DIV & MDIO_DIVISOR_MASK) |
+  labx_eth_write_mdio_config((LABX_ETHERNET_MDIO_DIV & MDIO_DIVISOR_MASK) |
 			      MDIO_ENABLED);
   
   /* Set up the MAC address in the hardware */

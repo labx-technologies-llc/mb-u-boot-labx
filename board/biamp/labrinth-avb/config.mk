@@ -28,6 +28,6 @@
 # Modified by hand for Biamp board; I don't think libgen
 # produces this particular file anymore...?
 # This places the execution location for U-Boot to be
-# the last MiB of the 512 Mib DDR2 device.
+# 15 MiB into the DDR2 device.
 TEXT_BASE = 0x88F00000
 
