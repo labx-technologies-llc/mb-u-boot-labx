@@ -151,11 +151,11 @@
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 3 2 2 2 >;
-			local-mac-address = [ 00 0a 35 4c 6a 00 ];
+			local-mac-address = [ 00 0a 35 1d 8b 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x1000 >;
 			xlnx,has-mdio = <0x1>;
-			xlnx,phy-addr = <0x1>;
+			xlnx,phy-addr = <0x0>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
