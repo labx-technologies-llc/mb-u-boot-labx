@@ -12,7 +12,7 @@ set clobstart 0x88000000
 echo Bootloader Configuration:
 set bootsize 0x40000
 set bootstart 0x87200000
-set bootenvsize 0x08000
+set bootenvsize 0x20000
 set bootenvstart 0x87FE0000
 set boottextbase 0x88F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
