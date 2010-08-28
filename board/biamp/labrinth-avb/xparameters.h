@@ -107,12 +107,12 @@
 
 /* Definitions for peripheral DLMB_CNTLR */
 #define XPAR_DLMB_CNTLR_BASEADDR 0x00000000
-#define XPAR_DLMB_CNTLR_HIGHADDR 0x00001FFF
+#define XPAR_DLMB_CNTLR_HIGHADDR 0x00003FFF
 
 
 /* Definitions for peripheral ILMB_CNTLR */
 #define XPAR_ILMB_CNTLR_BASEADDR 0x00000000
-#define XPAR_ILMB_CNTLR_HIGHADDR 0x00001FFF
+#define XPAR_ILMB_CNTLR_HIGHADDR 0x00003FFF
 
 
 /******************************************************************/
@@ -469,7 +469,7 @@
 #define XPAR_MICROBLAZE_USE_EXT_NM_BRK 1
 #define XPAR_MICROBLAZE_USE_BRANCH_TARGET_CACHE 0
 #define XPAR_MICROBLAZE_BRANCH_TARGET_CACHE_SIZE 0
-#define XPAR_MICROBLAZE_HW_VER "7.30.a"
+#define XPAR_MICROBLAZE_HW_VER "7.30.b"
 
 /******************************************************************/
 
