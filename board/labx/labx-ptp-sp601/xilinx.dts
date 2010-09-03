@@ -64,7 +64,7 @@
 			xlnx,allow-dcache-wr = <0x1>;
 			xlnx,allow-icache-wr = <0x1>;
 			xlnx,archiver = "0";
-			xlnx,area-optimized = <0x1>;
+			xlnx,area-optimized = <0x0>;
 			xlnx,branch-target-cache-size = <0x0>;
 			xlnx,cache-byte-size = <0x2000>;
 			xlnx,compiler = "0";
@@ -151,7 +151,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 3 2 2 2 >;
-			local-mac-address = [ 00 0a 35 82 15 00 ];
+			local-mac-address = [ 00 0a 35 a1 04 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x1000 >;
 			xlnx,has-mdio = <0x1>;
