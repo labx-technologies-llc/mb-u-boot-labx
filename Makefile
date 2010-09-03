@@ -3554,6 +3554,10 @@ aud8822-sp601_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze aud8822-sp601 labx
 
+labx-ptp-sp601_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labx-ptp-sp601 labx
+
 #========================================================================
 # Blackfin
 #========================================================================
