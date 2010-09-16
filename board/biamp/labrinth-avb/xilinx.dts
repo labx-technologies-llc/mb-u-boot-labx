@@ -147,12 +147,23 @@
 		#size-cells = <1>;
 		compatible = "xlnx,plb-v46-1.04.a", "xlnx,plb-v46-1.00.a", "simple-bus";
 		ranges ;
+		biamp_spi_mailbox_0: biamp-spi-mailbox@820c0000 {
+			compatible = "xlnx,biamp-spi-mailbox-1.00.a";
+			interrupt-parent = <&irq_Control>;
+			interrupts = < 10 2 >;
+			reg = < 0x820c0000 0x10000 >;
+			xlnx,device = "6slx45";
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,num-ports = <0x1>;
+			xlnx,package = "csg324";
+		} ;
 		eth0: ethernet@82050000 {
 			compatible = "xlnx,labx-ethernet-1.00.a";
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 3 2 2 2 >;
-			local-mac-address = [ 00 0a 35 49 38 00 ];
+			local-mac-address = [ 00 0a 35 83 88 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x1000 >;
 			xlnx,has-mdio = <0x1>;
@@ -165,7 +176,7 @@
 		eth0_audio_depacketizer: labx-audio-depacketizer@820b0000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_Control>;
-			interrupts = < 10 2 >;
+			interrupts = < 9 2 >;
 			reg = < 0x820b0000 0x10000 >;
 			xlnx,cache-address-width = <0xb>;
 			xlnx,cache-data-width = <0x20>;
@@ -179,7 +190,7 @@
 			xlnx,mplb-clk-period-ps = <0x3e80>;
 			xlnx,mplb-dwidth = <0x20>;
 			xlnx,mplb-native-dwidth = <0x20>;
-			xlnx,mplb-p2p = <0x1>;
+			xlnx,mplb-p2p = <0x0>;
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,npi-data-width = <0x20>;
 			xlnx,num-clock-domains = <0x1>;
@@ -202,7 +213,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 5 2 4 2 >;
-			local-mac-address = [ 00 0a 35 49 12 01 ];
+			local-mac-address = [ 00 0a 35 83 a6 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x1000 >;
 			xlnx,has-mdio = <0x0>;
@@ -211,16 +222,6 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
-		} ;
-		eth1_audio_packetizer: labrinth-avb-packetizer@820a0000 {
-			compatible = "xlnx,labrinth-avb-packetizer-1.00.a";
-			interrupt-parent = <&irq_Control>;
-			interrupts = < 9 2 >;
-			reg = < 0x820a0000 0x10000 >;
-			xlnx,device = "6slx45";
-			xlnx,family = "spartan6";
-			xlnx,include-dphase-timer = <0x0>;
-			xlnx,package = "csg324";
 		} ;
 		flash_Control: flash@87000000 {
 			bank-width = <2>;
@@ -317,6 +318,21 @@
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0xc1>;
 			xlnx,num-intr-inputs = <0xb>;
+		} ;
+		labx_local_audio0: labx-local-audio@820d0000 {
+			compatible = "xlnx,labx-local-audio-1.00.a";
+			reg = < 0x820d0000 0x10000 >;
+			xlnx,audio-format = "I2S";
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,mplb-awidth = <0x20>;
+			xlnx,mplb-clk-period-ps = <0x3e80>;
+			xlnx,mplb-dwidth = <0x20>;
+			xlnx,mplb-native-dwidth = <0x20>;
+			xlnx,mplb-p2p = <0x0>;
+			xlnx,mplb-smallest-slave = <0x20>;
+			xlnx,num-i2s-streams = <0xc>;
+			xlnx,param-address-width = <0xa>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
 			compatible = "xlnx,labx-ptp-1.00.a";
