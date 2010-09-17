@@ -39,7 +39,7 @@
 		serial0 = &serial_Console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(fpga),256K(boot),128K(fdt),5760K(image),6016K(romfs),2048K(settingsfs),32K(bootenv) root=mtd7 rootfstype=romfs";
+		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(fpga),256K(boot),128K(fdt),3840K(kernel),1920K(rootfs),6016K(romfs),2048K(settingsfs),32K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -132,7 +132,7 @@
 			xlnx,use-hw-mul = <0x1>;
 			xlnx,use-icache = <0x1>;
 			xlnx,use-interrupt = <0x1>;
-			xlnx,use-mmu = <0x0>;
+			xlnx,use-mmu = <0x3>;
 			xlnx,use-msr-instr = <0x1>;
 			xlnx,use-pcmp-instr = <0x1>;
 			xlnx,xmdstub-peripheral = "false";
@@ -163,9 +163,9 @@
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 3 2 2 2 >;
-			local-mac-address = [ 00 0a 35 83 88 00 ];
+			local-mac-address = [ 00 0a 35 da db 00 ];
 			phy-mdio-controller = <&eth0>;
-			reg = < 0x82050000 0x1000 >;
+			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
 			xlnx,phy-addr = <0x1>;
 			xlnx,phy-mask = <0xffff>;
@@ -213,9 +213,9 @@
 			device_type = "network";
 			interrupt-parent = <&irq_Control>;
 			interrupts = < 5 2 4 2 >;
-			local-mac-address = [ 00 0a 35 83 a6 01 ];
+			local-mac-address = [ 00 0a 35 da f8 01 ];
 			phy-mdio-controller = <&eth0>;
-			reg = < 0x82070000 0x1000 >;
+			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
 			xlnx,phy-addr = <0x2>;
 			xlnx,phy-mask = <0xffff>;

@@ -11,6 +11,11 @@ set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x33,0x01
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
+echo FPGA Configuration:
+set fpgasize 0x200000
+set fpgastart 0x87000000
+set fpganame Labrinth_Fpga.bin
+
 echo Bootloader Configuration:
 set bootsize 0x40000
 set bootstart 0x87200000
@@ -24,14 +29,13 @@ set fdtsize 0x20000
 set fdtstart 0x87240000
 set fdtname labrinth-avb.dtb
 
-echo FPGA Configuration:
-set fpgasize 0x200000
-set fpgastart 0x87000000
-set fpganame Labrinth_Fpga.bin
-
 echo Kernel Configuration:
-set kernsize 0x5A0000
+set kernsize 0x3C0000
 set kernstart 0x87260000
+
+echo Root Filesystem Configuration:
+set rootfssize 0x1E0000
+set rootfsstart 0x87620000
 
 echo ROM Filesystem Configuration:
 set romfssize 0x5E0000
@@ -49,7 +53,7 @@ set load_fpga 'tftp ${clobstart} ${fpganame}'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
-set kernname uclinux.ub
+set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
 set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
 set update_kernel run load_kernel install_kernel
@@ -57,6 +61,10 @@ set update_kernel run load_kernel install_kernel
 set load_uboot 'tftp ${clobstart} u-boot.bin'
 set install_uboot 'protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};cp.b ${fileaddr} ${bootstart} ${filesize}'
 set update_uboot run load_uboot install_uboot
+
+set load_rootfs 'tftp ${clobstart} rootfs.romfs'
+set install_rootfs 'protect off ${rootfsstart} +${rootfssize};erase ${rootfsstart} +${rootfssize};cp.b ${fileaddr} ${rootfsstart} ${filesize}'
+set update_rootfs run load_rootfs install_rootfs
 
 set load_romfs 'tftp ${clobstart} usr.romfs'
 set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
