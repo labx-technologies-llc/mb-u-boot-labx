@@ -1,0 +1,79 @@
+echo Setting up AUD8822-SP601 environment
+echo -----------------------------------
+echo Network Configuration:
+set autoload no
+set ethaddr 00:0a:35:00:33:01
+set ipaddr 192.168.1.1
+set serverip 192.168.1.100
+
+echo Clobber DRAM Configuration:
+set clobstart 0x88000000
+
+echo Bootloader Configuration:
+set bootsize 0x40000
+set bootstart 0x87200000
+set bootenvsize 0x20000
+set bootenvstart 0x87FE0000
+set boottextbase 0x88F00000
+set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
+
+echo Flattened Device Tree Configuration:
+set fdtsize 0x20000
+set fdtstart 0x87240000
+set fdtname aud8822-sp601.dtb
+
+echo FPGA Configuration:
+set fpgasize 0x200000
+set fpgastart 0x87000000
+set fpganame Avb_Demo_Sp601.bin
+
+echo Kernel Configuration:
+set kernsize 0x5A0000
+set kernstart 0x87260000
+
+echo ROM Filesystem Configuration:
+set romfssize 0x5E0000
+set romfsstart 0x87800000
+
+echo Settings Filesystem Configuration:
+set settingsfssize 0x200000
+set settingsfsstart 0x87DE0000
+
+echo Boot Configuration:
+set bootcmd 'bootm ${kernstart} - ${fdtstart}'
+set bootdelay 3
+
+set load_fpga 'tftp ${clobstart} ${fpganame}'
+set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
+set update_fpga run load_fpga install_fpga
+
+set kernname uclinux.ub
+set load_kernel 'tftp ${clobstart} ${kernname}'
+set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
+set update_kernel run load_kernel install_kernel
+
+set load_uboot 'tftp ${clobstart} u-boot.bin'
+set install_uboot 'protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};cp.b ${fileaddr} ${bootstart} ${filesize}'
+set update_uboot run load_uboot install_uboot
+
+set load_romfs 'tftp ${clobstart} usr.romfs'
+set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
+set update_romfs run load_romfs install_romfs
+
+set load_fdt 'tftp ${clobstart} ${fdtname}'
+set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
+set update_fdt run load_fdt install_fdt
+
+set load_settingsfs 'tftp ${clobstart} settings.jffs2'
+set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
+set update_settingsfs run load_settingsfs install_settingsfs
+
+echo Shortcuts for Development:
+set tempkernstart 0x88800000
+set tempfdtstart 0x88700000
+set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
+
+echo Saving Configurations...
+saveenv
+
+echo Configuration Completed
