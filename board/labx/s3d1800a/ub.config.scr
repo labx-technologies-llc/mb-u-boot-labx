@@ -1,4 +1,4 @@
-echo Setting up AUD8822-SP601 environment
+echo Setting up Avb Demo S3D1800A environment
 echo -----------------------------------
 echo Network Configuration:
 set autoload no
@@ -20,12 +20,12 @@ set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart}
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
 set fdtstart 0x87240000
-set fdtname aud8822-sp601.dtb
+set fdtname s3d1800a.dtb
 
 echo FPGA Configuration:
 set fpgasize 0x200000
 set fpgastart 0x87000000
-set fpganame Avb_Demo_Sp601.bin
+set fpganame Avb_Demo_S3D1800A.bin
 
 echo Kernel Configuration:
 set kernsize 0x5A0000
