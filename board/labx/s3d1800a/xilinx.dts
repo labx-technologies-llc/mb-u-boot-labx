@@ -42,7 +42,7 @@
 		serial0 = &RS232_Uart_1;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(fpga),256K(boot),128K(fdt),5760K(image),6016K(romfs),2048K(settingsfs),128K(bootenv) root=mtd7 rootfstype=romfs";
+		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(fpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),6016K(romfs),2048K(settingsfs),32K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@84000000";
 	} ;
 	cpus {
@@ -53,12 +53,12 @@
 			clock-frequency = <62500000>;
 			compatible = "xlnx,microblaze-8.00.a";
 			d-cache-baseaddr = <0x88000000>;
-			d-cache-highaddr = <0x89ffffff>;
+			d-cache-highaddr = <0x8bffffff>;
 			d-cache-line-size = <0x10>;
 			d-cache-size = <0x2000>;
 			device_type = "cpu";
 			i-cache-baseaddr = <0x88000000>;
-			i-cache-highaddr = <0x89ffffff>;
+			i-cache-highaddr = <0x8bffffff>;
 			i-cache-line-size = <0x10>;
 			i-cache-size = <0x2000>;
 			model = "microblaze,8.00.a";
@@ -289,7 +289,7 @@
 			device_type = "network";
 			interrupt-parent = <&xps_intc_0>;
 			interrupts = < 6 2 5 2 8 2 >;
-			local-mac-address = [ 00 0a 35 f0 9d 00 ];
+			local-mac-address = [ 00 0a 35 9c 0b 00 ];
 			phy-mdio-controller = <&labx_ethernet_0>;
 			reg = < 0x80040000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -466,7 +466,7 @@
 			xlnx,family = "spartan3adsp";
 			xlnx,gen0-assert = <0x1>;
 			xlnx,gen1-assert = <0x1>;
-			xlnx,one-timer-only = <0x1>;
+			xlnx,one-timer-only = <0x0>;
 			xlnx,trig0-assert = <0x1>;
 			xlnx,trig1-assert = <0x1>;
 		} ;
