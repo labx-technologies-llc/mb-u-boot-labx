@@ -468,6 +468,7 @@ static int labx_eth_init(struct eth_device *dev, bd_t *bis)
   if(!first)
     {
       labx_eth_restart();
+      labx_eth_phy_ctrl();
       return;
     }
 
@@ -509,6 +510,10 @@ static void labx_eth_halt(void)
 
 int labx_eth_send(struct eth_device *dev, volatile void *packet, int length)
 {
+  if(!link)
+    if(labx_eth_phy_ctrl() == 0)
+      return 0;
+
   return(labx_eth_send_fifo((unsigned char *)packet, length));
 }
 
