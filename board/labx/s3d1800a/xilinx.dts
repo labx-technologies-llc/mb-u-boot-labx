@@ -293,8 +293,8 @@
 			phy-mdio-controller = <&labx_ethernet_0>;
 			reg = < 0x80040000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
-			xlnx,phy-addr = <0x0>;
-			xlnx,phy-mask = <0xffff>;
+			xlnx,phy-addr = <0x1>;
+			xlnx,phy-mask = <0x2>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
