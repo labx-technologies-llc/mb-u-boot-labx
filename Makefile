@@ -3558,6 +3558,10 @@ labx-ptp-sp601_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labx-ptp-sp601 labx
 
+labx-ptp-ml605_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labx-ptp-ml605 labx
+
 s3d1800a_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze s3d1800a labx
