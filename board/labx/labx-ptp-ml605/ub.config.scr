@@ -7,37 +7,37 @@ set ipaddr 192.168.1.1
 set serverip 192.168.1.100
 
 echo Clobber DRAM Configuration:
-set clobstart 0x50000000
+set clobstart 0xB0000000
 
 echo Bootloader Configuration:
 set bootsize 0x40000
-set bootstart 0x86200000
+set bootstart 0x9C900000
 set bootenvsize 0x20000
-set bootenvstart 0x86FE0000
-set boottextbase 0x50F00000
+set bootenvstart 0x9DFF8000
+set boottextbase 0xB0F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
-set fdtstart 0x86240000
+set fdtstart 0x9C940000
 set fdtname labx-ptp-ml605.dtb
 
 echo FPGA Configuration:
-set fpgasize 0x200000
-set fpgastart 0x86000000
-set fpganame Ptp_Demo_Ml605.bin
+set fpgasize 0x900000
+set fpgastart 0x9C000000
+set fpganame Avb_Video_Ml605_Fpga.bin
 
 echo Kernel Configuration:
 set kernsize 0x5A0000
-set kernstart 0x86260000
+set kernstart 0x9C960000
 
 echo ROM Filesystem Configuration:
 set romfssize 0x5E0000
-set romfsstart 0x86800000
+set romfsstart 0x9C800000
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
-set settingsfsstart 0x86DE0000
+set settingsfsstart 0x9CDE0000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
@@ -69,8 +69,8 @@ set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase 
 set update_settingsfs run load_settingsfs install_settingsfs
 
 echo Shortcuts for Development:
-set tempkernstart 0x50800000
-set tempfdtstart 0x50700000
+set tempkernstart 0xB0800000
+set tempfdtstart 0xB0700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 
 echo Saving Configurations...

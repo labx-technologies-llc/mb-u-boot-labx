@@ -29,5 +29,5 @@
 # produces this particular file anymore...?
 # This places the execution location for U-Boot to be
 # 15 MiB into the DDR3 SODIMM
-TEXT_BASE = 0x50F00000
+TEXT_BASE = 0xB0F00000
 

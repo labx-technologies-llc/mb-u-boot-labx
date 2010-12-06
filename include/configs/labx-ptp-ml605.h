@@ -44,8 +44,9 @@
 
 #undef ET_DEBUG
 
-/* Use the Lab X Ethernet driver */
+/* Use the Lab X Ethernet driver, with the Xilinx hard TEMAC */
 #define CONFIG_LABX_ETH_LOCALLINK  1
+#define XILINX_HARD_MAC            1
 
 /* The MDIO divisor is set to produce a 1.5 MHz interface */
 #define LABX_ETH_LOCALLINK_MDIO_DIV  (0x28)
