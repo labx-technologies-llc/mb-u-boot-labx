@@ -33,15 +33,15 @@ set kernstart 0x9C960000
 
 echo Root Filesystem Configuration:
 set rootfssize 0x1E0000
-set rootfsstart 0x9CB40000
+set rootfsstart 0x9CD20000
 
 echo ROM Filesystem Configuration:
 set romfssize 0x5E0000
-set romfsstart 0x9C800000
+set romfsstart 0x9CF00000
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
-set settingsfsstart 0x9CDE0000
+set settingsfsstart 0x9D4E0000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'

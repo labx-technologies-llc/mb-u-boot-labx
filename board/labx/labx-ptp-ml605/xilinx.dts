@@ -42,7 +42,7 @@
 		serial0 = &RS232_Uart_1;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=9C000000.flash:9216K(fpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),6016K(romfs),2048K(settingsfs),16480K(padding),32K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=9c000000.flash:9216K(fpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),6016K(romfs),2048K(settingsfs),16480K(padding),32K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -441,7 +441,7 @@
 				compatible = "xlnx,labx-eth-locallink-1.00.a";
 				device_type = "network";
 				llink-connected = <&xps_ll_fifo_0>;
-				local-mac-address = [ 00 0a 35 38 1f 00 ];
+				local-mac-address = [ 00 0a 35 e0 96 00 ];
 				phy-mdio-controller = <&labx_eth_locallink_0>;
 				reg = < 0x80050000 0x40 >;
 				xlnx,has-mdio = <0x1>;
