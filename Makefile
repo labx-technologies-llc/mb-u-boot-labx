@@ -3760,6 +3760,7 @@ clean:
 	       $(obj)tools/gen_eth_addr    $(obj)tools/img2srec		  \
 	       $(obj)tools/mkimage	   $(obj)tools/mpc86x_clk	  \
 	       $(obj)tools/ncb		   $(obj)tools/ubsha1
+	@rm -f $(obj)board/biamp/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
 	@rm -f $(obj)board/cray/L1/{bootscript.c,bootscript.image}	  \
 	       $(obj)board/netstar/{eeprom,crcek,crcit,*.srec,*.bin}	  \
 	       $(obj)board/trab/trab_fkt   $(obj)board/voiceblue/eeprom   \
