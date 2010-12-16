@@ -425,6 +425,8 @@
 			compatible = "xlnx,xps-uartlite-1.01.a", "xlnx,xps-uartlite-1.00.a";
 			current-speed = <115200>;
 			device_type = "serial";
+			interrupt-parent = <&xps_intc_0>;
+			interrupts = < 5 0 >;
 			port-number = <0>;
 			reg = < 0x82020000 0x10000 >;
 			xlnx,baudrate = <0x1c200>;
@@ -440,13 +442,15 @@
 			ethernet@80050000 {
 				compatible = "xlnx,labx-eth-locallink-1.00.a";
 				device_type = "network";
+				interrupt-parent = <&xps_intc_0>;
+				interrupts = < 3 2 2 2 >;
 				llink-connected = <&xps_ll_fifo_0>;
-				local-mac-address = [ 00 0a 35 e0 96 00 ];
+				local-mac-address = [ 00 0a 35 d6 08 00 ];
 				phy-mdio-controller = <&labx_eth_locallink_0>;
 				reg = < 0x80050000 0x40 >;
 				xlnx,has-mdio = <0x1>;
-				xlnx,phy-addr = <0x1>;
-				xlnx,phy-mask = <0x6>;
+				xlnx,phy-addr = <0x7>;
+				xlnx,phy-mask = <0x7>;
 				xlnx,phy-type = <0x1>;
 				xlnx,rxcsum = <0x0>;
 				xlnx,txcsum = <0x0>;
@@ -495,13 +499,13 @@
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
 			interrupt-controller ;
 			reg = < 0x81800000 0x10000 >;
-			xlnx,kind-of-intr = <0x1>;
-			xlnx,num-intr-inputs = <0x3>;
+			xlnx,kind-of-intr = <0x21>;
+			xlnx,num-intr-inputs = <0x6>;
 		} ;
 		xps_ll_fifo_0: xps-ll-fifo@800a0000 {
 			compatible = "xlnx,xps-ll-fifo-1.02.a";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 2 2 >;
+			interrupts = < 4 2 >;
 			reg = < 0x800a0000 0x10000 >;
 			xlnx,family = "virtex6";
 		} ;
