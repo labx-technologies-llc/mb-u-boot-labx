@@ -1,0 +1,10 @@
+
+#ifndef __AVB_IDL__
+#define __AVB_IDL__
+
+#include "CommonTypes.idl"
+
+#endif // __AVB_IDL__
+        
+// vi:set ai sw=4 expandtab ts=4:
+

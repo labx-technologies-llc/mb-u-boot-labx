@@ -44,6 +44,11 @@
 DECLARE_GLOBAL_DATA_PTR;
 #endif
 
+#if defined(CONFIG_FIRMWARE_UPDATE) 
+extern void CheckFirmwareUpdate();
+#endif
+
+
 /*
  * Board-specific Platform code can reimplement show_boot_progress () if needed
  */
@@ -368,6 +373,11 @@ void main_loop (void)
 #if defined(CONFIG_UPDATE_TFTP)
 	update_tftp ();
 #endif /* CONFIG_UPDATE_TFTP */
+
+#if defined(CONFIG_FIRMWARE_UPDATE) 
+    CheckFirmwareUpdate();
+#endif
+
 
 #if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
 	s = getenv ("bootdelay");

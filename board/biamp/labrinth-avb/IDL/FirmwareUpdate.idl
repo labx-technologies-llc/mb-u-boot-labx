@@ -1,0 +1,35 @@
+
+#ifndef __FIRMWARE_UPDATE_IDL__
+#define __FIRMWARE_UPDATE_IDL__
+
+#include "AvbDefs.idl"
+
+module FirmwareUpdate
+{
+    typedef sequence<uint8_t> FwData;
+
+
+    enum ErrorCode
+    {
+        e_EC_SUCCESS,
+        e_EC_INVALID_CLASS_CODE,
+        e_EC_INVALID_INSTANCE,
+        e_EC_INVALID_SERVICE_CODE,
+        e_EC_INVALID_ATTRIBUTE_CODE,
+        e_EC_UPDATE_ALREADY_IN_PROGRESS,
+        e_EC_UPDATE_NOT_IN_PROGRESS,
+        e_EC_CORRUPT_IMAGE,
+        e_EC_NOT_EXECUTED
+    };
+
+    interface Services
+    {
+    	ErrorCode startFirmwareUpdate(in string cmd, in uint32_t length, in uint32_t crc);
+    	ErrorCode sendDataPacket(in FwData data);
+    };
+};
+
+#endif // __FIRMWARE_UPDATE_IDL__
+
+// vi:set ai sw=4 expandtab ts=4:
+
