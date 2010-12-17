@@ -84,7 +84,8 @@ typedef void	rxhand_f(uchar *, unsigned, unsigned, unsigned);
  */
 typedef void	thand_f(void);
 
-#define NAMESIZE 16
+/* Maximum name size for an Ethernet device */
+#define NAMESIZE 32
 
 enum eth_state_t {
 	ETH_STATE_INIT,
