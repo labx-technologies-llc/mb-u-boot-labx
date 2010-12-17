@@ -532,6 +532,7 @@ int labx_eth_initialize(bd_t *bis)
   
   memset(dev, 0, sizeof(*dev));
   sprintf(dev->name, "Lab X Ethernet");
+  dev->name[NAMESIZE - 1] = '\0';
   
   dev->iobase = LABX_PRIMARY_ETH_BASEADDR;
   dev->priv = 0;
