@@ -450,7 +450,7 @@
 				reg = < 0x80050000 0x40 >;
 				xlnx,has-mdio = <0x1>;
 				xlnx,phy-addr = <0x7>;
-				xlnx,phy-mask = <0x7>;
+				xlnx,phy-mask = <0xffff>;
 				xlnx,phy-type = <0x1>;
 				xlnx,rxcsum = <0x0>;
 				xlnx,txcsum = <0x0>;
