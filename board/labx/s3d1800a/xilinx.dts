@@ -288,7 +288,7 @@
 			compatible = "xlnx,labx-ethernet-1.00.a";
 			device_type = "network";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 6 2 5 2 8 2 >;
+			interrupts = < 6 2 5 2 >;
 			local-mac-address = [ 00 0a 35 9c 0b 00 ];
 			phy-mdio-controller = <&labx_ethernet_0>;
 			reg = < 0x80040000 0x10000 >;
