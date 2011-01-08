@@ -445,7 +445,7 @@
 				interrupt-parent = <&xps_intc_0>;
 				interrupts = < 3 2 2 2 >;
 				llink-connected = <&xps_ll_fifo_0>;
-				local-mac-address = [ 00 0a 35 d6 08 00 ];
+				local-mac-address = [ 00 0a 35 84 46 00 ];
 				phy-mdio-controller = <&labx_eth_locallink_0>;
 				reg = < 0x80050000 0x40 >;
 				xlnx,has-mdio = <0x1>;
@@ -457,7 +457,7 @@
 			} ;
 		} ;
 		labx_ptp0: labx-ptp@82060000 {
-			compatible = "xlnx,labx-ptp-1.00.a";
+			compatible = "xlnx,labx-ptp-1.01.a";
 			interrupt-parent = <&xps_intc_0>;
 			interrupts = < 1 2 >;
 			port-interface-0 = <&labx_eth_locallink_0>;
@@ -476,6 +476,7 @@
 			xlnx,port-interface-5 = "Invalid";
 			xlnx,port-interface-6 = "Invalid";
 			xlnx,port-interface-7 = "Invalid";
+			xlnx,port-width = <0x8>;
 			xlnx,rtc-d-coefficient = <0xf0000000>;
 			xlnx,rtc-i-coefficient = <0xf0000000>;
 			xlnx,rtc-p-coefficient = <0xfff00000>;
