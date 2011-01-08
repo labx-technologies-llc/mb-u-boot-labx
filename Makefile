@@ -3566,6 +3566,10 @@ s3d1800a_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze s3d1800a labx
 
+avid_garcia_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia avid
+
 
 #========================================================================
 # Blackfin
