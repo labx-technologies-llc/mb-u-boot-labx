@@ -50,8 +50,8 @@
 		microblaze_0: cpu@0 {
 			clock-frequency = <62500000>;
 			compatible = "xlnx,microblaze-8.00.a";
-			d-cache-baseaddr = <0x0>;
-			d-cache-highaddr = <0x3fffffff>;
+			d-cache-baseaddr = <0x88000000>;
+			d-cache-highaddr = <0x8fffffff>;
 			d-cache-line-size = <0x10>;
 			d-cache-size = <0x2000>;
 			device_type = "cpu";
@@ -64,7 +64,7 @@
 			timebase-frequency = <62500000>;
 			xlnx,addr-tag-bits = <0xe>;
 			xlnx,allow-dcache-wr = <0x1>;
-			xlnx,allow-icache-wr = <0x0>;
+			xlnx,allow-icache-wr = <0x1>;
 			xlnx,archiver = "0";
 			xlnx,area-optimized = <0x0>;
 			xlnx,branch-target-cache-size = <0x0>;
@@ -76,8 +76,8 @@
 			xlnx,d-lmb = <0x1>;
 			xlnx,d-plb = <0x1>;
 			xlnx,data-size = <0x20>;
-			xlnx,dcache-addr-tag = <0x0>;
-			xlnx,dcache-always-used = <0x0>;
+			xlnx,dcache-addr-tag = <0xe>;
+			xlnx,dcache-always-used = <0x1>;
 			xlnx,dcache-byte-size = <0x2000>;
 			xlnx,dcache-data-width = <0x0>;
 			xlnx,dcache-force-tag-lutram = <0x0>;
@@ -87,7 +87,7 @@
 			xlnx,dcache-use-writeback = <0x0>;
 			xlnx,dcache-victims = <0x0>;
 			xlnx,debug-enabled = <0x1>;
-			xlnx,div-zero-exception = <0x0>;
+			xlnx,div-zero-exception = <0x1>;
 			xlnx,dynamic-bus-sizing = <0x1>;
 			xlnx,ecc-use-ce-exception = <0x0>;
 			xlnx,edge-is-positive = <0x1>;
@@ -103,7 +103,7 @@
 			xlnx,i-axi = <0x0>;
 			xlnx,i-lmb = <0x1>;
 			xlnx,i-plb = <0x1>;
-			xlnx,icache-always-used = <0x0>;
+			xlnx,icache-always-used = <0x1>;
 			xlnx,icache-data-width = <0x0>;
 			xlnx,icache-force-tag-lutram = <0x0>;
 			xlnx,icache-interface = <0x0>;
@@ -111,7 +111,7 @@
 			xlnx,icache-streams = <0x0>;
 			xlnx,icache-use-fsl = <0x1>;
 			xlnx,icache-victims = <0x0>;
-			xlnx,ill-opcode-exception = <0x0>;
+			xlnx,ill-opcode-exception = <0x1>;
 			xlnx,instance = "microblaze_0";
 			xlnx,interconnect = <0x1>;
 			xlnx,interconnect-m-axi-dc-read-issuing = <0x2>;
@@ -179,7 +179,7 @@
 			xlnx,number-of-pc-brk = <0x1>;
 			xlnx,number-of-rd-addr-brk = <0x0>;
 			xlnx,number-of-wr-addr-brk = <0x0>;
-			xlnx,opcode-0x0-illegal = <0x0>;
+			xlnx,opcode-0x0-illegal = <0x1>;
 			xlnx,optimization = <0x0>;
 			xlnx,pvr = <0x0>;
 			xlnx,pvr-user1 = <0x0>;
@@ -206,7 +206,7 @@
 			xlnx,unaligned-exceptions = <0x1>;
 			xlnx,use-barrel = <0x1>;
 			xlnx,use-branch-target-cache = <0x0>;
-			xlnx,use-dcache = <0x0>;
+			xlnx,use-dcache = <0x1>;
 			xlnx,use-div = <0x1>;
 			xlnx,use-ext-brk = <0x1>;
 			xlnx,use-ext-nm-brk = <0x1>;
@@ -230,6 +230,56 @@
 		#size-cells = <1>;
 		compatible = "xlnx,plb-v46-1.05.a", "xlnx,plb-v46-1.00.a", "simple-bus";
 		ranges ;
+		audio_dma: labx-dma@800f0000 {
+			compatible = "xlnx,labx-dma-1.01.a";
+			interrupt-parent = <&interrupt_cntlr>;
+			interrupts = < 2 2 >;
+			reg = < 0x800f0000 0x10000 >;
+			xlnx,cache-address-width = <0x8>;
+			xlnx,cache-data-width = <0x20>;
+			xlnx,cache-data-words = <0x500>;
+			xlnx,dma-num-channels = <0x1>;
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,interface-type = "DMA_NPI";
+			xlnx,internal-params = <0x1>;
+			xlnx,mplb-awidth = <0x20>;
+			xlnx,mplb-clk-period-ps = <0x2710>;
+			xlnx,mplb-dwidth = <0x80>;
+			xlnx,mplb-native-dwidth = <0x20>;
+			xlnx,mplb-p2p = <0x0>;
+			xlnx,mplb-smallest-slave = <0x20>;
+			xlnx,num-cache-interfaces = <0x5>;
+			xlnx,num-param-interfaces = <0x1>;
+			xlnx,param-address-width = <0x9>;
+			xlnx,param-words = <0x200>;
+			xlnx,parameter-interlock-fifo = <0x1>;
+		} ;
+		depacketizer_dma: labx-dma@800e0000 {
+			compatible = "xlnx,labx-dma-1.01.a";
+			interrupt-parent = <&interrupt_cntlr>;
+			interrupts = < 22 2 >;
+			reg = < 0x800e0000 0x10000 >;
+			xlnx,cache-address-width = <0xa>;
+			xlnx,cache-data-width = <0x20>;
+			xlnx,cache-data-words = <0xc00>;
+			xlnx,dma-num-channels = <0x1>;
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,interface-type = "DMA_NPI";
+			xlnx,internal-params = <0x1>;
+			xlnx,mplb-awidth = <0x20>;
+			xlnx,mplb-clk-period-ps = <0x2710>;
+			xlnx,mplb-dwidth = <0x80>;
+			xlnx,mplb-native-dwidth = <0x20>;
+			xlnx,mplb-p2p = <0x0>;
+			xlnx,mplb-smallest-slave = <0x20>;
+			xlnx,num-cache-interfaces = <0x4>;
+			xlnx,num-param-interfaces = <0x4>;
+			xlnx,param-address-width = <0x9>;
+			xlnx,param-words = <0x200>;
+			xlnx,parameter-interlock-fifo = <0x1>;
+		} ;
 		eth01_audio_packetizer: labx-audio-packetizer@80020000 {
 			compatible = "xlnx,labx-audio-packetizer-1.00.a";
 			interrupt-parent = <&interrupt_cntlr>;
@@ -251,7 +301,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 10 2 6 2 >;
-			local-mac-address = [ 00 0a 35 af e4 00 ];
+			local-mac-address = [ 00 0a 35 ad a2 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80030000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -266,7 +316,7 @@
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 26 2 >;
 			reg = < 0x80010000 0x10000 >;
-			xlnx,cache-address-width = <0xb>;
+			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x300>;
 			xlnx,cache-read-latency = <0x2>;
@@ -292,7 +342,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 9 2 5 2 >;
-			local-mac-address = [ 00 0a 35 af 7d 01 ];
+			local-mac-address = [ 00 0a 35 ad 0a 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80060000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -307,7 +357,7 @@
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 25 2 >;
 			reg = < 0x80040000 0x10000 >;
-			xlnx,cache-address-width = <0xb>;
+			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x300>;
 			xlnx,cache-read-latency = <0x2>;
@@ -349,7 +399,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 8 2 4 2 >;
-			local-mac-address = [ 00 0a 35 af 24 02 ];
+			local-mac-address = [ 00 0a 35 ad c5 02 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80090000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -364,7 +414,7 @@
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 24 2 >;
 			reg = < 0x80070000 0x10000 >;
-			xlnx,cache-address-width = <0xb>;
+			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x300>;
 			xlnx,cache-read-latency = <0x2>;
@@ -390,7 +440,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 7 2 3 2 >;
-			local-mac-address = [ 00 0a 35 af 37 03 ];
+			local-mac-address = [ 00 0a 35 ad 95 03 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x800c0000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -405,7 +455,7 @@
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 23 2 >;
 			reg = < 0x800a0000 0x10000 >;
-			xlnx,cache-address-width = <0xb>;
+			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x300>;
 			xlnx,cache-read-latency = <0x2>;
@@ -566,13 +616,8 @@
 			xlnx,s-axi-protocol = "AXI4LITE";
 			xlnx,use-uart = <0x1>;
 		} ;
-		mpmc@88000000 {
-			#address-cells = <1>;
-			#size-cells = <1>;
-			compatible = "xlnx,mpmc-6.02.a";
-		} ;
 		ptp: labx-ptp@800d0000 {
-			compatible = "xlnx,labx-ptp-1.00.a";
+			compatible = "xlnx,labx-ptp-1.01.a";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 1 2 >;
 			port-interface-0 = <&eth0>;
@@ -594,6 +639,7 @@
 			xlnx,port-interface-5 = "Invalid";
 			xlnx,port-interface-6 = "Invalid";
 			xlnx,port-interface-7 = "Invalid";
+			xlnx,port-width = <0x8>;
 			xlnx,rtc-d-coefficient = <0x0>;
 			xlnx,rtc-i-coefficient = <0x0>;
 			xlnx,rtc-p-coefficient = <0x0>;
@@ -685,3 +731,4 @@
 		} ;
 	} ;
 }  ;
+
