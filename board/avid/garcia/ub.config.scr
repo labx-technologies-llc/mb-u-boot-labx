@@ -21,7 +21,7 @@ set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x08000
 set bootenvstart 0x87FE0000
-set boottextbase 0x88F00000
+set boottextbase 0x8FC00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
@@ -82,6 +82,7 @@ echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
+set ipset 'setenv ipaddr 192.168.1.1; setenv serverip 192.168.1.100; ping ${serverip}'
 
 echo Saving Configurations...
 saveenv
