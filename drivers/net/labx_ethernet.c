@@ -167,6 +167,18 @@
 #define ADVERTISE_ALL (ADVERTISE_10HALF | ADVERTISE_10FULL |	\
                        ADVERTISE_100HALF | ADVERTISE_100FULL)
 
+/* Special stuff for setting up a BCM5481.  Note that LS nibble of low ID
+ * is revision number, and will vary.
+ */
+#define BCM5481_ID_HIGH 0x0143
+#define BCM5481_ID_LOW 0xBCA0
+#define BCM5481_ID_LOW_MASK 0xFFF0
+#define BCM5481_RX_SKEW_REGISTER_SEL         0x7007
+#define BCM5481_RX_SKEW_ENABLE               0x0100
+#define BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL 0x0C00
+#define BCM5481_SHADOW_WRITE                 0x8000
+#define BCM5481_XMIT_CLOCK_DELAY             0x0200
+
 /* As mentioned above, the Lab X Ethernet hardware mimics the
  * Xilinx LocalLink FIFO peripheral
  */
@@ -293,6 +305,34 @@ static int labx_eth_phy_ctrl(void)
     id_high = read_phy_register(phy_addr, 2);
     id_low = read_phy_register(phy_addr, 3);
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
+    if (id_high == BCM5481_ID_HIGH &&
+    		(id_low & BCM5481_ID_LOW_MASK) == BCM5481_ID_LOW)
+    {
+    	/* RGMII Transmit Clock Delay: The RGMII transmit timing can be adjusted
+		 * by software control. TXD-to-GTXCLK clock delay time can be increased
+		 * by approximately 1.9 ns for 1000BASE-T mode, and between 2 ns to 6 ns
+		 * when in 10BASE-T or 100BASE-T mode by setting Register 1ch, SV 00011,
+		 * bit 9 = 1. Enabling this timing adjustment eliminates the need for
+		 * board trace delays as required by the RGMII specification.
+    	 */
+    	write_phy_register(phy_addr, 0x1C, BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL);
+    	result = read_phy_register(phy_addr, 0x1C);
+    	write_phy_register(phy_addr, 0x1C,
+    			BCM5481_SHADOW_WRITE | BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL | BCM5481_XMIT_CLOCK_DELAY);
+    	write_phy_register(phy_addr, 0x1C, BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL);
+    	printf("RGMII Transmit Clock Delay: %d (0x%04X) => %d\n",
+    			((result & BCM5481_XMIT_CLOCK_DELAY) != 0), result,
+    			((read_phy_register(phy_addr, 0x1C)& BCM5481_XMIT_CLOCK_DELAY) != 0));
+
+    	write_phy_register(phy_addr, 0x18, BCM5481_RX_SKEW_REGISTER_SEL);
+    	result = read_phy_register(phy_addr, 0x18);
+    	write_phy_register(phy_addr, 0x18,
+    			result | BCM5481_SHADOW_WRITE | BCM5481_RX_SKEW_REGISTER_SEL | BCM5481_RX_SKEW_ENABLE);
+    	write_phy_register(phy_addr, 0x18, BCM5481_RX_SKEW_REGISTER_SEL);
+    	printf("RGMII Receive Clock Skew: %d (0x%04X) => %d\n",
+    			((result & BCM5481_RX_SKEW_ENABLE) != 0), result,
+    			((read_phy_register(phy_addr, 0x18)& BCM5481_RX_SKEW_ENABLE) != 0));
+    }
   }
 
   if(!link) {
