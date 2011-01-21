@@ -531,7 +531,7 @@ int labx_eth_initialize(bd_t *bis)
     hang();
   
   memset(dev, 0, sizeof(*dev));
-  sprintf(dev->name, "Lab X Ethernet");
+  sprintf(dev->name, "Lab X Ethernet @ %d", WHICH_ETH_PORT);
   dev->name[NAMESIZE - 1] = '\0';
   
   dev->iobase = LABX_PRIMARY_ETH_BASEADDR;
