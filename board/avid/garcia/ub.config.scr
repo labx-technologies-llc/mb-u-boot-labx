@@ -21,7 +21,7 @@ set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x08000
 set bootenvstart 0x87FE0000
-set boottextbase 0x8FC00000
+set boottextbase 0x8BCC0000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:

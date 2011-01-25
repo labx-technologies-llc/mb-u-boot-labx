@@ -29,5 +29,5 @@
 # produces this particular file anymore...?
 # This places the execution location for U-Boot to be
 # 15 MiB into the DDR2 device.
-TEXT_BASE = 0x8FC00000
+TEXT_BASE = 0x8BCC0000
 
