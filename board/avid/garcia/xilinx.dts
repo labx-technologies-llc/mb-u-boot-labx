@@ -51,18 +51,18 @@
 			clock-frequency = <62500000>;
 			compatible = "xlnx,microblaze-8.00.a";
 			d-cache-baseaddr = <0x88000000>;
-			d-cache-highaddr = <0x8fffffff>;
+			d-cache-highaddr = <0x8bffffff>;
 			d-cache-line-size = <0x10>;
 			d-cache-size = <0x2000>;
 			device_type = "cpu";
 			i-cache-baseaddr = <0x88000000>;
-			i-cache-highaddr = <0x8fffffff>;
+			i-cache-highaddr = <0x8bffffff>;
 			i-cache-line-size = <0x10>;
 			i-cache-size = <0x2000>;
 			model = "microblaze,8.00.a";
 			reg = <0>;
 			timebase-frequency = <62500000>;
-			xlnx,addr-tag-bits = <0xe>;
+			xlnx,addr-tag-bits = <0xd>;
 			xlnx,allow-dcache-wr = <0x1>;
 			xlnx,allow-icache-wr = <0x1>;
 			xlnx,archiver = "0";
@@ -76,7 +76,7 @@
 			xlnx,d-lmb = <0x1>;
 			xlnx,d-plb = <0x1>;
 			xlnx,data-size = <0x20>;
-			xlnx,dcache-addr-tag = <0xe>;
+			xlnx,dcache-addr-tag = <0xd>;
 			xlnx,dcache-always-used = <0x1>;
 			xlnx,dcache-byte-size = <0x2000>;
 			xlnx,dcache-data-width = <0x0>;
@@ -223,7 +223,7 @@
 	} ;
 	ddr2_cntlr: memory@88000000 {
 		device_type = "memory";
-		reg = < 0x88000000 0x8000000 >;
+		reg = < 0x88000000 0x4000000 >;
 	} ;
 	mb_plb: plb@0 {
 		#address-cells = <1>;
@@ -301,7 +301,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 10 2 6 2 >;
-			local-mac-address = [ 00 0a 35 66 06 00 ];
+			local-mac-address = [ 00 0a 35 5e ea 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80030000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -342,7 +342,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 9 2 5 2 >;
-			local-mac-address = [ 00 0a 35 66 af 01 ];
+			local-mac-address = [ 00 0a 35 5e 6d 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80060000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -399,7 +399,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 8 2 4 2 >;
-			local-mac-address = [ 00 0a 35 66 7d 02 ];
+			local-mac-address = [ 00 0a 35 5e cc 02 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x80090000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -440,7 +440,7 @@
 			device_type = "network";
 			interrupt-parent = <&interrupt_cntlr>;
 			interrupts = < 7 2 3 2 >;
-			local-mac-address = [ 00 0a 35 66 b0 03 ];
+			local-mac-address = [ 00 0a 35 5e cd 03 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x800c0000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -671,6 +671,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailboxslave@0 {
+				compatible = "spidev";
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+			};
 		} ;
 		spi_2: xps-spi@80003080 {
 			compatible = "xlnx,xps-spi-2.02.a", "xlnx,xps-spi-2.00.a";
@@ -682,6 +687,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailboxslave@0 {
+				compatible = "spidev";
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+			};
 		} ;
 		spi_3: xps-spi@80003100 {
 			compatible = "xlnx,xps-spi-2.02.a", "xlnx,xps-spi-2.00.a";
@@ -693,6 +703,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailboxslave@0 {
+				compatible = "spidev";
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+			};
 		} ;
 		spi_4: xps-spi@80003180 {
 			compatible = "xlnx,xps-spi-2.02.a", "xlnx,xps-spi-2.00.a";
@@ -704,6 +719,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailboxslave@0 {
+				compatible = "spidev";
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+			};
 		} ;
 		spi_5: xps-spi@80003200 {
 			compatible = "xlnx,xps-spi-2.02.a", "xlnx,xps-spi-2.00.a";
@@ -715,6 +735,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailboxslave@0 {
+				compatible = "spidev";
+				spi-max-frequency = <1000000>;
+				reg = <0>;
+			};
 		} ;
 		system_timer: timer@83c00000 {
 			compatible = "xlnx,xps-timer-1.02.a", "xlnx,xps-timer-1.00.a";
