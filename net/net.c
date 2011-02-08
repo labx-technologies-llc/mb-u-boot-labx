@@ -283,7 +283,7 @@ NetInitLoop(proto_t protocol)
 
 	/* update only when the environment has changed */
 	if (env_changed_id != env_id) {
-		NetCopyIP(&NetOurIP, &bd->bi_ip_addr);
+	       	NetOurIP = getenv_IPaddr("ipaddr");
 		NetOurGatewayIP = getenv_IPaddr ("gatewayip");
 		NetOurSubnetMask= getenv_IPaddr ("netmask");
 		NetServerIP = getenv_IPaddr ("serverip");
