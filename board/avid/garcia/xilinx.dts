@@ -593,7 +593,15 @@
 			xlnx,scl-inertial-delay = <0x5>;
 			xlnx,sda-inertial-delay = <0x5>;
 			xlnx,ten-bit-adr = <0x0>;
-		} ;
+			amc6821@18 {
+				compatible = "amc,amc6821";
+				reg = <0x18>;
+			};
+			ads7830@48 {
+				compatible = "ads,ads7830";
+				reg = <0x48>;
+			};
+ 		} ;
 		interrupt_cntlr: interrupt-controller@81800000 {
 			#interrupt-cells = <0x2>;
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
