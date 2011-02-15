@@ -14,7 +14,7 @@ set clobstart 0x88000000
 echo FPGA Configuration:
 set fpgasize 0x200000
 set fpgastart 0x87000000
-set fpganame Garcia_FPGA.bin
+set fpganame GarciaFPGA.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
