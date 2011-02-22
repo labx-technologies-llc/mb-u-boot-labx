@@ -651,6 +651,8 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
    * to equip the labx_eth_locallink EDK core with the ability to filter unicast
    * and multicast traffic, at which point this code may be modified to do so.
    */
+  printf("NOTE - MAC address filter logic is available!\n");
+  printf("       Update pcore, and check labx_ethernet.c for setup code\n");
   
 #if 0
   /* set up unicast MAC address filter */
@@ -734,7 +736,7 @@ static int labx_eth_init(struct eth_device *dev, bd_t *bis)
   return(0);
 }
 
-static void labx_eth_halt(void)
+static void labx_eth_halt(struct eth_device *dev)
 {
   labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_DISABLE);
   labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_DISABLE);
