@@ -576,6 +576,11 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			mailbox_slave_0@0 {
+				compatible = "spidev";
+				spi-max-frequency = <15625000>;
+				reg = <0>;
+			} ;
 		} ;
 	} ;
 }  ;
