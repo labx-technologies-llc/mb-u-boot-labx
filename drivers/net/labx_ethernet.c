@@ -694,12 +694,14 @@ static int labx_eth_init(struct eth_device *dev, bd_t *bis)
 {
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;
 
-  if(!first)
-    {
-      labx_eth_restart();
-      labx_eth_phy_ctrl();
-      return(-1);
-    }
+  if(!first) {
+    /* Short-circuit some of the setup; still return no error to permit
+     * the client code to keep going
+     */
+    labx_eth_restart();
+    labx_eth_phy_ctrl();
+    return(0);
+  }
 
   /* Clear ISR flags and reset both transmit and receive FIFO logic */
   ll_fifo->isr = FIFO_ISR_ALL;
