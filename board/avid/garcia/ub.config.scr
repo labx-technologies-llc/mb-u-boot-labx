@@ -78,6 +78,8 @@ set load_settingsfs 'tftp ${clobstart} settings.jffs2'
 set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
 set update_settingsfs run load_settingsfs install_settingsfs
 
+set update_all 'ping ${serverip} ; run update_fpga update_uboot update_fdt update_kernel update_rootfs update_romfs update_settingsfs'
+
 echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
