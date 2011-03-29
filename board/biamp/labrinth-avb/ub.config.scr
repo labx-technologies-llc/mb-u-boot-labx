@@ -6,15 +6,14 @@ set autoload no
 set ethaddr 00:0a:35:00:33:01
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
-set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x33,0x01
 
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
-echo FPGA Configuration:
-set fpgasize 0x200000
-set fpgastart 0x87000000
-set fpganame Labrinth_Fpga.bin
+echo Boot FPGA Configuration:
+set bootfpgasize 0x200000
+set bootfpgastart 0x87000000
+set bootfpganame Labrinth_Fpga_Boot.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
@@ -38,8 +37,13 @@ set rootfssize 0x1E0000
 set rootfsstart 0x87620000
 
 echo ROM Filesystem Configuration:
-set romfssize 0x5E0000
+set romfssize 0x3E0000
 set romfsstart 0x87800000
+
+echo FPGA Configuration:
+set fpgasize 0x200000
+set fpgastart 0x87BE0000
+set fpganame Labrinth_Fpga.bin
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
@@ -48,6 +52,10 @@ set settingsfsstart 0x87DE0000
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
+
+set load_boot_fpga 'tftp ${clobstart} ${bootfpganame}'
+set install_boot_fpga 'protect off ${bootfpgastart} +${bootfpgasize};erase ${bootfpgastart} +${bootfpgasize};cp.b ${fileaddr} ${bootfpgastart} ${bootfpgasize}'
+set update_boot_fpga run load_boot_fpga install_boot_fpga
 
 set load_fpga 'tftp ${clobstart} ${fpganame}'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
