@@ -37,6 +37,9 @@
 #define SPI_MBOX_READ_REG(reg) ( *((volatile unsigned long *)reg) )
 #define SPI_MBOX_WRITE_REG(reg,val) ( *((volatile unsigned long *)reg) = val )
 
+/* Number of dummy bytes returned by the mailbox */
+#define MAILBOX_DUMMY_BYTES (4)
+
 /* Public functions */
 extern void SetupSPIMbox(void);
 extern int ReadSPIMailbox(uint8_t *buffer, uint32_t *size);

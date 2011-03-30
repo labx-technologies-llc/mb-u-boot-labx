@@ -114,6 +114,7 @@ static ResponseMessageBuffer_t response;
 int DoFirmwareUpdate(void)
 {
   uint32_t reqSize = sizeof(RequestMessageBuffer_t);
+  uint32_t respSize;
 
   /* Enable the SPI mailbox, which raises the BP_ATTN signal to indicate to
    * the host that we are ready.
@@ -122,10 +123,21 @@ int DoFirmwareUpdate(void)
 
   /* Continuously read request messages from the host and unmarshal them */
   while (ReadSPIMailbox(request, &reqSize)) {
-    /* Unmarshal the received request, and re-set the max request size for
-     * the next iteration
-     */
+    /* Unmarshal the received request */
     unmarshal(request, response);
+
+    /* Write the response out to the mailbox; before doing so, artificially
+     * increase the response length by four to accommodate the four garbage bytes
+     * which the mailbox inserts on reads.  The message length was originally defined
+     * for Labrinth to include these bytes, and it has stuck.  Only actually
+     * send the true size of the message, the dummy bytes are inherently added
+     * by the gateware.
+     */
+    respSize = getLength_resp(response);
+    setLength_resp(response, (respSize + MAILBOX_DUMMY_BYTES));
+    WriteSPIMailbox(response, respSize);
+
+    /* Re-set the max request size for the next iteration */
     reqSize = sizeof(RequestMessageBuffer_t);
   }
 

@@ -1,4 +1,5 @@
 #include <linux/string.h>
+#include <malloc.h>
 
 #include "message-buffer.h"
 
@@ -54,11 +55,15 @@ uint16_t sequence_t_uint8_t_marshal(RequestMessageBuffer_t request, uint32_t off
 uint16_t string_t_unmarshal(RequestMessageBuffer_t request, uint32_t offset, string_t *str)
 {
   uint32_t size;
-  memcpy(&size,request,4);
-  *str = (string_t *)malloc(size+1);
-  memset(str,'S',size);
-  memcpy(*str,&request[4],size);
-  *str[size] = NULL;
+  memcpy(&size, &request[offset], 4);
+  *str = (string_t) malloc(size);
+  memset(str, 'S', size);
+  memcpy(*str, &request[offset + 4], size);
+
+  /* The marshalled string should have a NULL terminator anyways, which *is* included
+   * in the size, but make sure!
+   */
+  *str[size - 1] = '\0';
   return offset+4+size;
 }
 
@@ -110,7 +115,6 @@ uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *valu
   return 4; 
 }
 
-
 uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value)
 { 
   set_uint32_t(msg,offset, (value) ? 0xFFFFFFFF : 0x00000000); 
@@ -122,84 +126,83 @@ uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value)
 void setLength_req(RequestMessageBuffer_t msg,uint16_t length)
 { 
   set_uint16_t(msg,0, length); 
-  set_uint16_t(msg,2, length-8); 
 }
+
 void setClassCode_req(RequestMessageBuffer_t msg,uint16_t classCode)           
 { 
   set_uint16_t(msg,4, classCode); 
 }
+
 void setInstanceNumber_req(RequestMessageBuffer_t msg,uint16_t instanceNumber) 
 { 
   set_uint16_t(msg,6, instanceNumber); 
 }
+
 void setServiceCode_req(RequestMessageBuffer_t msg,uint16_t serviceCode)       
 { 
   set_uint16_t(msg,8, serviceCode); 
 }
+
 void setAttributeCode_req(RequestMessageBuffer_t msg,uint16_t attributeCode)   
 { 
   set_uint16_t(msg,10, attributeCode); 
 }
+
 uint16_t getPayloadOffset_req(RequestMessageBuffer_t msg)   
 { 
   return 12; 
 }
+
 uint16_t getLength_req(RequestMessageBuffer_t msg)          
 { 
   return get_uint16_t(msg,0); 
 }
-uint16_t getPayloadLength_req(RequestMessageBuffer_t msg)   
-{ 
-  return get_uint16_t(msg,2); 
-}
+
 uint16_t getClassCode_req(RequestMessageBuffer_t msg)       
 { 
   return get_uint16_t(msg,4); 
 }
+
 uint16_t getInstanceNumber_req(RequestMessageBuffer_t msg)  
 { 
   return get_uint16_t(msg,6); 
 }
+
 uint16_t getServiceCode_req(RequestMessageBuffer_t msg)     
 { 
   return get_uint16_t(msg,8); 
 }
+
 uint16_t getAttributeCode_req(RequestMessageBuffer_t msg)   
 { 
   return get_uint16_t(msg,10); 
 }
 
 /* ResponseMessageBuffer_t  routines */
-void setLength_resp(RequestMessageBuffer_t msg,uint16_t length)                 
-{ 
-  set_uint16_t(msg,0, length); 
-  set_uint16_t(msg,2, length-8); 
-}
 
-void setStatusCode_resp(RequestMessageBuffer_t msg,uint16_t statusCode)         
-{ 
-  set_uint16_t(msg,4, statusCode); 
-}
-uint16_t getPayloadOffset_resp(RequestMessageBuffer_t msg) 
-{ 
-  return 8; 
-}
-uint16_t getLength_resp(RequestMessageBuffer_t msg) 
+uint16_t getLength_resp(ResponseMessageBuffer_t msg)          
 { 
   return get_uint16_t(msg,0); 
 }
-uint16_t getPayloadLength_resp(RequestMessageBuffer_t msg) 
+
+void setLength_resp(ResponseMessageBuffer_t msg,uint16_t length)                 
 { 
-  return get_uint16_t(msg,2); 
-}
-uint16_t getStatusCode_resp(RequestMessageBuffer_t msg) 
-{ 
-  return get_uint16_t(msg,4); 
+  set_uint16_t(msg,0, length); 
 }
 
-
-void SendMessage(MessageBuffer_t request, MessageBuffer_t response)
-{
-  /* TODO - Implement + Possibly move somelace else - is in test app in Wulffs Code */
+void setStatusCode_resp(ResponseMessageBuffer_t msg,uint16_t statusCode)         
+{ 
+  set_uint16_t(msg, 2, statusCode); 
 }
+
+uint16_t getPayloadOffset_resp(ResponseMessageBuffer_t msg) 
+{ 
+  return(4); 
+}
+
+uint16_t getStatusCode_resp(ResponseMessageBuffer_t msg) 
+{ 
+  return get_uint16_t(msg, 2); 
+}
+
 
