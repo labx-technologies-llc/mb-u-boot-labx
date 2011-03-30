@@ -16,7 +16,9 @@ void set_uint8_t(MessageBuffer_t msg, uint32_t offset, uint8_t value)
 
 void set_uint16_t(MessageBuffer_t msg, uint32_t offset, uint16_t value)
 { 
-  msg[offset] = value >> 8; msg[offset+1] = value; 
+  /* Pack big-endian */
+  msg[offset] = value >> 8; 
+  msg[offset+1] = value; 
 }
 
 void set_uint32_t(MessageBuffer_t msg, uint32_t offset, uint32_t value)
@@ -46,10 +48,12 @@ uint32_t get_uint32_t(MessageBuffer_t msg, uint32_t offset)
 }
 uint16_t sequence_t_uint8_t_marshal(RequestMessageBuffer_t request, uint32_t offset, sequence_t_uint8_t *data)
 {
-  int datasize = MAX_MSG_BUF_SIZE;
-  data->m_size = datasize;
-  memcpy(data->m_data, request, datasize);
-  return 0;
+  uint16_t sequenceOffset = 0;
+
+  sequenceOffset += uint32_t_marshal(request, offset, data->m_size);
+  memcpy(&request[offset + sequenceOffset], data->m_data, data->m_size);
+  sequenceOffset += data->m_size;
+  return sequenceOffset;
 }
 
 uint16_t string_t_unmarshal(RequestMessageBuffer_t request, uint32_t offset, string_t *str)
@@ -71,10 +75,11 @@ uint16_t sequence_t_uint8_t_unmarshal(RequestMessageBuffer_t request, uint32_t o
 {
   uint16_t sequenceOffset=0;
   uint32_t sequenceLen=0;
-  sequenceOffset+= uint32_t_unmarshal(request,offset,&sequenceLen);
-  memcpy(&data->m_size, request, sizeof(uint32_t));
-  memcpy(data->m_data,&request[sequenceOffset],sequenceLen);
-  sequenceOffset+=sequenceLen;
+
+  sequenceOffset += uint32_t_unmarshal(request, offset, &sequenceLen);
+  data->m_size = sequenceLen;
+  memcpy(data->m_data, &request[offset + sequenceOffset], sequenceLen);
+  sequenceOffset += sequenceLen;
   return sequenceOffset;
 }
 

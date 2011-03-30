@@ -101,6 +101,14 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
   return e_EC_SUCCESS;
 }
 
+FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
+  if (run_command(fwUpdateCtxt.cmd,0) < 0) {
+    return e_EC_NOT_EXECUTED;
+  }
+
+  return e_EC_SUCCESS;
+}
+
 /* Statically-allocated request and response buffers for use with IDL */
 static RequestMessageBuffer_t request;
 static ResponseMessageBuffer_t response;

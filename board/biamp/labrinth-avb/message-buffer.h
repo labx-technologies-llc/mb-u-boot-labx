@@ -39,6 +39,7 @@ typedef enum {
 typedef enum {
   k_SC_startFirmwareUpdate = (MIN_SERVICE_CODE    ),
   k_SC_sendDataPacket      = (MIN_SERVICE_CODE + 1),
+  k_SC_sendCommand         = (MIN_SERVICE_CODE + 2),
 } FirmwareUpdateServiceCode;
 
 /* Request buffer methods */

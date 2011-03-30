@@ -6,27 +6,57 @@
 
 module FirmwareUpdate
 {
-    typedef sequence<uint8_t> FwData;
+  typedef sequence<uint8_t> FwData;
 
 
-    enum ErrorCode
-    {
-        e_EC_SUCCESS,
-        e_EC_INVALID_CLASS_CODE,
-        e_EC_INVALID_INSTANCE,
-        e_EC_INVALID_SERVICE_CODE,
-        e_EC_INVALID_ATTRIBUTE_CODE,
-        e_EC_UPDATE_ALREADY_IN_PROGRESS,
-        e_EC_UPDATE_NOT_IN_PROGRESS,
-        e_EC_CORRUPT_IMAGE,
-        e_EC_NOT_EXECUTED
-    };
+  enum ErrorCode
+  {
+    e_EC_SUCCESS,
+    e_EC_INVALID_CLASS_CODE,
+    e_EC_INVALID_INSTANCE,
+    e_EC_INVALID_SERVICE_CODE,
+    e_EC_INVALID_ATTRIBUTE_CODE,
+    e_EC_UPDATE_ALREADY_IN_PROGRESS,
+    e_EC_UPDATE_NOT_IN_PROGRESS,
+    e_EC_CORRUPT_IMAGE,
+    e_EC_NOT_EXECUTED
+  };
 
-    interface Services
-    {
-    	ErrorCode startFirmwareUpdate(in string cmd, in uint32_t length, in uint32_t crc);
-    	ErrorCode sendDataPacket(in FwData data);
-    };
+  interface Services
+  {
+      
+    /**
+     * Issues an arbitrary string command to U-Boot, independent of any firmware
+     * update context.
+     *
+     * @param cmd - String command to send to U-Boot immediately
+     */
+    ErrorCode sendCommand(in string cmd);
+
+    /**
+     * Begins a firmware update command, which consists of this call, followed by mutiple
+     * calls to sendDataPacket().  Once "length" bytes of data have been sent in packets,
+     * the command specified within "cmd" is invoked within U-Boot.
+     *
+     * @param cmd    - String command to send to U-Boot after all data has been sent
+     * @param length - Length, in bytes, of the data image which will be sent
+     * @param crc    - Expected CRC-32 of the data to be checked
+     *
+     * @return e_EC_SUCCESS upon success, e_EC_CORRUPT_IMAGE if CRC check failed.
+     */
+    ErrorCode startFirmwareUpdate(in string cmd, in uint32_t length, in uint32_t crc);
+
+    /**
+     * Sends a packet of data for a firmware image using a sequence type.
+     * This must only be called as a followup to a previous invocation of startFirmwareUpdate().
+     *
+     * @param data - Byte sequence constituting the packet of image data being sent
+     *
+     * @return e_EC_SUCCESS upon success, e_EC_UPDATE_NOT_IN_PROGRESS if no
+     *         firmware update context is in progress.
+     */
+    ErrorCode sendDataPacket(in FwData data);
+  };
 };
 
 #endif // __FIRMWARE_UPDATE_IDL__
