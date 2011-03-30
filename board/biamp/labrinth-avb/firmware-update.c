@@ -126,7 +126,11 @@ int DoFirmwareUpdate(void)
   return 1;
 }
 
-
+/*
+ * GPIO definition for reading the backplane GPIO pin
+ */
+#define BP_GPIO_DATA (*((volatile unsigned long*) XPAR_XPS_GPIO_0_BASEADDR))
+#define BP_GPIO_BIT  (0x00000001)
 
 /**
  * Read the GPIO that tells if a FW update is requested from Host
@@ -137,8 +141,10 @@ int DoFirmwareUpdate(void)
  **/
 int ReadFWUpdateGPIO(void)
 {
-  /* TODO - Read the GPIO to see if Host is initiating FW Update on us */
-  return 0;
+  /* Examine the GPIO signal from the backplane to see if the host is
+   * initiating a firware update or not
+   */
+  return((BP_GPIO_DATA & BP_GPIO_BIT) != 0);
 }
 
 /**

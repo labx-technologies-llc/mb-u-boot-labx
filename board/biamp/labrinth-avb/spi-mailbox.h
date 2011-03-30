@@ -34,8 +34,8 @@
 #define SPI_MBOX_DATA              (SPI_MBOX_BASE + 0x0400)
 
 
-#define SPI_MBOX_READ_REG(reg) ( *((unsigned long *)reg) )
-#define SPI_MBOX_WRITE_REG(reg,val) ( *((unsigned long *)reg) = val )
+#define SPI_MBOX_READ_REG(reg) ( *((volatile unsigned long *)reg) )
+#define SPI_MBOX_WRITE_REG(reg,val) ( *((volatile unsigned long *)reg) = val )
 
 /* Public functions */
 extern void SetupSPIMbox(void);
