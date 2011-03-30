@@ -13,7 +13,9 @@ uint8_t bWaitingForSPIMsg=FALSE;
 
 void SetupSPIMbox(void)
 {
-  SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL,SPI_MBOX_ENABLE);
+  /* Clear the message ready flag and enable the mailbox */
+  SPI_MBOX_WRITE_REG(SPI_MBOX_FLAGS, SPI_MBOX_HOST2SLAVE);
+  SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL,  SPI_MBOX_ENABLE);
 }
 
 /**
@@ -38,25 +40,37 @@ int ReadSPIMailbox(uint8_t *buffer, uint32_t *size)
   bWaitingForSPIMsg = TRUE;
   while(bWaitingForSPIMsg)
   {
-    uint32_t ctrl_reg = SPI_MBOX_READ_REG(SPI_MBOX_CTRL);
-    if (ctrl_reg & SPI_MBOX_HOST2SLAVE)
+    /* Use the IRQ flags register to determine when a message has been received,
+     * despite the fact that we don't actually use interrupts.
+     */
+    uint32_t flags_reg = SPI_MBOX_READ_REG(SPI_MBOX_CTRL);
+    if(flags_reg & SPI_MBOX_HOST2SLAVE)
     {
+      /* A message has been received from the host, obtain its length */
       uint32_t bufLen = SPI_MBOX_READ_REG(SPI_MBOX_MSG_LENGTH);
-      if (*size < bufLen) break;
-      *size = bufLen;
-
-      for (idx=0;idx<((*size+3)/4);idx++)
-      {
-        ((uint32_t *)buffer)[idx] = ((uint32_t *)SPI_MBOX_DATA)[idx];
+      if (*size < bufLen) {
+        /* We received a message longer than the requested message size; bail
+         * out and return FALSE as an indication
+         */
+        break;
       }
 
-      SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL,SPI_MBOX_MSG_CONSUMED | SPI_MBOX_ENABLE);
+      /* Received a message, inform the caller of its length */
+      *size = bufLen;
+
+      /* Retrieve and buffer the message words for the client */
+      for (idx = 0; idx < ((*size + 3) / 4); idx++) {
+        ((uint32_t *) buffer)[idx] = ((uint32_t *) SPI_MBOX_DATA)[idx];
+      }
+
+      SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL, (SPI_MBOX_MSG_CONSUMED | SPI_MBOX_ENABLE));
       bStatus = TRUE;
       bWaitingForSPIMsg = FALSE;
     }
   }
   return bStatus;
 }
+
 /**
  * Writes a message out to the SPI mailbox
  *
@@ -66,9 +80,12 @@ int ReadSPIMailbox(uint8_t *buffer, uint32_t *size)
 void WriteSPIMailbox(uint8_t *buffer, uint32_t size)
 {
   int idx;
-  for (idx=0;idx<(size+3)/4;idx++)
-  {
-    ((uint32_t *)SPI_MBOX_DATA)[idx] = ((uint32_t *)buffer)[idx];
+
+  /* Write the response words into the data buffer */
+  for(idx = 0; idx < (size + 3) / 4; idx++) {
+    ((uint32_t *) SPI_MBOX_DATA)[idx] = ((uint32_t *) buffer)[idx];
   }
-  SPI_MBOX_WRITE_REG(SPI_MBOX_MSG_LENGTH,size);
+
+  /* Commit the response message to the host */
+  SPI_MBOX_WRITE_REG(SPI_MBOX_MSG_LENGTH, size);
 }

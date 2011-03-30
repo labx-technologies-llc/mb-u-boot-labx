@@ -19,8 +19,6 @@
 
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
 
-extern int ReadSPIMailbox(uint8_t *buffer, uint32_t *size);
-extern void WriteSPIMailbox(uint8_t *buffer, uint32_t size);
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
 /**
@@ -103,7 +101,9 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
   return e_EC_SUCCESS;
 }
 
-
+/* Statically-allocated request and response buffers for use with IDL */
+static RequestMessageBuffer_t request;
+static ResponseMessageBuffer_t response;
 
 /**
  * Perform a firmware update throught he SPI mailbox interface
@@ -113,14 +113,20 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
  */
 int DoFirmwareUpdate(void)
 {
-  RequestMessageBuffer_t request;
-  ResponseMessageBuffer_t response;
   uint32_t reqSize = sizeof(RequestMessageBuffer_t);
 
+  /* Enable the SPI mailbox, which raises the BP_ATTN signal to indicate to
+   * the host that we are ready.
+   */
+  SetupSPIMbox();
 
-  while (ReadSPIMailbox(request,&reqSize))
-  {
-    unmarshal(request,response);
+  /* Continuously read request messages from the host and unmarshal them */
+  while (ReadSPIMailbox(request, &reqSize)) {
+    /* Unmarshal the received request, and re-set the max request size for
+     * the next iteration
+     */
+    unmarshal(request, response);
+    reqSize = sizeof(RequestMessageBuffer_t);
   }
 
   return 1;
@@ -156,8 +162,6 @@ int ReadFWUpdateGPIO(void)
  */
 void CheckFirmwareUpdate(void)
 {
-  SetupSPIMbox();
-
   if (ReadFWUpdateGPIO())
   {
     printf("Firmware Update Requested from HOST, starting Firmware Update\n");

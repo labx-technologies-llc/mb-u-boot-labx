@@ -18,22 +18,26 @@ typedef struct
 } sequence_t_uint8_t;
 
 // Common constants
-typedef enum 
-{
-    k_CC_FirmwareUpdate       = 1
+
+// First class-specific service or attribute codes to be used for
+// any class.  Codes below this value are reserved for any generic
+// facilities.
+#define MIN_SERVICE_CODE    (0x1000)
+#define MIN_ATTRIBUTE_CODE  (0x8000)
+
+// Define a hard class code for firmware update
+typedef enum {
+  k_CC_FirmwareUpdate = 128
 } ClassCode;
 
-typedef enum 
-{
-    k_SC_getAttribute = 1,
-    k_SC_setAttribute = 2,
-
+typedef enum {
+  k_SC_getAttribute = 1,
+  k_SC_setAttribute = 2,
 } CommonServiceCode;
 
-typedef enum 
-{
-    k_SC_startFirmwareUpdate= 1000,
-    k_SC_sendDataPacket,
+typedef enum {
+  k_SC_startFirmwareUpdate = (MIN_SERVICE_CODE    ),
+  k_SC_sendDataPacket      = (MIN_SERVICE_CODE + 1),
 } FirmwareUpdateServiceCode;
 
 extern void     setClassCode_req(RequestMessageBuffer_t msg, uint16_t classCode);
@@ -60,4 +64,5 @@ extern uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t 
 extern uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *value);
 extern uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value);
 extern void     SendMessage(MessageBuffer_t request, MessageBuffer_t response);
+
 #endif
