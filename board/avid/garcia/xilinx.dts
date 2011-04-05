@@ -276,8 +276,8 @@
 			xlnx,mplb-native-dwidth = <0x20>;
 			xlnx,mplb-p2p = <0x0>;
 			xlnx,mplb-smallest-slave = <0x20>;
-			xlnx,num-cache-interfaces = <0x4>;
-			xlnx,num-param-interfaces = <0x4>;
+			xlnx,num-cache-interfaces = <0x2>;
+			xlnx,num-param-interfaces = <0x2>;
 			xlnx,param-address-width = <0x9>;
 			xlnx,param-words = <0x200>;
 			xlnx,parameter-interlock-fifo = <0x1>;
@@ -317,7 +317,7 @@
 		eth0_audio_depacketizer: labx-audio-depacketizer@80010000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.01.a";
 			interrupt-parent = <&interrupt_cntlr>;
-			interrupts = < 22 2 >;
+			interrupts = < 20 2 >;
 			reg = < 0x80010000 0x10000 >;
 			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
@@ -356,11 +356,28 @@
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
 		} ;
-		eth1_audio_depacketizer: labx-audio-depacketizer@80040000 {
+		eth23_audio_packetizer: labx-audio-packetizer@80080000 {
+			compatible = "xlnx,labx-audio-packetizer-1.01.a";
+			interrupt-parent = <&interrupt_cntlr>;
+			interrupts = < 16 2 >;
+			reg = < 0x80080000 0x10000 >;
+			xlnx,cache-address-width = <0xd>;
+			xlnx,cache-data-width = <0x8>;
+			xlnx,cache-data-words = <0x1400>;
+			xlnx,cache-enable-width = <0x1>;
+			xlnx,device = "6slx45";
+			xlnx,family = "spartan6";
+			xlnx,has-internal-cache-ram = <0x0>;
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,is-dual-headed = <0x1>;
+			xlnx,num-clock-domains = <0x1>;
+			xlnx,package = "fgg484";
+		} ;
+		eth2_audio_depacketizer: labx-audio-depacketizer@80070000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.01.a";
 			interrupt-parent = <&interrupt_cntlr>;
-			interrupts = < 21 2 >;
-			reg = < 0x80040000 0x10000 >;
+			interrupts = < 19 2 >;
+			reg = < 0x80070000 0x10000 >;
 			xlnx,cache-address-width = <0xa>;
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x300>;
@@ -545,7 +562,7 @@
 			interrupt-controller ;
 			reg = < 0x81800000 0x10000 >;
 			xlnx,kind-of-intr = <0x3001>;
-			xlnx,num-intr-inputs = <0x17>;
+			xlnx,num-intr-inputs = <0x15>;
 		} ;
 		mdm_0: debug@84400000 {
 			compatible = "xlnx,mdm-2.00.a";
