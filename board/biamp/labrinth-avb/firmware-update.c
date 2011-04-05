@@ -19,8 +19,6 @@
 
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
 
-extern int ReadSPIMailbox(uint8_t *buffer, uint32_t *size);
-extern void WriteSPIMailbox(uint8_t *buffer, uint32_t size);
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
 /**
@@ -103,7 +101,17 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
   return e_EC_SUCCESS;
 }
 
+FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
+  if (run_command(fwUpdateCtxt.cmd,0) < 0) {
+    return e_EC_NOT_EXECUTED;
+  }
 
+  return e_EC_SUCCESS;
+}
+
+/* Statically-allocated request and response buffers for use with IDL */
+static RequestMessageBuffer_t request;
+static ResponseMessageBuffer_t response;
 
 /**
  * Perform a firmware update throught he SPI mailbox interface
@@ -113,20 +121,42 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
  */
 int DoFirmwareUpdate(void)
 {
-  RequestMessageBuffer_t request;
-  ResponseMessageBuffer_t response;
   uint32_t reqSize = sizeof(RequestMessageBuffer_t);
+  uint32_t respSize;
 
+  /* Enable the SPI mailbox, which raises the BP_ATTN signal to indicate to
+   * the host that we are ready.
+   */
+  SetupSPIMbox();
 
-  while (ReadSPIMailbox(request,&reqSize))
-  {
-    unmarshal(request,response);
+  /* Continuously read request messages from the host and unmarshal them */
+  while (ReadSPIMailbox(request, &reqSize)) {
+    /* Unmarshal the received request */
+    unmarshal(request, response);
+
+    /* Write the response out to the mailbox; before doing so, artificially
+     * increase the response length by four to accommodate the four garbage bytes
+     * which the mailbox inserts on reads.  The message length was originally defined
+     * for Labrinth to include these bytes, and it has stuck.  Only actually
+     * send the true size of the message, the dummy bytes are inherently added
+     * by the gateware.
+     */
+    respSize = getLength_resp(response);
+    setLength_resp(response, (respSize + MAILBOX_DUMMY_BYTES));
+    WriteSPIMailbox(response, respSize);
+
+    /* Re-set the max request size for the next iteration */
+    reqSize = sizeof(RequestMessageBuffer_t);
   }
 
   return 1;
 }
 
-
+/*
+ * GPIO definition for reading the backplane GPIO pin
+ */
+#define BP_GPIO_DATA (*((volatile unsigned long*) XPAR_XPS_GPIO_0_BASEADDR))
+#define BP_GPIO_BIT  (0x00000001)
 
 /**
  * Read the GPIO that tells if a FW update is requested from Host
@@ -137,8 +167,10 @@ int DoFirmwareUpdate(void)
  **/
 int ReadFWUpdateGPIO(void)
 {
-  /* TODO - Read the GPIO to see if Host is initiating FW Update on us */
-  return 0;
+  /* Examine the GPIO signal from the backplane to see if the host is
+   * initiating a firware update or not
+   */
+  return((BP_GPIO_DATA & BP_GPIO_BIT) != 0);
 }
 
 /**
@@ -150,8 +182,6 @@ int ReadFWUpdateGPIO(void)
  */
 void CheckFirmwareUpdate(void)
 {
-  SetupSPIMbox();
-
   if (ReadFWUpdateGPIO())
   {
     printf("Firmware Update Requested from HOST, starting Firmware Update\n");
