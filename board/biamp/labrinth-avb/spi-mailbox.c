@@ -13,8 +13,9 @@ uint8_t bWaitingForSPIMsg=FALSE;
 
 void SetupSPIMbox(void)
 {
-  /* Clear the message ready flag and enable the mailbox */
-  SPI_MBOX_WRITE_REG(SPI_MBOX_FLAGS, SPI_MBOX_HOST2SLAVE);
+  /* Clear the message ready flag and reset / enable the mailbox */
+  SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL,  SPI_MBOX_DISABLE);
+  SPI_MBOX_WRITE_REG(SPI_MBOX_IRQ_MASK,  SPI_MBOX_NO_IRQS);
   SPI_MBOX_WRITE_REG(SPI_MBOX_CTRL,  SPI_MBOX_ENABLE);
 }
 
@@ -43,7 +44,7 @@ int ReadSPIMailbox(uint8_t *buffer, uint32_t *size)
     /* Use the IRQ flags register to determine when a message has been received,
      * despite the fact that we don't actually use interrupts.
      */
-    uint32_t flags_reg = SPI_MBOX_READ_REG(SPI_MBOX_CTRL);
+    uint32_t flags_reg = SPI_MBOX_READ_REG(SPI_MBOX_FLAGS);
     if(flags_reg & SPI_MBOX_HOST2SLAVE)
     {
       /* A message has been received from the host, obtain its length */
