@@ -298,7 +298,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 3 2 2 2 16 2 >;
-			local-mac-address = [ 00 0a 35 7e 26 00 ];
+			local-mac-address = [ 00 0a 35 7e 27 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -341,7 +341,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 5 2 4 2 >;
-			local-mac-address = [ 00 0a 35 7e 26 01 ];
+			local-mac-address = [ 00 0a 35 7e 27 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -488,6 +488,8 @@
 			xlnx,nominal-increment-fraction = <0x0>;
 			xlnx,nominal-increment-mantissa = <0x8>;
 			xlnx,num-ports = <0x2>;
+			xlnx,phy-mac-rx-delay = <0xfa>;
+			xlnx,phy-mac-tx-delay = <0xfa>;
 			xlnx,port-interface-0 = "eth0";
 			xlnx,port-interface-1 = "eth1";
 			xlnx,port-interface-2 = "Invalid";
