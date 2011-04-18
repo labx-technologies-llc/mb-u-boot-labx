@@ -98,7 +98,7 @@
 			xlnx,freq = <0x3b9aca0>;
 			xlnx,fsl-data-size = <0x20>;
 			xlnx,fsl-exception = <0x0>;
-			xlnx,fsl-links = <0x0>;
+			xlnx,fsl-links = <0x1>;
 			xlnx,i-axi = <0x0>;
 			xlnx,i-lmb = <0x1>;
 			xlnx,i-plb = <0x1>;
@@ -283,8 +283,18 @@
 			xlnx,num-ports = <0x1>;
 			xlnx,package = "csg324";
 		} ;
+		eth01_audio_packetizer: labrinth-avb-packetizer@82090000 {
+			compatible = "xlnx,labrinth-avb-packetizer-1.00.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 8 2 >;
+			reg = < 0x82090000 0x10000 >;
+			xlnx,device = "6slx45";
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,package = "csg324";
+		} ;
 		eth0: ethernet@82050000 {
-			compatible = "xlnx,labx-ethernet-1.00.a";
+			compatible = "xlnx,labx-ethernet-1.01.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 3 2 2 2 16 2 >;
@@ -299,7 +309,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.01.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.02.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82100000 0x10000 >;
@@ -311,6 +321,7 @@
 			xlnx,family = "spartan6";
 			xlnx,has-mcr = <0x1>;
 			xlnx,has-suppress-inputs = <0x1>;
+			xlnx,has-vco = <0x1>;
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "BYTE_RAW";
 			xlnx,mplb-awidth = <0x20>;
@@ -321,22 +332,12 @@
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,npi-data-width = <0x20>;
 			xlnx,num-clock-domains = <0x1>;
-			xlnx,num-streams = <0x40>;
+			xlnx,num-streams = <0x8>;
 			xlnx,package = "csg324";
 			xlnx,param-address-width = <0xa>;
 		} ;
-		eth0_audio_packetizer: labrinth-avb-packetizer@82090000 {
-			compatible = "xlnx,labrinth-avb-packetizer-1.00.a";
-			interrupt-parent = <&irq_control>;
-			interrupts = < 8 2 >;
-			reg = < 0x82090000 0x10000 >;
-			xlnx,device = "6slx45";
-			xlnx,family = "spartan6";
-			xlnx,include-dphase-timer = <0x0>;
-			xlnx,package = "csg324";
-		} ;
 		eth1: ethernet@82070000 {
-			compatible = "xlnx,labx-ethernet-1.00.a";
+			compatible = "xlnx,labx-ethernet-1.01.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 5 2 4 2 >;
@@ -351,7 +352,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.01.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.02.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 10 2 >;
 			reg = < 0x82110000 0x10000 >;
@@ -363,6 +364,7 @@
 			xlnx,family = "spartan6";
 			xlnx,has-mcr = <0x1>;
 			xlnx,has-suppress-inputs = <0x1>;
+			xlnx,has-vco = <0x1>;
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "BYTE_RAW";
 			xlnx,mplb-awidth = <0x20>;
@@ -373,7 +375,7 @@
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,npi-data-width = <0x20>;
 			xlnx,num-clock-domains = <0x1>;
-			xlnx,num-streams = <0x40>;
+			xlnx,num-streams = <0x8>;
 			xlnx,package = "csg324";
 			xlnx,param-address-width = <0xa>;
 		} ;
@@ -471,10 +473,10 @@
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0xc1>;
-			xlnx,num-intr-inputs = <0x11>;
+			xlnx,num-intr-inputs = <0x12>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
-			compatible = "xlnx,labx-ptp-1.00.a";
+			compatible = "xlnx,labx-ptp-1.03.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 1 2 >;
 			port-interface-0 = <&eth0>;
@@ -494,6 +496,7 @@
 			xlnx,port-interface-5 = "Invalid";
 			xlnx,port-interface-6 = "Invalid";
 			xlnx,port-interface-7 = "Invalid";
+			xlnx,port-width = <0x8>;
 			xlnx,rtc-d-coefficient = <0xf0000000>;
 			xlnx,rtc-i-coefficient = <0xf0000000>;
 			xlnx,rtc-p-coefficient = <0xfff00000>;
@@ -551,7 +554,7 @@
 			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,num-clock-domains = <0x1>;
-			xlnx,num-streams = <0x40>;
+			xlnx,num-streams = <0x8>;
 			xlnx,package = "csg324";
 			xlnx,param-address-width = <0xa>;
 		} ;

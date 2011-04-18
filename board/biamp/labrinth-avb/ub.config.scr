@@ -3,7 +3,7 @@ echo -----------------------------------
 echo Network Configuration:
 echo TODO - Use Biamp OUI for MAC address
 set autoload no
-set ethaddr 00:0a:35:00:33:01
+echo Leaving ethaddr unconfigured
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
 

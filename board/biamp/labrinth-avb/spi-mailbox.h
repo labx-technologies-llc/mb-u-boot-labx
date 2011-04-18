@@ -8,17 +8,19 @@
 
 /* Control Register */
 #define SPI_MBOX_CTRL              (SPI_MBOX_BASE + 0x00)
-#define SPI_MBOX_ENABLE            (0x000000001)
-#define SPI_MBOX_MSG_CONSUMED      (0x000000002)         /* Notify host we have consumed a message            */
-#define SPI_MBOX_MSG_RDY           (0x000000004)         /* Notifies us that a message from the host is ready */
+#define SPI_MBOX_DISABLE           (0x00000000)
+#define SPI_MBOX_ENABLE            (0x00000001)
+#define SPI_MBOX_MSG_CONSUMED      (0x00000002)         /* Notify host we have consumed a message            */
+#define SPI_MBOX_MSG_RDY           (0x00000004)         /* Notifies us that a message from the host is ready */
 
 /* IRQ Mask Register */
 #define SPI_MBOX_IRQ_MASK          (SPI_MBOX_BASE + 0x04)
 
 /* IRQ Flags Register */
 #define SPI_MBOX_FLAGS             (SPI_MBOX_BASE + 0x08)
-#define SPI_MBOX_HOST2SLAVE        0x000000001           /* Notify slave that there is a msg */
-#define SPI_MBOX_SLAVE2HOST        0x000000002
+#define SPI_MBOX_NO_IRQS           0x00000000
+#define SPI_MBOX_HOST2SLAVE        0x00000001           /* Notify slave that there is a msg */
+#define SPI_MBOX_SLAVE2HOST        0x00000002
 
 /* 
  * Mailbox Message Length Register 
