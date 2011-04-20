@@ -37,9 +37,9 @@ typedef enum {
 } CommonServiceCode;
 
 typedef enum {
-  k_SC_startFirmwareUpdate = (MIN_SERVICE_CODE    ),
-  k_SC_sendDataPacket      = (MIN_SERVICE_CODE + 1),
-  k_SC_sendCommand         = (MIN_SERVICE_CODE + 2),
+  k_SC_sendCommand         = (MIN_SERVICE_CODE    ),
+  k_SC_startFirmwareUpdate = (MIN_SERVICE_CODE + 1),
+  k_SC_sendDataPacket      = (MIN_SERVICE_CODE + 2),
 } FirmwareUpdateServiceCode;
 
 /* Request buffer methods */
@@ -48,6 +48,8 @@ extern void     setInstanceNumber_req(RequestMessageBuffer_t msg, uint16_t insta
 extern void     setServiceCode_req(RequestMessageBuffer_t msg, uint16_t serviceCode);
 extern void     setAttributeCode_req(RequestMessageBuffer_t msg, uint16_t attributeCode);
 extern uint16_t getPayloadOffset_req(RequestMessageBuffer_t msg);
+extern uint16_t getLength_req(RequestMessageBuffer_t msg);
+extern uint16_t getClassCode_req(RequestMessageBuffer_t msg);
 extern void     setLength_req(RequestMessageBuffer_t msg, uint16_t length);
 extern uint16_t getServiceCode_req(RequestMessageBuffer_t msg);
 extern uint16_t getAttributeCode_req(RequestMessageBuffer_t msg);

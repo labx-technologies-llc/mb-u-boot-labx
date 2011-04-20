@@ -1,3 +1,4 @@
+#include "hush.h"
 #include "spi-mailbox.h"
 #include "FirmwareUpdate_unmarshal.h"
 #include "FirmwareUpdate.h"
@@ -93,8 +94,9 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
   if (doCrcCheck() == FALSE)
     return e_EC_CORRUPT_IMAGE;
 
-  if (run_command(fwUpdateCtxt.cmd,0) < 0)
-  {
+  /* Invoke the HUSH parser on the command */
+  if(parse_string_outer(fwUpdateCtxt.cmd, 
+                        (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
     return e_EC_NOT_EXECUTED;
   }
 
@@ -102,7 +104,11 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
 }
 
 FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
-  if (run_command(fwUpdateCtxt.cmd,0) < 0) {
+  printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd));
+  int returnValue;
+
+  /* Invoke the HUSH parser on the command */
+  if(parse_string_outer(cmd, (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
     return e_EC_NOT_EXECUTED;
   }
 
@@ -132,6 +138,7 @@ int DoFirmwareUpdate(void)
   /* Continuously read request messages from the host and unmarshal them */
   while (ReadSPIMailbox(request, &reqSize)) {
     /* Unmarshal the received request */
+    printf("Host msg!\n");
     unmarshal(request, response);
 
     /* Write the response out to the mailbox; before doing so, artificially
