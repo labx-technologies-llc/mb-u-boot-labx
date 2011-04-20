@@ -25,9 +25,7 @@
 # Version: Xilinx EDK 6.3 EDK_Gmm.12.3
 #
 
-# Modified by hand for Biamp board; I don't think libgen
-# produces this particular file anymore...?
 # This places the execution location for U-Boot to be
-# 15 MiB into the DDR2 device.
+# a little over 60 MiB into the DDR2 device.
 TEXT_BASE = 0x8BCC0000
 
