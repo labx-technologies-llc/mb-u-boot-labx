@@ -86,7 +86,7 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 
 uint8_t doCrcCheck(void)
 {
-  uint32_t crc = crc32(fwUpdateCtxt.crc,fwUpdateCtxt.fwImageBase,fwUpdateCtxt.length);
+  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.length);
   printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", crc, fwUpdateCtxt.crc);
   return (crc == fwUpdateCtxt.crc);
 }
