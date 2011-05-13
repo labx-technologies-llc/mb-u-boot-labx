@@ -530,6 +530,15 @@ restart:
 				sprintf(buf, "%lX", NetBootFileXferSize);
 				setenv("filesize", buf);
 
+				if(image_check_type((image_header_t *)load_addr, IH_TYPE_KERNEL)) {
+				  printf("   Verifying Checksum ... ");
+				  if (!image_check_dcrc ((image_header_t *)load_addr)) {
+				    printf("Bad Data CRC\n");
+				    return 1;
+				  }
+				  printf("OK\n");
+				}
+
 				sprintf(buf, "%lX", (unsigned long)load_addr);
 				setenv("fileaddr", buf);
 			}
