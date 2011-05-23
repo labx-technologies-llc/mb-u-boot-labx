@@ -34,10 +34,6 @@
 
 void do_reset (void)
 {
-#ifdef CONFIG_SYS_GPIO_0
-	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) =
-	    ++(*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)));
-#endif
 #ifdef CONFIG_SYS_RESET_ADDRESS
 	puts ("Reseting board\n");
 	asm ("bra r0");
@@ -46,10 +42,18 @@ void do_reset (void)
 
 int gpio_init (void)
 {
-#ifdef CONFIG_SYS_GPIO_0
-	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) = 0xFFFFFFFF;
+	int is_update = 0;
+#ifdef CONFIG_SYS_GPIO
+	is_update = ((rdreg32(CONFIG_SYS_GPIO_ADDR) & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0);
+	if (is_update) {
+		wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_POWER_LED_B |
+				GARCIA_FPGA_STATUS_LED_B | GARCIA_FPGA_STATUS_LED_FLASH);
+	} else {
+		wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_POWER_LED_B |
+				GARCIA_FPGA_STATUS_LED_A | GARCIA_FPGA_STATUS_LED_B);
+	}
 #endif
-	return 0;
+	return is_update;
 }
 
 #ifdef CONFIG_SYS_FSL_2
