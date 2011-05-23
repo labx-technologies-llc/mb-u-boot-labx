@@ -14,7 +14,8 @@ set clobstart 0x88000000
 echo FPGA Configuration:
 set fpgasize 0x420000
 set fpgastart 0x87000000
-set fpganame GarciaFPGA.bin
+set fpganame45 GarciaFPGA-LX45.bin
+set fpganame150 GarciaFPGA-LX150.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
@@ -27,7 +28,8 @@ set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart}
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
 set fdtstart 0x87460000
-set fdtname garcia.dtb
+set fdtname45 garcia-LX45.dtb
+set fdtname150 garcia-LX150.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3A0000
@@ -49,7 +51,7 @@ echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
-set load_fpga 'tftp ${clobstart} ${fpganame}'
+set load_fpga 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fpganame150}; else tftp ${clobstart} ${fpganame45}; fi'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
@@ -70,7 +72,7 @@ set load_romfs 'tftp ${clobstart} usr.romfs'
 set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
 set update_romfs run load_romfs install_romfs
 
-set load_fdt 'tftp ${clobstart} ${fdtname}'
+set load_fdt 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fdtname150}; else tftp ${clobstart} ${fdtname45}; fi'
 set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
 set update_fdt run load_fdt install_fdt
 

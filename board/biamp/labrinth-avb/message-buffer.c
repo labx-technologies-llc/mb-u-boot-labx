@@ -61,14 +61,14 @@ uint16_t string_t_unmarshal(RequestMessageBuffer_t request, uint32_t offset, str
   uint32_t size;
   memcpy(&size, &request[offset], 4);
   *str = (string_t) malloc(size);
-  memset(str, 'S', size);
+  memset(*str, 'S', size);
   memcpy(*str, &request[offset + 4], size);
 
   /* The marshalled string should have a NULL terminator anyways, which *is* included
    * in the size, but make sure!
    */
-  *str[size - 1] = '\0';
-  return offset+4+size;
+  (*str)[size - 1] = '\0';
+  return(4+size);
 }
 
 uint16_t sequence_t_uint8_t_unmarshal(RequestMessageBuffer_t request, uint32_t offset, sequence_t_uint8_t *data)

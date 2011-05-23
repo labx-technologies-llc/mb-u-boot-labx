@@ -46,6 +46,7 @@
 
 /* Use the Lab X Ethernet driver */
 #define CONFIG_LABX_ETHERNET  1
+#define WHICH_ETH_PORT        0
 
 /* The MDIO divisor is set to produce a 1.5 MHz interface */
 #define LABX_ETHERNET_MDIO_DIV  (0x28)
@@ -53,9 +54,9 @@
 /* Port zero is used for all MDIO operations, regardless of which
  * port is used for communications.
  */
-#define LABX_MDIO_ETH_BASEADDR  (XPAR_LABX_ETHERNET_0_BASEADDR)
+#define LABX_MDIO_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
 
-#define LABX_PRIMARY_ETH_BASEADDR    (XPAR_LABX_ETHERNET_0_BASEADDR)
+#define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
 #define LABX_ETHERNET_PHY_ADDR  (0x01)
 
 /* gpio */

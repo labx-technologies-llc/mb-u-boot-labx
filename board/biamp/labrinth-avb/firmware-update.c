@@ -47,7 +47,9 @@ FirmwareUpdateCtxt_t fwUpdateCtxt;
  */
 FirmwareUpdate__ErrorCode startFirmwareUpdate(string_t cmd, uint32_t length, uint32_t crc)
 {
+  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc);
   if(fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_ALREADY_IN_PROGRESS;
+  printf("Update now in progress\n");
   fwUpdateCtxt.bUpdateInProgress = TRUE;
   fwUpdateCtxt.crc = crc;
   fwUpdateCtxt.length = length;
@@ -84,7 +86,8 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 
 uint8_t doCrcCheck(void)
 {
-  uint32_t crc = crc32(fwUpdateCtxt.crc,fwUpdateCtxt.fwImageBase,fwUpdateCtxt.length);
+  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.length);
+  printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", crc, fwUpdateCtxt.crc);
   return (crc == fwUpdateCtxt.crc);
 }
 
