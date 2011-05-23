@@ -48,6 +48,10 @@ DECLARE_GLOBAL_DATA_PTR;
 extern void CheckFirmwareUpdate();
 #endif
 
+#if defined(CONFIG_GPIO_INIT)
+extern int gpio_init();
+#endif
+
 
 /*
  * Board-specific Platform code can reimplement show_boot_progress () if needed
@@ -288,6 +292,7 @@ void main_loop (void)
 #if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
 	char *s;
 	int bootdelay;
+	int do_update = 0;
 #endif
 #ifdef CONFIG_PREBOOT
 	char *p;
@@ -385,6 +390,14 @@ void main_loop (void)
 
 	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
+#if defined(CONFIG_GPIO_INIT)
+	if (gpio_init()) {
+		do_update = 1;
+	} else {
+		bootdelay = 0;
+	}
+#endif
+
 # ifdef CONFIG_BOOT_RETRY_TIME
 	init_cmd_timeout ();
 # endif	/* CONFIG_BOOT_RETRY_TIME */
@@ -403,6 +416,11 @@ void main_loop (void)
 	}
 	else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
+#if defined(CONFIG_FIRMWARE_UPDATE)
+		if (do_update != 0) {
+			s = getenv("update_all");
+		} else
+#endif
 		s = getenv ("bootcmd");
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
