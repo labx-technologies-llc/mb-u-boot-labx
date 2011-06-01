@@ -89,7 +89,9 @@ set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtnam
 set ipset 'setenv ipaddr 192.168.1.1; setenv serverip 192.168.1.100; ping ${serverip}'
 
 echo Firmware Update Configuration
-set garcia_update 'tftp 0x88000000 garcia.blob; source 0x88000040'
+set blob_update 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then run update150; else run update45; fi'
+set update45 'tftp 0x88000000 garcia45.blob; source 0x88000040'
+set update150 'tftp 0x88000000 garcia150.blob; source 0x88000040'
 
 echo Saving Configurations...
 saveenv

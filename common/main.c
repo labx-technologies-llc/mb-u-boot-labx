@@ -418,7 +418,7 @@ void main_loop (void)
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
 #if defined(CONFIG_FIRMWARE_UPDATE)
 		if (do_update != 0) {
-			s = getenv("update_all");
+			s = getenv("blob_update");
 		} else
 #endif
 		s = getenv ("bootcmd");
