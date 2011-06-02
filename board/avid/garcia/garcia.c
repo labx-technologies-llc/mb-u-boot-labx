@@ -32,14 +32,6 @@
 #include <net.h>
 #include <netdev.h>
 
-void do_reset (void)
-{
-#ifdef CONFIG_SYS_RESET_ADDRESS
-	puts ("Reseting board\n");
-	asm ("bra r0");
-#endif
-}
-
 int gpio_init (void)
 {
 	int is_update = 0;

@@ -25,7 +25,7 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).a
 CFLAGS	+= -I. 
-COBJS	= $(BOARD).o firmware-update.o
+COBJS	= $(BOARD).o firmware-update.o cmd_reset.o
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
