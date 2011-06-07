@@ -391,15 +391,33 @@ int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
 	   ) {
 		int rc;
+		int i, diff;
+		int step = 131072; //arbitrary value - 
+		//found to be good for gauging time in flash transfer
 
-		puts ("Copy to Flash... ");
-
-		rc = flash_write ((char *)addr, dest, count*size);
-		if (rc != 0) {
-			flash_perror (rc);
-			return (1);
+		puts ("Copy to Flash...\n");
+		
+		/*rc = flash_write ((char *)addr, dest, count*size);
+		if(rc != 0){
+		        flash_perror (rc);
+			return (1); 
 		}
-		puts ("done\n");
+		*/
+		for(i = 0; i < count; i+= step*size) {
+		        if((diff = (count - i)) >= step*size) {
+		                rc = flash_write ((char *)addr+i*size, 
+						  dest+i*size, step*size);
+			} else {
+			        rc = flash_write ((char *)addr+i*size, 
+						  dest+i*size, diff*size);
+			}
+			if (rc != 0) {
+			        flash_perror (rc);
+				return (1);
+			}
+			puts (".");
+		}
+		puts (" done\n");
 		return 0;
 	}
 #endif
