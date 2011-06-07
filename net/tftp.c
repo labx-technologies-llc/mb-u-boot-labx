@@ -59,6 +59,9 @@ static IPaddr_t TftpServerIP;
 static int	TftpServerPort;		/* The UDP port at their end		*/
 static int	TftpOurPort;		/* The UDP port at our end		*/
 static int	TftpTimeoutCount;
+#ifdef CONFIG_SYS_GPIO
+static int      TftpRetryCount;
+#endif
 static ulong	TftpBlock;		/* packet sequence number		*/
 static ulong	TftpLastBlock;		/* last packet sequence number received */
 static ulong	TftpBlockWrap;		/* count of sequence number wraparounds */
@@ -102,6 +105,10 @@ extern flash_info_t flash_info[];
 #define TFTP_MTU_BLOCKSIZE CONFIG_TFTP_BLOCKSIZE
 #else
 #define TFTP_MTU_BLOCKSIZE 1468
+#endif
+
+#ifdef CONFIG_SYS_GPIO
+#define RETRY_COUNT 3
 #endif
 
 static unsigned short TftpBlkSize=TFTP_BLOCK_SIZE;
@@ -484,6 +491,11 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 		case TFTP_ERR_FILE_NOT_FOUND:
 		case TFTP_ERR_ACCESS_DENIED:
 			puts("Not retrying...\n");
+#ifdef CONFIG_SYS_GPIO
+			wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A |
+				GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
+			while(1);
+#endif
 			eth_halt();
 			NetState = NETLOOP_FAIL;
 			break;
@@ -510,6 +522,14 @@ TftpTimeout (void)
 {
 	if (++TftpTimeoutCount > TftpTimeoutCountMax) {
 		puts ("\nRetry count exceeded; starting again\n");
+#ifdef CONFIG_SYS_GPIO
+		if(++TftpRetryCount > RETRY_COUNT) {
+		        printf("Too many retries; quitting\n");  
+			wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A | 
+				GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
+			while(1);
+		}
+#endif
 #ifdef CONFIG_MCAST_TFTP
 		mcast_cleanup();
 #endif
