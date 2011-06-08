@@ -494,7 +494,6 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 #ifdef CONFIG_SYS_GPIO
 			wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A |
 				GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
-			while(1);
 #endif
 			eth_halt();
 			NetState = NETLOOP_FAIL;
