@@ -195,6 +195,9 @@
 #define BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL 0x0C00
 #define BCM5481_SHADOW_WRITE                 0x8000
 #define BCM5481_XMIT_CLOCK_DELAY             0x0200
+#define BCM5481_AUTO_NEGOTIATE_ENABLE        0x1000
+#define BCM5481_HIGH_PERFORMANCE_ENABLE      0x0040
+#define BCM5481_HPE_REGISTER_SELECT          0x0002
 
 /* As mentioned above, the Lab X Ethernet hardware mimics the
  * Xilinx LocalLink FIFO peripheral
@@ -341,6 +344,19 @@ static int labx_eth_phy_ctrl(void)
     			((result & BCM5481_XMIT_CLOCK_DELAY) != 0), result,
     			((read_phy_register(phy_addr, 0x1C)& BCM5481_XMIT_CLOCK_DELAY) != 0));
 
+	result = read_phy_register(phy_addr, 0x00);
+	result = result | BCM5481_AUTO_NEGOTIATE_ENABLE;
+	write_phy_register(phy_addr, 0x00, result);
+	printf("Auto-Negotiate Enable: %d (0x%04X) => %d\n",
+	                ((result & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0), result,
+	                ((read_phy_register(phy_addr, 0x00) & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0));
+	result = read_phy_register(phy_addr, 0x18);
+	result = result | BCM5481_SHADOW_WRITE | BCM5481_HPE_REGISTER_SELECT;
+	result = result & ~BCM5481_HIGH_PERFORMANCE_ENABLE;
+	printf("High-Performance Enable: %d (0x%04X) => %d\n",
+	                ((result & BCM5481_HIGH_PERFORMANCE_ENABLE) != 0), result,
+	                ((read_phy_register(phy_addr, 0x18) & BCM5481_HIGH_PERFORMANCE_ENABLE) != 0));
+
     	write_phy_register(phy_addr, 0x18, BCM5481_RX_SKEW_REGISTER_SEL);
     	result = read_phy_register(phy_addr, 0x18);
     	write_phy_register(phy_addr, 0x18,
@@ -349,6 +365,7 @@ static int labx_eth_phy_ctrl(void)
     	printf("RGMII Receive Clock Skew: %d (0x%04X) => %d\n",
     			((result & BCM5481_RX_SKEW_ENABLE) != 0), result,
     			((read_phy_register(phy_addr, 0x18)& BCM5481_RX_SKEW_ENABLE) != 0));
+	
     }
   }
 
