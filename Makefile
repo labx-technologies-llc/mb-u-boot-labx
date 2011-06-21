@@ -3570,6 +3570,9 @@ avid_garcia_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia avid
 
+riedel_artist_config:   unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze artist riedel
 
 #========================================================================
 # Blackfin
