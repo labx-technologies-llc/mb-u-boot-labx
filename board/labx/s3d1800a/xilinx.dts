@@ -283,7 +283,7 @@
 			current-speed = <115200>;
 			device_type = "serial";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 5 0 >;
+			interrupts = < 4 0 >;
 			port-number = <0>;
 			reg = < 0x84000000 0x10000 >;
 			xlnx,baudrate = <0x1c200>;
@@ -295,7 +295,7 @@
 		audio_dma: labx-dma@82060000 {
 			compatible = "xlnx,labx-dma-1.01.a";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 4 2 >;
+			interrupts = < 3 2 >;
 			reg = < 0x82060000 0x10000 >;
 			xlnx,cache-address-width = <0x8>;
 			xlnx,cache-data-width = <0x20>;
@@ -322,8 +322,8 @@
 			compatible = "xlnx,labx-ethernet-1.02.a";
 			device_type = "network";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 7 2 6 2 >;
-			local-mac-address = [ 00 0a 35 a4 61 00 ];
+			interrupts = < 6 2 5 2 >;
+			local-mac-address = [ 00 0a 35 c3 14 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -336,7 +336,7 @@
 		labx_audio_depacketizer_0: labx-audio-depacketizer@80020000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.04.a";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 3 2 >;
+			interrupts = < 2 2 >;
 			reg = < 0x80020000 0x10000 >;
 			xlnx,cache-address-width = <0x7>;
 			xlnx,cache-data-width = <0x20>;
@@ -361,9 +361,9 @@
 			xlnx,param-address-width = <0x9>;
 		} ;
 		labx_audio_packetizer_0: labx-audio-packetizer@80010000 {
-			compatible = "xlnx,labx-audio-packetizer-1.02.a";
+			compatible = "xlnx,labx-audio-packetizer-1.03.a";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 8 2 >;
+			interrupts = < 7 2 >;
 			reg = < 0x80010000 0x10000 >;
 			xlnx,cache-address-width = <0x8>;
 			xlnx,cache-data-width = <0x20>;
@@ -409,7 +409,7 @@
 		mdm_0: debug@84400000 {
 			compatible = "xlnx,mdm-2.00.b";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 1 0 >;
+			interrupts = < 8 0 >;
 			reg = < 0x84400000 0x10000 >;
 			xlnx,family = "spartan3adsp";
 			xlnx,interconnect = <0x1>;
@@ -423,7 +423,7 @@
 		ptp: labx-ptp@80030000 {
 			compatible = "xlnx,labx-ptp-1.04.a";
 			interrupt-parent = <&xps_intc_0>;
-			interrupts = < 2 2 >;
+			interrupts = < 1 2 >;
 			port-interface-0 = <&eth0>;
 			reg = < 0x80030000 0x10000 >;
 			xlnx,extra-dsp = <0x0>;
@@ -454,7 +454,7 @@
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
 			interrupt-controller ;
 			reg = < 0x81800000 0x10000 >;
-			xlnx,kind-of-intr = <0x23>;
+			xlnx,kind-of-intr = <0x111>;
 			xlnx,num-intr-inputs = <0x9>;
 		} ;
 		xps_mch_emc_0: flash@87000000 {
