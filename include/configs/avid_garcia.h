@@ -179,6 +179,7 @@ static inline void wrreg32(unsigned long int n, unsigned long int v) {
 #define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
 #define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
 #define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
+#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/avid/garcia/ub.config.scr!
