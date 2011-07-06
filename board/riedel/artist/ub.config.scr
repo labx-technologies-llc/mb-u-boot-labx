@@ -26,7 +26,7 @@ set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart}
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
 set fdtstart 0x87240000
-set fdtname artist-avb.dtb
+set fdtname artist.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
@@ -43,7 +43,7 @@ set romfsstart 0x87800000
 echo FPGA Configuration:
 set fpgasize 0x200000
 set fpgastart 0x87BE0000
-set fpganame artist.bin
+set fpganame ArtistFPGA.bin
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
