@@ -1,7 +1,6 @@
 echo Setting up Riedel Artist environment
 echo -----------------------------------
-echo Network Configuration:
-echo TODO - Use something for MAC address
+echo Network Configuration
 set autoload no
 echo Leaving ethaddr unconfigured
 set ipaddr 192.168.1.1
@@ -90,6 +89,7 @@ echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
+set update 'tftp 0x88000000 artistUpdate.bin; source 0x88000040'
 
 echo Saving Configurations...
 saveenv
