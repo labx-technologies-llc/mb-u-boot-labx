@@ -282,7 +282,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 2 2 1 2 5 2 >;
-			local-mac-address = [ 00 0a 35 2d 50 00 ];
+			local-mac-address = [ 00 0a 35 92 36 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -291,6 +291,23 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
+		} ;
+		eth0_audio_packetizer: labx-audio-packetizer@82070000 {
+			compatible = "xlnx,labx-audio-packetizer-1.03.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 6 2 >;
+			reg = < 0x82070000 0x10000 >;
+			xlnx,cache-address-width = <0x9>;
+			xlnx,cache-data-width = <0x8>;
+			xlnx,cache-data-words = <0x80>;
+			xlnx,cache-enable-width = <0x1>;
+			xlnx,device = "6slx45";
+			xlnx,family = "spartan6";
+			xlnx,has-internal-cache-ram = <0x1>;
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,is-dual-headed = <0x0>;
+			xlnx,num-clock-domains = <0x1>;
+			xlnx,package = "csg324";
 		} ;
 		flash_control: flash@87000000 {
 			bank-width = <2>;
@@ -386,7 +403,36 @@
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0x19>;
-			xlnx,num-intr-inputs = <0x6>;
+			xlnx,num-intr-inputs = <0x8>;
+		} ;
+		labx_ptp0: labx-ptp@82080000 {
+			compatible = "xlnx,labx-ptp-1.04.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 7 2 >;
+			port-interface-0 = <&eth0>;
+			reg = < 0x82080000 0x10000 >;
+			xlnx,extra-dsp = <0x0>;
+			xlnx,family = "spartan6";
+			xlnx,include-dphase-timer = <0x0>;
+			xlnx,nominal-increment-fraction = <0x0>;
+			xlnx,nominal-increment-mantissa = <0x8>;
+			xlnx,num-ports = <0x1>;
+			xlnx,phy-mac-rx-delay = <0xfa>;
+			xlnx,phy-mac-tx-delay = <0xfa>;
+			xlnx,port-interface-0 = "eth0";
+			xlnx,port-interface-1 = "Invalid";
+			xlnx,port-interface-2 = "Invalid";
+			xlnx,port-interface-3 = "Invalid";
+			xlnx,port-interface-4 = "Invalid";
+			xlnx,port-interface-5 = "Invalid";
+			xlnx,port-interface-6 = "Invalid";
+			xlnx,port-interface-7 = "Invalid";
+			xlnx,port-width = <0x8>;
+			xlnx,rtc-d-coefficient = <0xf0000000>;
+			xlnx,rtc-i-coefficient = <0xf0000000>;
+			xlnx,rtc-p-coefficient = <0xfff00000>;
+			xlnx,timer-divider = <0x271>;
+			xlnx,timer-prescaler = <0x3e8>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.00.b";
