@@ -27,6 +27,6 @@
 
 # This places the execution location for U-Boot to be
 # 15 MiB into the DDR2 device.
-TEXT_BASE = 0x88F00000
+TEXT_BASE = 0x89F00000
 
 PLATFORM_CPPFLAGS += -mno-xl-soft-mul -mno-xl-soft-div -mxl-barrel-shift -mxl-pattern-compare
