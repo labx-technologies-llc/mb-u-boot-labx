@@ -31,3 +31,9 @@
 # 15 MiB into the 1 Gib DDR2 device.
 TEXT_BASE = 0x88F00000
 
+# Build for use with dedicated hardware multiplier instructions.
+# This not only speeds things up, but also eliminates a lurking,
+# nasty bug in which the software-emulation routings for multiply
+# fail to recover their context properly after a return from
+# interrupt!
+PLATFORM_CPPFLAGS += -mno-xl-soft-mul -mno-xl-soft-div -mxl-barrel-shift -mxl-pattern-compare
