@@ -256,7 +256,7 @@
 	} ;
 	ddr2_control: memory@88000000 {
 		device_type = "memory";
-		reg = < 0x88000000 0x8000000 >;
+		reg = < 0x88000000 0x4000000 >;
 	} ;
 	peripheral_bus: plb@0 {
 		#address-cells = <1>;

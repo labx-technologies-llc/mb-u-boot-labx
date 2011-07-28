@@ -47,9 +47,12 @@ FirmwareUpdateCtxt_t fwUpdateCtxt;
  */
 FirmwareUpdate__ErrorCode startFirmwareUpdate(string_t cmd, uint32_t length, uint32_t crc)
 {
-  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc);
+  /*  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc); */
   if(fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_ALREADY_IN_PROGRESS;
-  printf("Update now in progress\n");
+
+  /* Initialize the firware update context; load the binary image to the "clobber"
+   * region, which is at the start of DDR2.
+   */
   fwUpdateCtxt.bUpdateInProgress = TRUE;
   fwUpdateCtxt.crc = crc;
   fwUpdateCtxt.length = length;
@@ -71,6 +74,12 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
   if(!fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_NOT_IN_PROGRESS;
   memcpy(fwUpdateCtxt.fwImagePtr,data->m_data,data->m_size);
   fwUpdateCtxt.bytesReceived+=data->m_size;
+
+  /*  printf("BLK[%d] : 0x%08X @ 0x%08X, sz %d\n", fwUpdateCtxt.bytesReceived,
+         fwUpdateCtxt.fwImagePtr, *((uint32_t *) data->m_data),
+         data->m_size);
+  */
+
   if (fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.length)
   {
     /* We are done with the transfer, start the flash update process */
@@ -87,7 +96,7 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 uint8_t doCrcCheck(void)
 {
   uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.length);
-  printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", crc, fwUpdateCtxt.crc);
+  /* printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", crc, fwUpdateCtxt.crc); */
   return (crc == fwUpdateCtxt.crc);
 }
 
@@ -107,10 +116,10 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
 }
 
 FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
-  printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd));
   int returnValue;
 
   /* Invoke the HUSH parser on the command */
+  /* printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd)); */
   if(parse_string_outer(cmd, (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
     return e_EC_NOT_EXECUTED;
   }
@@ -141,7 +150,6 @@ int DoFirmwareUpdate(void)
   /* Continuously read request messages from the host and unmarshal them */
   while (ReadSPIMailbox(request, &reqSize)) {
     /* Unmarshal the received request */
-    printf("Host msg!\n");
     unmarshal(request, response);
 
     /* Write the response out to the mailbox; before doing so, artificially
