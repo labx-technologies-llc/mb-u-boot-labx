@@ -11,45 +11,54 @@ set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
+echo FPGA_RO Configuration:
+set fpgarosize 0x340000
+set fpgarostart 0x87000000
+
 echo FPGA Configuration:
-set fpgasize 0x420000
-set fpgastart 0x87000000
+set fpgasize 0x340000
+set fpgastart 0x87340000
 set fpganame45 GarciaFPGA-LX45.bin
+set fpganame100 GarciaFPGA-LX100.bin
 set fpganame150 GarciaFPGA-LX150.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
-set bootstart 0x87420000
+set bootstart 0x87680000
 set bootenvsize 0x08000
 set bootenvstart 0x87FE0000
 set boottextbase 0x8BCC0000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
-set fdtsize 0x20000
-set fdtstart 0x87460000
+set fdtsize 0x10000
+set fdtstart 0x87FE8000
 set fdtname45 garcia-LX45.dtb
 set fdtname150 garcia-LX150.dtb
 
 echo Kernel Configuration:
-set kernsize 0x3A0000
-set kernstart 0x87480000
+set kernsize 0x300000
+set kernstart 0x876C0000
 
 echo Root Filesystem Configuration:
-set rootfssize 0x1E0000
-set rootfsstart 0x87820000
+set rootfssize 0x140000
+set rootfsstart 0x879C0000
 
 echo ROM Filesystem Configuration:
-set romfssize 0x3E0000
-set romfsstart 0x87A00000
+set romfssize 0x360000
+set romfsstart 0x87B00000
 
 echo Settings Filesystem Configuration:
-set settingsfssize 0x200000
-set settingsfsstart 0x87DE0000
+set settingsfssize 0x180000
+set settingsfsstart 0x87E60000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
+
+set load_fpga_ro 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fpganame150}; else tftp ${clobstart} ${fpganame45}; fi'
+set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
+set update_fpga_ro run load_fpga_ro install_fpga_ro
 
 set load_fpga 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fpganame150}; else tftp ${clobstart} ${fpganame45}; fi'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
