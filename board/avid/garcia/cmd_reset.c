@@ -3,15 +3,22 @@
 // implement reset command using ICAP
 
 #include <common.h>
+#include <config.h>
 #include <command.h>
 #include "microblaze_fsl.h"
 
-#define RUNTIME_FPGA_BASE (0x00000000)
+#define RUNTIME_FPGA_BASE (0x00340000)
 #define BOOT_FPGA_BASE (0x00000000)
 #define FINISH_FSL_BIT (0x80000000)
 
 int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
+	unsigned long int fpga_base = RUNTIME_FPGA_BASE;
+#ifdef CONFIG_SYS_GPIO
+	if ((rdreg32(CONFIG_SYS_GPIO_ADDR) & GARCIA_FPGA_LX150_ID) != 0) {
+		fpga_base = BOOT_FPGA_BASE;
+	}
+#endif
    // Synchronize command bytes
         putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
         putfslx(0x0FFFF, 0, FSL_ATOMIC);
@@ -22,9 +29,9 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
         // "run-time" FPGA is #defined as a byte address, but the ICAP needs
         // a 16-bit half-word address, so we shift right by one extra bit.
         putfslx(0x03261, 0, FSL_ATOMIC); // Write GENERAL1
-        putfslx(((RUNTIME_FPGA_BASE >> 1) & 0x0FFFF), 0, FSL_ATOMIC); // Multiboot start address[15:0]
+        putfslx(((fpga_base >> 1) & 0x0FFFF), 0, FSL_ATOMIC); // Multiboot start address[15:0]
         putfslx(0x03281, 0, FSL_ATOMIC); // Write GENERAL2
-        putfslx(((RUNTIME_FPGA_BASE >> 17) & 0x0FF), 0, FSL_ATOMIC); // Opcode 0x00 and address[23:16]
+        putfslx(((fpga_base >> 17) & 0x0FF), 0, FSL_ATOMIC); // Opcode 0x00 and address[23:16]
 
         // Write the fallback FPGA offset (this image)
         putfslx(0x032A1, 0, FSL_ATOMIC); // Write GENERAL3
