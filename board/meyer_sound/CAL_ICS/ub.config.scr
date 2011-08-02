@@ -1,6 +1,7 @@
-echo Setting up Riedel Artist environment
+echo Setting up Meyer Sound CAL ICS environment
 echo -----------------------------------
-echo Network Configuration
+echo Network Configuration:
+echo TODO - Use something for MAC address
 set autoload no
 echo Leaving ethaddr unconfigured
 set ipaddr 192.168.1.1
@@ -12,7 +13,7 @@ set clobstart 0x88000000
 echo Boot FPGA Configuration:
 set bootfpgasize 0x200000
 set bootfpgastart 0x87000000
-set bootfpganame ArtistFPGA-failsafe.bin
+set bootfpganame CAL_ICS_FPGA-failsafe.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
@@ -25,7 +26,7 @@ set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart}
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
 set fdtstart 0x87240000
-set fdtname artist.dtb
+set fdtname CAL_ICS.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
@@ -42,7 +43,7 @@ set romfsstart 0x87800000
 echo FPGA Configuration:
 set fpgasize 0x200000
 set fpgastart 0x87BE0000
-set fpganame ArtistFPGA.bin
+set fpganame CAL_ICS.bin
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
@@ -89,7 +90,6 @@ echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
-set update 'tftp 0x88000000 artistUpdate.bin; source 0x88000040'
 
 echo Saving Configurations...
 saveenv

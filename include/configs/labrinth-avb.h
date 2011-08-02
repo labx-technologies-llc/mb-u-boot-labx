@@ -133,10 +133,11 @@
 #define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)
 #define	CONFIG_SYS_FLASH_CFI		1
 #define	CONFIG_FLASH_CFI_DRIVER		1
-#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
-#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
-#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
-#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
+#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	    /* ?empty sector */
+#define	CONFIG_SYS_MAX_FLASH_BANKS	1	    /* max number of memory banks */
+#define	CONFIG_SYS_MAX_FLASH_SECT	512	    /* max number of sectors on one chip */
+#define	CONFIG_SYS_FLASH_PROTECTION		    /* hardware flash protection */
+#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE 1 /* Accelerate Flash writes with on-chip buffers */
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/biamp/labrinth_avb/ub.config.scr!

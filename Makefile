@@ -3574,6 +3574,10 @@ riedel_artist_config:   unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze artist riedel
 
+meyer_sound_CAL_ICS_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze CAL_ICS meyer_sound
+
 #========================================================================
 # Blackfin
 #========================================================================
