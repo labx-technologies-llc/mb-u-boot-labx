@@ -50,6 +50,9 @@
 /* Use the Lab X Ethernet driver */
 #define CONFIG_LABX_ETHERNET  1
 
+/* Use Marvell Link Street Ethernet Switch */
+#define CONFIG_MVSWITCH_6350R 1
+
 /* Top-level configuration setting to determine whether AVB port 0 or 1
  * is used by U-Boot.  AVB 0 is on top at the card edge, with AVB 1
  * located underneath of it.
@@ -80,9 +83,9 @@
 #endif /* if(U_BOOT_PORT = 0) */
 
 /* gpio */
-#ifdef XPAR_GPIO_0_BASEADDR
+#ifdef XPAR_XPS_GPIO_0_BASEADDR
 #  define	CONFIG_SYS_GPIO_0		1
-#  define	CONFIG_SYS_GPIO_0_ADDR		XILINX_GPIO_BASEADDR
+#  define	CONFIG_SYS_GPIO_0_ADDR		XPAR_XPS_GPIO_0_BASEADDR
 #endif
 
 /* interrupt controller */
@@ -122,7 +125,7 @@
 #define	CONFIG_SYS_MONITOR_LEN		(SIZE - CONFIG_SYS_GBL_DATA_SIZE)
 #define	CONFIG_SYS_MONITOR_BASE		(CONFIG_SYS_GBL_DATA_OFFSET - CONFIG_SYS_MONITOR_LEN)
 #define	CONFIG_SYS_MONITOR_END		(CONFIG_SYS_MONITOR_BASE + CONFIG_SYS_MONITOR_LEN)
-#define	CONFIG_SYS_MALLOC_LEN		SIZE
+#define	CONFIG_SYS_MALLOC_LEN		0x100000
 #define	CONFIG_SYS_MALLOC_BASE		(CONFIG_SYS_MONITOR_BASE - CONFIG_SYS_MALLOC_LEN)
 
 /* stack */
@@ -130,24 +133,44 @@
 
 /* Flash memory is always present on this board */
 
-#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR
-#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)
-#define	CONFIG_SYS_FLASH_CFI		1
-#define	CONFIG_FLASH_CFI_DRIVER		1
-#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
-#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
-#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
-#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
+#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR                                               
+#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)       
+/*#define	CONFIG_SYS_FLASH_CFI		1                                                                                */
+/*#define	CONFIG_FLASH_CFI_DRIVER		1                                                                              */
+/*#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	  */                 /* ?empty sector */
+/*#define	CONFIG_SYS_MAX_FLASH_BANKS	1	  */                 /* max number of memory banks */
+/*#define	CONFIG_SYS_MAX_FLASH_SECT	512	  */                 /* max number of sectors on one chip */
+/*#define	CONFIG_SYS_FLASH_PROTECTION		  */                 /* hardware flash protection */
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/meyer_sound/CAL_ICS/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
-#define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
-#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
-#define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
+/*#define	CONFIG_ENV_IS_IN_FLASH	1   */
+#define	CONFIG_ENV_SECT_SIZE	0x40000	 /* 256K */
+/*#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      */
+#define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
+#define CONFIG_ENV_OFFSET	0x00000
+
+/* Enable support of SPI Flash */
+#define CONFIG_SYS_NO_FLASH
+#define CONFIG_SPI
+#define CONFIG_XILINX_SPI /* Xilinx xps SPI controller */
+#define CONFIG_SPI_FLASH /* SPI Flash subsystem */
+#define CONFIG_CMD_SF /* Command line interface sf */
+#define CONFIG_SF_DEFAULT_SPEED 40000000 /* speed to run the SPI flash */
+#define CONFIG_SF_DEFAULT_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
+#define CONFIG_ENV_IS_IN_SPI_FLASH 1/* store the env in SPI flash */
+#define CONFIG_ENV_SPI_MAX_HZ 40000000 /* speed to run the SPI flash */
+#define CONFIG_ENV_SPI_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
+#define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
+#define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
+#define CONFIG_SPI_FLASH_SPANSION 1
+
+
+
+
 
 /* Perform the normal bootdelay checking */
 #define CONFIG_BOOTDELAY 1
@@ -183,8 +206,8 @@
 #endif
 
 #define CONFIG_CMD_ECHO
-#define CONFIG_CMD_FLASH
-#define CONFIG_CMD_IMLS
+//#define CONFIG_CMD_FLASH
+//#define CONFIG_CMD_IMLS
 #define CONFIG_CMD_JFFS2
 
 #define CONFIG_CMD_SAVEENV
@@ -193,7 +216,7 @@
 /* JFFS2 partitions */
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
 #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
-#define CONFIG_FLASH_CFI_MTD
+//#define CONFIG_FLASH_CFI_MTD
 
 /* Miscellaneous configurable options */
 #define	CONFIG_SYS_PROMPT	"U-Boot> "

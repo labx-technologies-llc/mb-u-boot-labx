@@ -246,7 +246,7 @@ struct labx_eth_private {
 };
 
 /* Performs a register write to a PHY */
-static void write_phy_register(int phy_addr, int reg_addr, int phy_data)
+void write_phy_register(int phy_addr, int reg_addr, int phy_data)
 {
   unsigned int addr;
 
@@ -261,7 +261,7 @@ static void write_phy_register(int phy_addr, int reg_addr, int phy_data)
 }
 
 /* Performs a register read from a PHY */
-static unsigned int read_phy_register(int phy_addr, int reg_addr)
+unsigned int read_phy_register(int phy_addr, int reg_addr)
 {
   unsigned int addr;
   unsigned int readValue;
@@ -707,6 +707,40 @@ static void labx_eth_restart(void)
   labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
 }
 
+#ifdef CONFIG_MVSWITCH_6350R
+static void labx_eth_reset_phy(void)
+{
+  unsigned long reg;
+  /* read the GPIO_TRI register*/
+  reg = *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR + 0x04));  
+  /* set bit 20 as output */
+  reg &= ~0x00000800;
+  *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR + 0x04)) = reg;
+  
+  /* read the GPIO_Data register*/
+  reg = *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR));  
+  /* set bit 20 as 0, reset phy */
+  reg &= ~0x00000800;
+  *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR)) = reg;
+  /* delay 10 ms */
+  mdelay(10);
+  
+  reg = *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR)); 
+  /* free up PHY_Reset_n */
+  reg |= 0x00000800;
+  *((unsigned long *)(XPAR_XPS_GPIO_0_BASEADDR)) = reg;
+  
+}
+
+static int __def_labx_eth_board_init(bd_t *bis)
+{
+        return -1;
+}
+int labx_eth_board_init(bd_t *bis) __attribute__((weak, alias("__def_labx_eth_board_init")));
+
+#endif
+
+
 static int labx_eth_init(struct eth_device *dev, bd_t *bis)
 {
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;
@@ -742,6 +776,15 @@ static int labx_eth_init(struct eth_device *dev, bd_t *bis)
   /* Enable the receiver and transmitter */
   labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_ENABLE | RX_VLAN_TAGS_ENABLE);
   labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
+
+  #ifdef CONFIG_MVSWITCH_6350R  
+  /* Reset and then free up the PHY_RESET_n pin from GPIO, specifically for Meyer Sound CAL board */
+  labx_eth_reset_phy();
+
+  /* configure board specific ethernet now that the MDIO controller is set up */
+  labx_eth_board_init(bis);
+  
+  #endif
 
   /* Configure the PHY */
   labx_eth_phy_ctrl();

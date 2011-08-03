@@ -27,6 +27,7 @@ LIB	:= $(obj)libspi.a
 
 COBJS-$(CONFIG_ATMEL_DATAFLASH_SPI) += atmel_dataflash_spi.o
 COBJS-$(CONFIG_ATMEL_SPI) += atmel_spi.o
+COBJS-$(CONFIG_XILINX_SPI) += xilinx_spi.o
 COBJS-$(CONFIG_BFIN_SPI) += bfin_spi.o
 COBJS-$(CONFIG_CF_SPI) += cf_spi.o
 COBJS-$(CONFIG_DAVINCI_SPI) += davinci_spi.o

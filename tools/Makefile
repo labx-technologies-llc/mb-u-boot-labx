@@ -152,7 +152,7 @@ $(obj)bmp_logo$(SFX):	$(obj)bmp_logo.o
 	$(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^
 	$(HOSTSTRIP) $@
 
-$(obj)envcrc$(SFX):	$(obj)crc32.o $(obj)env_embedded.o $(obj)envcrc.o $(obj)sha1.o
+$(obj)envcrc$(SFX):	$(obj)crc32.o  $(obj)envcrc.o $(obj)sha1.o $(obj)env_embedded.o
 	$(HOSTCC) $(HOSTCFLAGS) $(HOSTLDFLAGS) -o $@ $^
 
 $(obj)gen_eth_addr$(SFX):	$(obj)gen_eth_addr.o
