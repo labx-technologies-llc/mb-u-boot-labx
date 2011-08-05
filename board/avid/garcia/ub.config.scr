@@ -60,7 +60,7 @@ set bootdelay 3
 set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
 set update_fpga_ro run load_fpga install_fpga_ro
 
-set load_fpga 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; fi; '
+set load_fpga 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; fi;'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
@@ -81,7 +81,7 @@ set load_romfs 'tftp ${clobstart} usr.romfs'
 set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
 set update_romfs run load_romfs install_romfs
 
-set load_fdt 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fdtname150}; else tftp ${clobstart} ${fdtname45}; fi'
+set load_fdt 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45v2}; fi;'
 set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
 set update_fdt run load_fdt install_fdt
 
