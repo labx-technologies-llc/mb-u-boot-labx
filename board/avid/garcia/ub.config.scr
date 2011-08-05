@@ -19,6 +19,7 @@ echo FPGA Configuration:
 set fpgasize 0x340000
 set fpgastart 0x87340000
 set fpganame45 GarciaFPGA-LX45.bin
+set fpganame45v2 GarciaFPGA-LX45_v2.bin
 set fpganame100 GarciaFPGA-LX100.bin
 set fpganame150 GarciaFPGA-LX150.bin
 
@@ -56,11 +57,10 @@ echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
-set load_fpga_ro 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fpganame150}; else tftp ${clobstart} ${fpganame45}; fi'
 set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
-set update_fpga_ro run load_fpga_ro install_fpga_ro
+set update_fpga_ro run load_fpga install_fpga_ro
 
-set load_fpga 'if itest.b 0x80 -eq "*0x80002002 &0x80"; then tftp ${clobstart} ${fpganame150}; else tftp ${clobstart} ${fpganame45}; fi'
+set load_fpga 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; fi; '
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run load_fpga install_fpga
 
