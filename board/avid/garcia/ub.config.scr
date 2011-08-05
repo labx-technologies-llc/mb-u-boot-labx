@@ -57,12 +57,14 @@ echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
-set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
-set update_fpga_ro run load_fpga install_fpga_ro
-
-set load_fpga 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; fi;'
+set try_load_fpga45 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; fi'
+set try_load_fpga100 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; fi'
+set try_load_fpga150 'if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; fi'
+set try_load_fpga45v2 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; fi'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
-set update_fpga run load_fpga install_fpga
+set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
+set update_fpga run try_load_fpga45 try_load_fpga100 try_load_fpga150 try_load_fpga45v2 install_fpga
+set update_fpga_ro run try_load_fpga45 try_load_fpga100 try_load_fpga150 try_load_fpga45v2 install_fpga_ro
 
 set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
@@ -81,9 +83,12 @@ set load_romfs 'tftp ${clobstart} usr.romfs'
 set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
 set update_romfs run load_romfs install_romfs
 
-set load_fdt 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45}; fi; if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname100}; fi; if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname150}; fi; if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45v2}; fi;'
+set try_load_fdt_45 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45}; fi'
+set try_load_fdt100 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname100}; fi'
+set try_load_fdt150 'if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname150}; fi'
+set try_load_fdt45v2 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45v2}; fi'
 set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
-set update_fdt run load_fdt install_fdt
+set update_fdt run try_load_fdt_45 try_load_fdt_100 try_load_fdt_150 try_load_fdt_45v2 install_fdt
 
 set load_settingsfs 'tftp ${clobstart} settings.jffs2'
 set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
