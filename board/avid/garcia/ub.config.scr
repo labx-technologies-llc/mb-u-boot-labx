@@ -35,6 +35,8 @@ echo Flattened Device Tree Configuration:
 set fdtsize 0x10000
 set fdtstart 0x87FE8000
 set fdtname45 garcia-LX45.dtb
+set fdtname45v2 garcia-LX45_v2.dtb
+set fdtname100 garcia-LX100.dtb
 set fdtname150 garcia-LX150.dtb
 
 echo Kernel Configuration:
