@@ -204,6 +204,7 @@ void CheckFirmwareUpdate(void)
   u8 macaddr[16];
   char fdtmac0[100];
   char fdtmac1[100];
+  char ubootmac[50];
   int fdt0 = 0;
   int fdt1 = 0;
 
@@ -254,6 +255,11 @@ void CheckFirmwareUpdate(void)
     run_command("fdt addr 0x88F40000 0x00020000", 0);
     
     if(fdt0) {
+      //special case for fdt0: also modify MAC address in u-boot
+      sprintf(ubootmac, "setenv ethaddr %02X:%02X:%02X:%02X:%02X:%02X",
+	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+      run_command(ubootmac, 0);
+
       sprintf(fdtmac0, "fdt set /plb@0/ethernet@82050000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
 	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
     
