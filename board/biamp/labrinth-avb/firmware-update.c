@@ -23,7 +23,7 @@
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
 /**
- * Simple structure to encapsulate firmwar update globals
+ * Simple structure to encapsulate firmware update globals
  */
 typedef struct
 {
@@ -200,6 +200,14 @@ int ReadFWUpdateGPIO(void)
  */
 void CheckFirmwareUpdate(void)
 {
+
+  u8 macaddr[16];
+  char fdtmac0[100];
+  char fdtmac1[100];
+  char ubootmac[50];
+  int fdt0 = 0;
+  int fdt1 = 0;
+
   if (ReadFWUpdateGPIO())
   {
     printf("Firmware Update Requested from HOST, starting Firmware Update\n");
@@ -209,4 +217,63 @@ void CheckFirmwareUpdate(void)
   }
 
   printf("No Firmware update requested\n");
+
+  //read from magic location in memory
+  memcpy(macaddr, (void *)0x87FE8000, 16);
+
+  //printf("MAC addresses (with prefix) are:\n");
+  //printf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", macaddr[0], macaddr[1],
+  //	 macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+  //printf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", macaddr[8], macaddr[9],
+  //	 macaddr[10], macaddr[11], macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
+
+  //TODO: Bytes 0 and 1 may be updated to some OUI
+  //check that result 0 is valid
+  if (macaddr[0] == 0 && macaddr[1] == 0 &&
+      ((macaddr[2] != 0 && macaddr[2] != 0xFF) ||
+       (macaddr[3] != 0 && macaddr[3] != 0xFF) ||
+       (macaddr[4] != 0 && macaddr[4] != 0xFF) ||
+       (macaddr[5] != 0 && macaddr[5] != 0xFF) ||
+       (macaddr[6] != 0 && macaddr[6] != 0xFF) ||
+       (macaddr[7] != 0 && macaddr[7] != 0xFF) )) {
+    fdt0 = 1;
+  }
+  //check that result 1 is valid
+  if (macaddr[8] == 0 && macaddr[9] == 0 &&
+      ((macaddr[10] != 0 && macaddr[10] != 0xFF) ||
+       (macaddr[11] != 0 && macaddr[11] != 0xFF) ||
+       (macaddr[12] != 0 && macaddr[12] != 0xFF) ||
+       (macaddr[13] != 0 && macaddr[13] != 0xFF) ||
+       (macaddr[14] != 0 && macaddr[14] != 0xFF) ||
+       (macaddr[15] != 0 && macaddr[15] != 0xFF) )) {
+    fdt1 = 1;
+  }
+  
+  //only bother loading up the device tree and booting from it if there is a valid address
+  if(fdt0 || fdt1) {
+    run_command("cp.b 0x87240000 0x88F40000 0x00020000", 0);
+    run_command("fdt addr 0x88F40000 0x00020000", 0);
+    
+    if(fdt0) {
+      //special case for fdt0: also modify MAC address in u-boot
+      sprintf(ubootmac, "setenv ethaddr %02X:%02X:%02X:%02X:%02X:%02X",
+	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+      run_command(ubootmac, 0);
+
+      sprintf(fdtmac0, "fdt set /plb@0/ethernet@82050000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
+	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+    
+      //modify fdt
+      run_command(fdtmac0, 0);
+    }
+    if(fdt1) {
+      sprintf(fdtmac1, "fdt set /plb@0/ethernet@82070000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
+	      macaddr[10], macaddr[11], macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
+      //modify fdt
+      run_command(fdtmac1, 0);
+    }
+    //change the fdstart location
+    run_command("set fdtstart 0x88F40000", 0);
+  }
+
 }
