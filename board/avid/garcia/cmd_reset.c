@@ -11,11 +11,13 @@
 #define BOOT_FPGA_BASE (0x00000000)
 #define FINISH_FSL_BIT (0x80000000)
 
-int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+void icap_reset(int resetProduction)
 {
-	unsigned long int fpga_base = RUNTIME_FPGA_BASE;
+	unsigned long int fpga_base;
+	fpga_base = (resetProduction != 0) ? RUNTIME_FPGA_BASE : BOOT_FPGA_BASE;
 #ifdef CONFIG_SYS_GPIO
-	if ((rdreg32(CONFIG_SYS_GPIO_ADDR) & GARCIA_FPGA_LX150_ID) != 0) {
+	if ((rdreg32(CONFIG_SYS_GPIO_ADDR) &
+			(GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) == GARCIA_FPGA_LX150_ID) {
 		fpga_base = BOOT_FPGA_BASE;
 	}
 #endif
@@ -38,6 +40,8 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
         putfslx((BOOT_FPGA_BASE & 0x0FFFF), 0, FSL_ATOMIC);
         putfslx(0x032C1, 0, FSL_ATOMIC); // Write GENERAL4
         putfslx(((BOOT_FPGA_BASE >> 16) & 0x0FF), 0, FSL_ATOMIC);
+        putfslx(0x032E1, 0, FSL_ATOMIC); // Write GENERAL5
+        putfslx(0x00, 0, FSL_ATOMIC); // Value 0 allows u-boot to use production image
 
         // Write IPROG command
         putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
@@ -47,5 +51,11 @@ int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
         // Trigger the FSL peripheral to drain the FIFO into the ICAP
         putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
 	while(1);
+	return;
+}
+
+int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	icap_reset(0);
 	return 0;
 }

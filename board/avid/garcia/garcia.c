@@ -32,11 +32,9 @@
 #include <net.h>
 #include <netdev.h>
 
-int gpio_init (void)
+void gpio_init (int is_update)
 {
-	int is_update = 0;
 #ifdef CONFIG_SYS_GPIO
-	is_update = ((rdreg32(CONFIG_SYS_GPIO_ADDR) & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0);
 	if (is_update) {
 		wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_POWER_LED_B |
 				GARCIA_FPGA_STATUS_LED_B | GARCIA_FPGA_STATUS_LED_FLASH);
@@ -45,7 +43,7 @@ int gpio_init (void)
 				GARCIA_FPGA_STATUS_LED_A | GARCIA_FPGA_STATUS_LED_B);
 	}
 #endif
-	return is_update;
+	return;
 }
 
 #ifdef CONFIG_SYS_FSL_2

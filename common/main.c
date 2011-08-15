@@ -45,11 +45,11 @@ DECLARE_GLOBAL_DATA_PTR;
 #endif
 
 #if defined(CONFIG_FIRMWARE_UPDATE) 
-extern void CheckFirmwareUpdate();
+extern int CheckFirmwareUpdate(void);
 #endif
 
 #if defined(CONFIG_GPIO_INIT)
-extern int gpio_init();
+extern void gpio_init(int is_update);
 #endif
 
 
@@ -380,7 +380,10 @@ void main_loop (void)
 #endif /* CONFIG_UPDATE_TFTP */
 
 #if defined(CONFIG_FIRMWARE_UPDATE) 
-    CheckFirmwareUpdate();
+	do_update = CheckFirmwareUpdate();
+	if (do_update == 0) {
+		bootdelay = 0;
+	}
 #endif
 
 
@@ -391,11 +394,7 @@ void main_loop (void)
 	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
 #if defined(CONFIG_GPIO_INIT)
-	if (gpio_init()) {
-		do_update = 1;
-	} else {
-		bootdelay = 0;
-	}
+	gpio_init(do_update);
 #endif
 
 # ifdef CONFIG_BOOT_RETRY_TIME
