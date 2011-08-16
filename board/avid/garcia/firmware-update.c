@@ -73,6 +73,7 @@ static int isProductionBoot(void)
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
 	printf("FPGA boot image at address 0x%04xxxxx\n", (val << 1));
+	__udelay (10000);
 	return (val != 0);
 }
 
@@ -120,11 +121,16 @@ int isUpdateRequested(void)
  */
 int CheckFirmwareUpdate(void)
 {
+	unsigned long int gpioReg;
+	gpioReg = rdreg32(CONFIG_SYS_GPIO_ADDR);
+	if (((gpioReg >> 16) & 0xffff) < 0x200B ||  // We can't do FPGA reads before this version
+			(gpioReg & GARCIA_FPGA_LX100_ID) == 0) { // We can't handle LX-150 or LX-45
+		return((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0);
+	}
 	if (isProductionBoot()) {
 		return 0;  // Production boot does not update
 	} else if (!isUpdateRequested()) {
-		if ((rdreg32(CONFIG_SYS_GPIO_ADDR) &
-				(GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) == GARCIA_FPGA_LX150_ID) {
+		if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) == GARCIA_FPGA_LX150_ID) {
 			return 0; // An LX-150 must not load production because it has no production image.
 		}
 		icap_reset(1); // "Golden" boot immediately loads production boot unless update requested
