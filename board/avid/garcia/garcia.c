@@ -99,7 +99,7 @@ int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	} else {
 		strcat(tftpcmd, argv[1]);
 	}
-	for (i = 0; i < sizeof(script_list)/sizeof(script_list[0]) && rc == 0; i++) {
+	for (i = 0; i < sizeof(script_list)/sizeof(script_list[0]); i++) {
 		if (script_list[i] != NULL) {
 			rc = run_command(script_list[i], flag);
 		} else {
