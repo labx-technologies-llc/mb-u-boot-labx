@@ -74,36 +74,43 @@ int board_eth_init(bd_t *bis)
 
 int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
-	const char script1[] = "\
-			echo Starting Garcia Flash image load\n\
-			echo --------------------------------\n\
-			set autoload no\n\
-			set ethaddr 00:0a:35:00:44:01\n\
-			setenv ipaddr 192.168.1.1\n\
-			setenv serverip 192.168.1.100\n\
-			setenv netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01\n\
-			ping 192.168.1.100\n\
-			tftp 0x88001000 ";
-	const char script2[] = "\n\
-			protect off 0x87000000 +0x1000000\n\
-			erase 0x87000000 +0x1000000\n\
-			cp.b 0x88001000 0x87000000 0x1000000\n\
-			echo Flash load complete\n\
-			echo -------------------\n";
+	int rc = 0;
+	int i;
+	const char * const script_list[] = {
+			"echo Starting Garcia Flash image load",
+			"echo --------------------------------",
+			"set autoload no",
+			"set ethaddr 00:0a:35:00:44:01",
+			"setenv ipaddr 192.168.1.1",
+			"setenv serverip 192.168.1.100",
+			"setenv netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01",
+			"ping 192.168.1.100",
+			NULL,
+			"protect off 0x87000000 +0x1000000",
+			"erase 0x87000000 +0x1000000",
+			"cp.b 0x88001000 0x87000000 0x1000000",
+			"echo Flash load complete",
+			"echo -------------------"};
 	const char default_rom_image[] = "garcia.rom";
-	char script[sizeof(script1)+sizeof(script2)+64];
-    strcpy(script, script1);
+	char tftpcmd[80];
+    strcpy(tftpcmd, "tftp 0x88001000 ");
 	if (argc < 2) {
-		strcat(script, default_rom_image);
+		strcat(tftpcmd, default_rom_image);
 	} else {
-		strcat(script, argv[1]);
+		strcat(tftpcmd, argv[1]);
 	}
-	strcat(script, script2);
-	return(run_command(script, flag));
+	for (i = 0; i < sizeof(script_list)/sizeof(script_list[0]) && rc == 0; i++) {
+		if (script_list[i] != NULL) {
+			rc = run_command(script_list[i], flag);
+		} else {
+			rc = run_command(tftpcmd, flag);
+		}
+	}
+	return(rc);
 
 }
 
-U_BOOT_CMD(flash_rom_image, 1, 0, do_flash_rom_image,
+U_BOOT_CMD(flash_rom_image, 2, 0, do_flash_rom_image,
 		"Load a Garcia Flash ROM image into Flash memory",
 		"Read a flash ROM image, by default named \"garcia.rom\", from a TFTP server at"
 		" IP address 192.168.1.100 and write it to the Flash ROM.");
