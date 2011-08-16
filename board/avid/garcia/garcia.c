@@ -107,3 +107,4 @@ U_BOOT_CMD(flash_rom_image, 1, 0, do_flash_rom_image,
 		"Load a Garcia Flash ROM image into Flash memory",
 		"Read a flash ROM image, by default named \"garcia.rom\", from a TFTP server at"
 		" IP address 192.168.1.100 and write it to the Flash ROM.");
+
