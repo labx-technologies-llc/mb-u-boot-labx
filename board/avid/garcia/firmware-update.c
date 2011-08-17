@@ -77,7 +77,7 @@ static int isProductionBoot(void)
 	return (val != 0);
 }
 
-int isUpdateRequested(void)
+int isICAPUpdateRequested(void)
 {
 	int is_update = 0;
 	unsigned short int val;
@@ -104,11 +104,9 @@ int isUpdateRequested(void)
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
 	if (val == 1) {
 		printf("Update triggered by ICAP GENERAL5 == 1\n");
-		is_update = 1;
-	} else {
-		is_update = ((rdreg32(CONFIG_SYS_GPIO_ADDR) & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0);
+		return 1;
 	}
-	return (val != 0);
+	return (0);
 }
 
 /**
@@ -122,18 +120,24 @@ int isUpdateRequested(void)
 int CheckFirmwareUpdate(void)
 {
 	unsigned long int gpioReg;
+	int updateRequired = 0;
 	gpioReg = rdreg32(CONFIG_SYS_GPIO_ADDR);
-	if (((gpioReg >> 16) & 0xffff) < 0x200B ||  // We can't do FPGA reads before this version
-			(gpioReg & GARCIA_FPGA_LX100_ID) == 0) { // We can't handle LX-150 or LX-45
-		return((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0);
+
+	if (((gpioReg >> 16) & 0xffff) < 0x200B) { // We can't do FPGA reads before this version
+		updateRequired = isICAPUpdateRequested();
 	}
-	if (isProductionBoot()) {
-		return 0;  // Production boot does not update
-	} else if (!isUpdateRequested()) {
-		if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) == GARCIA_FPGA_LX150_ID) {
-			return 0; // An LX-150 must not load production because it has no production image.
-		}
-		icap_reset(1); // "Golden" boot immediately loads production boot unless update requested
+	if (!updateRequired && ((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0)) {
+		printf("Update triggered by pushbutton\n");
+		updateRequired = 1;
 	}
-	return 1; // "Golden" boot with an update request
+	if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) !=
+					GARCIA_FPGA_LX150_ID && // An LX-150 must not load production because it has no production image
+			!updateRequired &&              // We stay with golden image to do updates
+			(((gpioReg >> 16) & 0xffff) < 0x200B ||  // We can't do FPGA reads before this version
+			!isProductionBoot())) {          // We're booted into golden image
+		icap_reset(1); // "Golden" boot immediately loads production boot
+	}
+
+	// OK, now we're production boot and know if we need to do an update
+	return (updateRequired != 0); // "Golden" boot with an update request
 }
