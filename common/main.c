@@ -379,19 +379,18 @@ void main_loop (void)
 	update_tftp ();
 #endif /* CONFIG_UPDATE_TFTP */
 
+#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
+	s = getenv ("bootdelay");
+	bootdelay = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
+
+	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
+
 #if defined(CONFIG_FIRMWARE_UPDATE) 
 	do_update = CheckFirmwareUpdate();
 	if (do_update == 0) {
 		bootdelay = 0;
 	}
 #endif
-
-
-#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
-	s = getenv ("bootdelay");
-	bootdelay = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
-
-	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
 #if defined(CONFIG_GPIO_INIT)
 	gpio_init(do_update);
