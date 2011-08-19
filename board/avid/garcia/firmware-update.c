@@ -123,7 +123,8 @@ int CheckFirmwareUpdate(void)
 	int updateRequired = 0;
 	gpioReg = rdreg32(CONFIG_SYS_GPIO_ADDR);
 
-	if (((gpioReg >> 16) & 0xffff) < 0x200B || ((gpioReg >> 16) & 0xffff) > 0xD000) { // We can't do FPGA reads before this version
+	if (((gpioReg >> 16) & 0xffff) >= 0x200B &&
+			((gpioReg >> 16) & 0xffff) < 0xD000) { // We can't do FPGA reads before this version
 		updateRequired = isICAPUpdateRequested();
 	}
 	if (!updateRequired && ((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0)) {
