@@ -73,7 +73,7 @@ static int isProductionBoot(void)
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
 	printf("FPGA boot image at address 0x%04xxxxx\n", (val << 1));
-	__udelay (10000);
+	__udelay (3000);
 	return (val != 0);
 }
 
@@ -124,7 +124,7 @@ int CheckFirmwareUpdate(void)
 	gpioReg = rdreg32(CONFIG_SYS_GPIO_ADDR);
 
 	if (((gpioReg >> 16) & 0xffff) >= 0x200B &&
-			((gpioReg >> 16) & 0xffff) < 0xD000) { // We can't do FPGA reads before this version
+			((gpioReg >> 16) & 0xffff) != 0xdead) { // We can't do FPGA reads before this version
 		updateRequired = isICAPUpdateRequested();
 	}
 	if (!updateRequired && ((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0)) {
@@ -134,9 +134,11 @@ int CheckFirmwareUpdate(void)
 	if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) !=
 					GARCIA_FPGA_LX150_ID && // An LX-150 must not load production because it has no production image
 			!updateRequired &&              // We stay with golden image to do updates
-			(((gpioReg >> 16) & 0xffff) < 0x200B ||  // We can't do FPGA reads before this version
-			((gpioReg >> 16) & 0xffff) > 0xD000 || // Avoid DEAD
-			!isProductionBoot())) {          // We're booted into golden image
+			((gpioReg >> 16) & 0xffff) >= 0x200B &&  // We can't do FPGA reads before this version
+			((gpioReg >> 16) & 0xffff) != 0xdead && // Avoid DEAD
+			!isProductionBoot()) {          // We're booted into golden image
+		printf("ICAP reset to production image\n");
+		__udelay(2000);
 		icap_reset(1); // "Golden" boot immediately loads production boot
 	}
 
