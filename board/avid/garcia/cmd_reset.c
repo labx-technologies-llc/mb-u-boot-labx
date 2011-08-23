@@ -46,7 +46,10 @@ void icap_reset(int resetProduction)
         // Write IPROG command
         putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
         putfslx(0x0000E, 0, FSL_ATOMIC); // IPROG Command
-        putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+    	// Add some safety noops
+    	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+    	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+    	__udelay (1000);
 
         // Trigger the FSL peripheral to drain the FIFO into the ICAP
         putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);

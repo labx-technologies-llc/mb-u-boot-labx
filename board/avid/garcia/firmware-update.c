@@ -20,19 +20,10 @@ static int isProductionBoot(void)
 
 	// Read the boot status register; we want 0s in bits FALLBACK_0 and FALLBACK_1.
 	putfslx(0x02C01, 0, FSL_ATOMIC); // Read BOOTSTS
-	// Fill up the FIFO with noops
+	// Add some safety noops
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-
-	// Write IPROG command
-	putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
-	putfslx(0x0000E, 0, FSL_ATOMIC); // IPROG Command
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	__udelay (1000);
 
 	// Trigger the FSL peripheral to drain the FIFO into the ICAP
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
@@ -54,19 +45,10 @@ static int isProductionBoot(void)
 	// Read the reconfiguration FPGA offset; we only need to read
 	// the upper register and see if it is 0.
 	putfslx(0x02A81, 0, FSL_ATOMIC); // Read GENERAL2
-	// Fill up the FIFO with noops
+	// Add some safety noops
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-
-	// Write IPROG command
-	putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
-	putfslx(0x0000E, 0, FSL_ATOMIC); // IPROG Command
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	__udelay (1000);
 
 	// Trigger the FSL peripheral to drain the FIFO into the ICAP
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
@@ -80,33 +62,27 @@ static int isProductionBoot(void)
 int isICAPUpdateRequested(void)
 {
 	int is_update = 0;
-	unsigned short int val;
+	unsigned long int val;
+
+	// Synchronize command bytes
+	putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
+	putfslx(0x0FFFF, 0, FSL_ATOMIC);
+	putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
+	putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+
 	// Read the reconfiguration FPGA offset; we only need to read
 	// the upper register and see if it is 0.
 	putfslx(0x02AE1, 0, FSL_ATOMIC); // Read GENERAL5
-	// Fill up the FIFO with noops
+	// Add some safety noops
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
 	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-
-	// Write IPROG command
-	putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
-	putfslx(0x0000E, 0, FSL_ATOMIC); // IPROG Command
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	__udelay (1000);
 
 	// Trigger the FSL peripheral to drain the FIFO into the ICAP
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
-	if (val == 1) {
-		printf("Update triggered by ICAP GENERAL5 == 1\n");
-		return 1;
-	}
-	return (0);
+	return (val == 1);
 }
 
 /**
@@ -122,10 +98,15 @@ int CheckFirmwareUpdate(void)
 	unsigned long int gpioReg;
 	int updateRequired = 0;
 	gpioReg = rdreg32(CONFIG_SYS_GPIO_ADDR);
+	// Escape mechanism!  If both jumpers are on, we always go to golden uboot!
+	if ((gpioReg & (GARCIA_FPGA_GPIO_JUMPER_1 | GARCIA_FPGA_GPIO_JUMPER_2)) == 0) {
+		printf("Update triggered by escape jumpers 1 and 2!\n");
+		updateRequired = 1;
+	}
 
-	if (((gpioReg >> 16) & 0xffff) >= 0x200B &&
-			((gpioReg >> 16) & 0xffff) != 0xdead) { // We can't do FPGA reads before this version
-		updateRequired = isICAPUpdateRequested();
+	if (!updateRequired && isICAPUpdateRequested()) {
+		printf("Update triggered by ICAP GENERAL5 == 1\n");
+		updateRequired = 1;
 	}
 	if (!updateRequired && ((gpioReg & GARCIA_FPGA_GPIO_PUSHBUTTON) == 0)) {
 		printf("Update triggered by pushbutton\n");
@@ -134,8 +115,6 @@ int CheckFirmwareUpdate(void)
 	if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) !=
 					GARCIA_FPGA_LX150_ID && // An LX-150 must not load production because it has no production image
 			!updateRequired &&              // We stay with golden image to do updates
-			((gpioReg >> 16) & 0xffff) >= 0x200B &&  // We can't do FPGA reads before this version
-			((gpioReg >> 16) & 0xffff) != 0xdead && // Avoid DEAD
 			!isProductionBoot()) {          // We're booted into golden image
 		printf("ICAP reset to production image\n");
 		__udelay(2000);
