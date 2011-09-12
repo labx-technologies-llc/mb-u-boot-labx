@@ -54,8 +54,9 @@ static int isProductionBoot(void)
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
-	printf("FPGA boot image at address 0x%04xxxxx\n", (val << 1));
-	__udelay (3000);
+	printf("FPGA boot image at address 0x%04xxxxx, ICAP 0x08x\n", (val << 1) & 0xFFFF, val);
+	__udelay (5000);
+	val &= 0xFFFF;
 	return (val != 0);
 }
 
@@ -82,6 +83,7 @@ int isICAPUpdateRequested(void)
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+	val &= 0xFFFF;
 	return (val == 1);
 }
 
