@@ -10,7 +10,7 @@ extern void icap_reset(int resetProduction);
 
 static int isProductionBoot(void)
 {
-	unsigned short int val;
+	unsigned long int val;
 	// First find out if we had to use a fallback image
 	// Synchronize command bytes
 	putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
@@ -31,7 +31,7 @@ static int isProductionBoot(void)
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
 	// FALLBACK_0 is Bit 1 and FALLBACK_1 is bit 7
 	if ((val & 0x82) != 0) {
-		printf("Booted from fallback image.  Boot status register = 0x%x\n", val);
+		printf("Booted from fallback image.  Boot status register = 0x%lx\n", val);
 		return 0;
 	}
 
@@ -54,7 +54,7 @@ static int isProductionBoot(void)
 	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
 	__udelay (1000);
 	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
-	printf("FPGA boot image at address 0x%04xxxxx, ICAP 0x08x\n", (val << 1) & 0xFFFF, val);
+	printf("FPGA boot image at address 0x%04lxxxxx, ICAP 0x%08lx\n", ((val << 1) & 0xFFFF), val);
 	__udelay (5000);
 	val &= 0xFFFF;
 	return (val != 0);
@@ -62,7 +62,6 @@ static int isProductionBoot(void)
 
 int isICAPUpdateRequested(void)
 {
-	int is_update = 0;
 	unsigned long int val;
 
 	// Synchronize command bytes
