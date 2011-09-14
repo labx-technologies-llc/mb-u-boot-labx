@@ -31,6 +31,7 @@
 #include <asm/asm.h>
 #include <net.h>
 #include <netdev.h>
+#include "microblaze_fsl.h"
 
 void gpio_init (int is_update)
 {
@@ -114,4 +115,76 @@ U_BOOT_CMD(flash_rom_image, 2, 0, do_flash_rom_image,
 		"Load a Garcia Flash ROM image into Flash memory",
 		"Read a flash ROM image, by default named \"garcia.rom\", from a TFTP server at"
 		" IP address 192.168.1.100 and write it to the Flash ROM.");
+
+#define FINISH_FSL_BIT (0x80000000)
+
+int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned long int val;
+
+  if (argc < 2 || *(argv[1]) != '-' || *(argv[1] + 1) != 'r') {
+    // Synchronize command bytes
+    putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
+    putfslx(0x0FFFF, 0, FSL_ATOMIC);
+    putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
+    putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+
+    // Read the reconfiguration FPGA offset; we only need to read
+    // the upper register and see if it is 0.
+    putfslx(0x02AE1, 0, FSL_ATOMIC); // Read GENERAL5
+    // Add some safety noops
+    putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+    putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+    __udelay (1000);
+
+    // Trigger the FSL peripheral to drain the FIFO into the ICAP
+    putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+    __udelay (1000);
+  }
+  getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+  printf("ICAP GP5 register value is 0x%04lx (FSL read value 0x%08lx)\n", val & 0xFFFF, val);
+  val &= 0xFFFF;
+  return 0;
+}
+
+U_BOOT_CMD(rg5, 2, 0, do_read_icap5,
+		"Read ICAP General Purpose register 5.  \"-r\" flag: single instruction read.",
+		"Issue a command to the ICAP peripheral to read General Purpose Register 5.  "
+		"The command will be a full ICAP read sequence unless the \"-r\" flag is "
+		"specified, in which case just a single fsl read instruction is issued.");
+
+int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned long int val;
+
+  if (argc < 2) {
+    cmd_usage(cmdtp);
+    return 1;
+  }
+
+  val = simple_strtoul(argv[1], NULL, 16);
+
+  printf ("## Writing 0x%08lX to ICAP GP5\n", val);
+
+  putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
+  putfslx(0x0FFFF, 0, FSL_ATOMIC);
+  putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
+  putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+
+  // Write the supplied value to ICAP GP5.
+  putfslx(0x032E1, 0, FSL_ATOMIC); // Write GENERAL5
+  putfslx(val, 0, FSL_ATOMIC);
+
+  // Add some safety noops
+  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+
+  // Trigger the FSL peripheral to drain the FIFO into the ICAP
+  putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+  return 0;
+}
+
+U_BOOT_CMD(wg5, 2, 0, do_write_icap5,
+		"Write ICAP General Purpose register 5 with <value>.",
+		"Issue a command to the ICAP peripheral to write General Purpose Register 5.");
 
