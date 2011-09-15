@@ -124,24 +124,20 @@ int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
   if (argc < 2 || *(argv[1]) != '-' || *(argv[1] + 1) != 'r') {
     // Synchronize command bytes
-    putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-    putfslx(0x0FFFF, 0, FSL_ATOMIC);
-    putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-    putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+    putfsl(0x0FFFF, 0); // Pad words
+    putfsl(0x0FFFF, 0);
+    putfsl(0x0AA99, 0); // SYNC
+    putfsl(0x05566, 0); // SYNC
 
     // Read the reconfiguration FPGA offset; we only need to read
     // the upper register and see if it is 0.
-    putfslx(0x02AE1, 0, FSL_ATOMIC); // Read GENERAL5
+    putfsl(0x02AE1, 0); // Read GENERAL5
     // Add some safety noops
-    putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-    putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-    __udelay (1000);
-
-    // Trigger the FSL peripheral to drain the FIFO into the ICAP
-    putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+    putfsl(0x02000, 0); // Type 1 NOP
+    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
     __udelay (1000);
   }
-  getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+  getfsl(val, 0); // Read the ICAP result
   printf("ICAP GP5 register value is 0x%04lx (FSL read value 0x%08lx)\n", val & 0xFFFF, val);
   val &= 0xFFFF;
   return 0;
@@ -166,21 +162,18 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
   printf ("## Writing 0x%08lX to ICAP GP5\n", val);
 
-  putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-  putfslx(0x0FFFF, 0, FSL_ATOMIC);
-  putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-  putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+  putfsl(0x0FFFF, 0); // Pad words
+  putfsl(0x0FFFF, 0);
+  putfsl(0x0AA99, 0); // SYNC
+  putfsl(0x05566, 0); // SYNC
 
   // Write the supplied value to ICAP GP5.
-  putfslx(0x032E1, 0, FSL_ATOMIC); // Write GENERAL5
-  putfslx(val, 0, FSL_ATOMIC);
+  putfsl(0x032E1, 0); // Write GENERAL5
+  putfsl(val, 0);
 
   // Add some safety noops
-  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-
-  // Trigger the FSL peripheral to drain the FIFO into the ICAP
-  putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+  putfsl(0x02000, 0); // Type 1 NOP
+  putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
   return 0;
 }
 

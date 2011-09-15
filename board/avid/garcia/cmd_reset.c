@@ -22,37 +22,33 @@ void icap_reset(int resetProduction)
 	}
 #endif
    // Synchronize command bytes
-        putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-        putfslx(0x0FFFF, 0, FSL_ATOMIC);
-        putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-        putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+        putfsl(0x0FFFF, 0); // Pad words
+        putfsl(0x0FFFF, 0);
+        putfsl(0x0AA99, 0); // SYNC
+        putfsl(0x05566, 0); // SYNC
 
         // Write the reconfiguration FPGA offset; the base address of the
         // "run-time" FPGA is #defined as a byte address, but the ICAP needs
         // a 16-bit half-word address, so we shift right by one extra bit.
-        putfslx(0x03261, 0, FSL_ATOMIC); // Write GENERAL1
-        putfslx(((fpga_base >> 1) & 0x0FFFF), 0, FSL_ATOMIC); // Multiboot start address[15:0]
-        putfslx(0x03281, 0, FSL_ATOMIC); // Write GENERAL2
-        putfslx(((fpga_base >> 17) & 0x0FF), 0, FSL_ATOMIC); // Opcode 0x00 and address[23:16]
+        putfsl(0x03261, 0); // Write GENERAL1
+        putfsl(((fpga_base >> 1) & 0x0FFFF), 0); // Multiboot start address[15:0]
+        putfsl(0x03281, 0); // Write GENERAL2
+        putfsl(((fpga_base >> 17) & 0x0FF), 0); // Opcode 0x00 and address[23:16]
 
         // Write the fallback FPGA offset (this image)
-        putfslx(0x032A1, 0, FSL_ATOMIC); // Write GENERAL3
-        putfslx((BOOT_FPGA_BASE & 0x0FFFF), 0, FSL_ATOMIC);
-        putfslx(0x032C1, 0, FSL_ATOMIC); // Write GENERAL4
-        putfslx(((BOOT_FPGA_BASE >> 16) & 0x0FF), 0, FSL_ATOMIC);
-        putfslx(0x032E1, 0, FSL_ATOMIC); // Write GENERAL5
-        putfslx(0x00, 0, FSL_ATOMIC); // Value 0 allows u-boot to use production image
+        putfsl(0x032A1, 0); // Write GENERAL3
+        putfsl((BOOT_FPGA_BASE & 0x0FFFF), 0);
+        putfsl(0x032C1, 0); // Write GENERAL4
+        putfsl(((BOOT_FPGA_BASE >> 16) & 0x0FF), 0);
+        putfsl(0x032E1, 0); // Write GENERAL5
+        putfsl(0x00, 0); // Value 0 allows u-boot to use production image
 
         // Write IPROG command
-        putfslx(0x030A1, 0, FSL_ATOMIC); // Write CMD
-        putfslx(0x0000E, 0, FSL_ATOMIC); // IPROG Command
+        putfsl(0x030A1, 0); // Write CMD
+        putfsl(0x0000E, 0); // IPROG Command
     	// Add some safety noops
-    	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-    	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-    	__udelay (1000);
-
-        // Trigger the FSL peripheral to drain the FIFO into the ICAP
-        putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+    	putfsl(0x02000, 0); // Type 1 NOP
+        putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	while(1);
 	return;
 }

@@ -13,22 +13,18 @@ static int isProductionBoot(void)
 	unsigned long int val;
 	// First find out if we had to use a fallback image
 	// Synchronize command bytes
-	putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-	putfslx(0x0FFFF, 0, FSL_ATOMIC);
-	putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-	putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+	putfsl(0x0FFFF, 0); // Pad words
+	putfsl(0x0FFFF, 0);
+	putfsl(0x0AA99, 0); // SYNC
+	putfsl(0x05566, 0); // SYNC
 
 	// Read the boot status register; we want 0s in bits FALLBACK_0 and FALLBACK_1.
-	putfslx(0x02C01, 0, FSL_ATOMIC); // Read BOOTSTS
+	putfsl(0x02C01, 0); // Read BOOTSTS
 	// Add some safety noops
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	putfsl(0x02000, 0); // Type 1 NOP
+    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
-
-	// Trigger the FSL peripheral to drain the FIFO into the ICAP
-	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
-	__udelay (1000);
-	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+	getfsl(val, 0); // Read the ICAP result
 	// FALLBACK_0 is Bit 1 and FALLBACK_1 is bit 7
 	if ((val & 0x82) != 0) {
 		printf("Booted from fallback image.  Boot status register = 0x%lx\n", val);
@@ -37,23 +33,19 @@ static int isProductionBoot(void)
 
 	// Next find out if the primary image was the production image
 	// Synchronize command bytes
-	putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-	putfslx(0x0FFFF, 0, FSL_ATOMIC);
-	putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-	putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+	putfsl(0x0FFFF, 0); // Pad words
+	putfsl(0x0FFFF, 0);
+	putfsl(0x0AA99, 0); // SYNC
+	putfsl(0x05566, 0); // SYNC
 
 	// Read the reconfiguration FPGA offset; we only need to read
 	// the upper register and see if it is 0.
-	putfslx(0x02A81, 0, FSL_ATOMIC); // Read GENERAL2
+	putfsl(0x02A81, 0); // Read GENERAL2
 	// Add some safety noops
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	putfsl(0x02000, 0); // Type 1 NOP
+    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
-
-	// Trigger the FSL peripheral to drain the FIFO into the ICAP
-	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
-	__udelay (1000);
-	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+	getfsl(val, 0); // Read the ICAP result
 	printf("FPGA boot image at address 0x%04lxxxxx, ICAP 0x%08lx\n", ((val << 1) & 0xFFFF), val);
 	__udelay (5000);
 	val &= 0xFFFF;
@@ -65,23 +57,19 @@ int isICAPUpdateRequested(void)
 	unsigned long int val;
 
 	// Synchronize command bytes
-	putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-	putfslx(0x0FFFF, 0, FSL_ATOMIC);
-	putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-	putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+	putfsl(0x0FFFF, 0); // Pad words
+	putfsl(0x0FFFF, 0);
+	putfsl(0x0AA99, 0); // SYNC
+	putfsl(0x05566, 0); // SYNC
 
 	// Read the reconfiguration FPGA offset; we only need to read
 	// the upper register and see if it is 0.
-	putfslx(0x02AE1, 0, FSL_ATOMIC); // Read GENERAL5
+	putfsl(0x02AE1, 0); // Read GENERAL5
 	// Add some safety noops
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-	putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+	putfsl(0x02000, 0); // Type 1 NOP
+    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
-
-	// Trigger the FSL peripheral to drain the FIFO into the ICAP
-	putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
-	__udelay (1000);
-	getfslx(val, 0, FSL_ATOMIC); // Read the ICAP result
+	getfsl(val, 0); // Read the ICAP result
 	val &= 0xFFFF;
 	return (val == 1);
 }
