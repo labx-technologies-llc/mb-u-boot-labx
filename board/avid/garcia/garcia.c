@@ -122,6 +122,7 @@ int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
   unsigned long int val;
 
+#ifdef USE_ICAP_FSL
   if (argc < 2 || *(argv[1]) != '-' || *(argv[1] + 1) != 'r') {
     // Synchronize command bytes
     putfsl(0x0FFFF, 0); // Pad words
@@ -138,6 +139,32 @@ int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
     __udelay (1000);
   }
   getfsl(val, 0); // Read the ICAP result
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02AE1); // Read GENERAL5
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+	// Read back the ICAP result
+	wrreg32(CONFIG_SYS_ICAP_SZ, 1); // Read 1 word
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_READ);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_READ) != 0)
+		;
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
   printf("ICAP GP5 register value is 0x%04lx (FSL read value 0x%08lx)\n", val & 0xFFFF, val);
   val &= 0xFFFF;
   return 0;
@@ -162,6 +189,7 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
   printf ("## Writing 0x%08lX to ICAP GP5\n", val);
 
+#ifdef USE_ICAP_FSL
   putfsl(0x0FFFF, 0); // Pad words
   putfsl(0x0FFFF, 0);
   putfsl(0x0AA99, 0); // SYNC
@@ -174,6 +202,29 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
   // Add some safety noops
   putfsl(0x02000, 0); // Type 1 NOP
   putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	// Read the reconfiguration FPGA offset; we only need to read
+	// the upper register and see if it is 0.
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x032E1); // Write GENERAL5
+	wrreg32(CONFIG_SYS_ICAP_WF, val);
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+#endif
   return 0;
 }
 

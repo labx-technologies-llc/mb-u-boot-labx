@@ -12,6 +12,7 @@ static int isProductionBoot(void)
 {
 	unsigned long int val;
 	// First find out if we had to use a fallback image
+#ifdef USE_ICAP_FSL
 	// Synchronize command bytes
 	putfsl(0x0FFFF, 0); // Pad words
 	putfsl(0x0FFFF, 0);
@@ -25,6 +26,33 @@ static int isProductionBoot(void)
     putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
 	getfsl(val, 0); // Read the ICAP result
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	// Read the boot status register; we want 0s in bits FALLBACK_0 and FALLBACK_1.
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02C01); // Read BOOTSTS
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+	// Read back the ICAP result
+	wrreg32(CONFIG_SYS_ICAP_SZ, 1); // Read 1 word
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_READ);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_READ) != 0)
+		;
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
 	// FALLBACK_0 is Bit 1 and FALLBACK_1 is bit 7
 	if ((val & 0x82) != 0) {
 		printf("Booted from fallback image.  Boot status register = 0x%lx\n", val);
@@ -32,6 +60,7 @@ static int isProductionBoot(void)
 	}
 
 	// Next find out if the primary image was the production image
+#ifdef USE_ICAP_FSL
 	// Synchronize command bytes
 	putfsl(0x0FFFF, 0); // Pad words
 	putfsl(0x0FFFF, 0);
@@ -46,7 +75,35 @@ static int isProductionBoot(void)
     putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
 	getfsl(val, 0); // Read the ICAP result
-	printf("FPGA boot image at address 0x%04lxxxxx, ICAP 0x%08lx\n", ((val << 1) & 0xFFFF), val);
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	// Read the reconfiguration FPGA offset; we only need to read
+	// the upper register and see if it is 0.
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02A81); // Read GENERAL2
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+	// Read back the ICAP result
+	wrreg32(CONFIG_SYS_ICAP_SZ, 1); // Read 1 word
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_READ);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_READ) != 0)
+		;
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
+	printf("FPGA boot image at address 0x%04lxxxxx, ICAP GP2 0x%08lx\n", ((val << 1) & 0xFFFF), val);
 	__udelay (5000);
 	val &= 0xFFFF;
 	return (val != 0);
@@ -56,20 +113,47 @@ int isICAPUpdateRequested(void)
 {
 	unsigned long int val;
 
+#ifdef USE_ICAP_FSL
 	// Synchronize command bytes
 	putfsl(0x0FFFF, 0); // Pad words
 	putfsl(0x0FFFF, 0);
 	putfsl(0x0AA99, 0); // SYNC
 	putfsl(0x05566, 0); // SYNC
 
-	// Read the reconfiguration FPGA offset; we only need to read
-	// the upper register and see if it is 0.
 	putfsl(0x02AE1, 0); // Read GENERAL5
 	// Add some safety noops
 	putfsl(0x02000, 0); // Type 1 NOP
     putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 	__udelay (1000);
 	getfsl(val, 0); // Read the ICAP result
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	// Read the reconfiguration FPGA offset; we only need to read
+	// the upper register and see if it is 0.
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02AE1); // Read GENERAL5
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+	// Read back the ICAP result
+	wrreg32(CONFIG_SYS_ICAP_SZ, 1); // Read 1 word
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_READ);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_READ) != 0)
+		;
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
 	val &= 0xFFFF;
 	return (val == 1);
 }
