@@ -6,26 +6,38 @@
 
 extern void icap_reset(int resetProduction);
 
-#define FINISH_FSL_BIT (0x80000000)
-
 static int isProductionBoot(void)
 {
 	unsigned long int val;
 	// First find out if we had to use a fallback image
 #ifdef USE_ICAP_FSL
-	// Synchronize command bytes
-	putfsl(0x0FFFF, 0); // Pad words
-	putfsl(0x0FFFF, 0);
-	putfsl(0x0AA99, 0); // SYNC
-	putfsl(0x05566, 0); // SYNC
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
-	// Read the boot status register; we want 0s in bits FALLBACK_0 and FALLBACK_1.
-	putfsl(0x02C01, 0); // Read BOOTSTS
-	// Add some safety noops
-	putfsl(0x02000, 0); // Type 1 NOP
-    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
-	__udelay (1000);
-	getfsl(val, 0); // Read the ICAP result
+	// Abort anything in progress
+	do {
+		putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
+		udelay(1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
+
+	do {
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
+
+		// Read the boot status register; we want 0s in bits FALLBACK_0 and FALLBACK_1.
+		putfsl(0x02C01, 0); // Read BOOTSTS
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
 #else
 	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
@@ -61,20 +73,22 @@ static int isProductionBoot(void)
 
 	// Next find out if the primary image was the production image
 #ifdef USE_ICAP_FSL
-	// Synchronize command bytes
-	putfsl(0x0FFFF, 0); // Pad words
-	putfsl(0x0FFFF, 0);
-	putfsl(0x0AA99, 0); // SYNC
-	putfsl(0x05566, 0); // SYNC
+	do {
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
 
-	// Read the reconfiguration FPGA offset; we only need to read
-	// the upper register and see if it is 0.
-	putfsl(0x02A81, 0); // Read GENERAL2
-	// Add some safety noops
-	putfsl(0x02000, 0); // Type 1 NOP
-    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
-	__udelay (1000);
-	getfsl(val, 0); // Read the ICAP result
+		// Read the reconfiguration FPGA offset; we only need to read
+		// the upper register and see if it is 0.
+		putfsl(0x02A81, 0); // Read GENERAL2
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
 #else
 	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
@@ -114,18 +128,32 @@ int isICAPUpdateRequested(void)
 	unsigned long int val;
 
 #ifdef USE_ICAP_FSL
-	// Synchronize command bytes
-	putfsl(0x0FFFF, 0); // Pad words
-	putfsl(0x0FFFF, 0);
-	putfsl(0x0AA99, 0); // SYNC
-	putfsl(0x05566, 0); // SYNC
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
-	putfsl(0x02AE1, 0); // Read GENERAL5
-	// Add some safety noops
-	putfsl(0x02000, 0); // Type 1 NOP
-    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
-	__udelay (1000);
-	getfsl(val, 0); // Read the ICAP result
+	// Abort anything in progress
+	do {
+		putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
+		udelay(1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
+
+	do {
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
+
+		putfsl(0x02AE1, 0); // Read GENERAL5
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
 #else
 	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |

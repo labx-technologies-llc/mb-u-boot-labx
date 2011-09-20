@@ -126,6 +126,10 @@ static inline void wrreg32(unsigned long int n, unsigned long int v) {
 #endif
 
 /* ICAP peripheral controller */
+#define FINISH_FSL_BIT (0x80000000)
+#define ICAP_FSL_FAILED (0x80000000)
+
+#define USE_ICAP_FSL
 #define XPAR_ICAP_CR_ABORT		BIT(4)
 #define XPAR_ICAP_CR_RESET		BIT(3)
 #define XPAR_ICAP_CR_FIFO_CLEAR	BIT(2)

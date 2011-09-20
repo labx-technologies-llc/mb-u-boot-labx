@@ -116,29 +116,43 @@ U_BOOT_CMD(flash_rom_image, 2, 0, do_flash_rom_image,
 		"Read a flash ROM image, by default named \"garcia.rom\", from a TFTP server at"
 		" IP address 192.168.1.100 and write it to the Flash ROM.");
 
-#define FINISH_FSL_BIT (0x80000000)
-
 int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
   unsigned long int val;
 
 #ifdef USE_ICAP_FSL
   if (argc < 2 || *(argv[1]) != '-' || *(argv[1] + 1) != 'r') {
-    // Synchronize command bytes
-    putfsl(0x0FFFF, 0); // Pad words
-    putfsl(0x0FFFF, 0);
-    putfsl(0x0AA99, 0); // SYNC
-    putfsl(0x05566, 0); // SYNC
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
-    // Read the reconfiguration FPGA offset; we only need to read
-    // the upper register and see if it is 0.
-    putfsl(0x02AE1, 0); // Read GENERAL5
-    // Add some safety noops
-    putfsl(0x02000, 0); // Type 1 NOP
-    putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
-    __udelay (1000);
+	// Abort anything in progress
+	do {
+		putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
+		udelay(1000);
+		getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
+
+	do {
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
+
+		// Read the reconfiguration FPGA offset; we only need to read
+		// the upper register and see if it is 0.
+		putfsl(0x02AE1, 0); // Read GENERAL5
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		  getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
+  } else {
+	  getfsl(val, 0); // Read the ICAP result
   }
-  getfsl(val, 0); // Read the ICAP result
 #else
 	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
@@ -190,18 +204,34 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
   printf ("## Writing 0x%08lX to ICAP GP5\n", val);
 
 #ifdef USE_ICAP_FSL
-  putfsl(0x0FFFF, 0); // Pad words
-  putfsl(0x0FFFF, 0);
-  putfsl(0x0AA99, 0); // SYNC
-  putfsl(0x05566, 0); // SYNC
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
-  // Write the supplied value to ICAP GP5.
-  putfsl(0x032E1, 0); // Write GENERAL5
-  putfsl(val, 0);
+	// Abort anything in progress
+	do {
+	  putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
+	  udelay(1000);
+	  getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
 
-  // Add some safety noops
-  putfsl(0x02000, 0); // Type 1 NOP
-  putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+	do {
+	  putfsl(0x0FFFF, 0); // Pad words
+	  putfsl(0x0FFFF, 0);
+	  putfsl(0x0AA99, 0); // SYNC
+	  putfsl(0x05566, 0); // SYNC
+
+	  // Write the supplied value to ICAP GP5.
+	  putfsl(0x032E1, 0); // Write GENERAL5
+	  putfsl(val, 0);
+
+	  // Add some safety noops
+	  putfsl(0x02000, 0); // Type 1 NOP
+	  putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		  getfsl(val, 0); // Read the ICAP result
+	} while ((val & ICAP_FSL_FAILED) != 0);
 #else
 	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
