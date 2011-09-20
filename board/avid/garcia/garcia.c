@@ -118,21 +118,14 @@ U_BOOT_CMD(flash_rom_image, 2, 0, do_flash_rom_image,
 
 int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
-  unsigned long int val;
+	unsigned long int val;
+	int attempt_count = 0;
 
 #ifdef USE_ICAP_FSL
-  if (argc < 2 || *(argv[1]) != '-' || *(argv[1] + 1) != 'r') {
 	// It has been empirically determined that ICAP FSL doesn't always work
 	// the first time, but if retried enough times it does eventually work.
 	// Thus we keep hammering the operation we want and checking for failure
 	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
-
-	// Abort anything in progress
-	do {
-		putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
-		udelay(1000);
-		getfsl(val, 0); // Read the ICAP result
-	} while ((val & ICAP_FSL_FAILED) != 0);
 
 	do {
 		// Synchronize command bytes
@@ -149,15 +142,9 @@ int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 		__udelay (1000);
 		  getfsl(val, 0); // Read the ICAP result
-	} while ((val & ICAP_FSL_FAILED) != 0);
-  } else {
-	  getfsl(val, 0); // Read the ICAP result
-  }
+		  ++attempt_count;
+	} while ((val & ICAP_FSL_FAILED) != 0 && attempt_count < 10000);
 #else
-	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
-	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
-			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
-		;
 	// Synchronize command bytes
 	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
 	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
@@ -179,29 +166,19 @@ int do_read_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		;
 	val = rdreg32(CONFIG_SYS_ICAP_RF);
 #endif
-  printf("ICAP GP5 register value is 0x%04lx (FSL read value 0x%08lx)\n", val & 0xFFFF, val);
-  val &= 0xFFFF;
+  printf("ICAP GP5 register value is 0x%04lx (FSL read value 0x%08lx, attempt count %d)\n", val & 0xFFFF, val, attempt_count);
   return 0;
 }
 
 U_BOOT_CMD(rg5, 2, 0, do_read_icap5,
-		"Read ICAP General Purpose register 5.  \"-r\" flag: single instruction read.",
-		"Issue a command to the ICAP peripheral to read General Purpose Register 5.  "
-		"The command will be a full ICAP read sequence unless the \"-r\" flag is "
-		"specified, in which case just a single fsl read instruction is issued.");
+		"Read ICAP General Purpose register 5.",
+		"Issue a command to the ICAP peripheral to read General Purpose Register 5.");
 
-int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+int do_read_idreg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
-  unsigned long int val;
-
-  if (argc < 2) {
-    cmd_usage(cmdtp);
-    return 1;
-  }
-
-  val = simple_strtoul(argv[1], NULL, 16);
-
-  printf ("## Writing 0x%08lX to ICAP GP5\n", val);
+	unsigned long int val;
+	unsigned long int id;
+	int attempt_count = 0;
 
 #ifdef USE_ICAP_FSL
 	// It has been empirically determined that ICAP FSL doesn't always work
@@ -209,12 +186,106 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	// Thus we keep hammering the operation we want and checking for failure
 	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
-	// Abort anything in progress
 	do {
-	  putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
-	  udelay(1000);
-	  getfsl(val, 0); // Read the ICAP result
-	} while ((val & ICAP_FSL_FAILED) != 0);
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
+
+		// Read the reconfiguration FPGA offset; we only need to read
+		// the upper register and see if it is 0.
+		putfsl(0x029C1, 0); // Read ID
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		  getfsl(val, 0); // Read the ICAP result
+		  ++ attempt_count;
+	} while ((val & ICAP_FSL_FAILED) != 0 && attempt_count < 10000);
+	do {
+		// Synchronize command bytes
+		putfsl(0x0FFFF, 0); // Pad words
+		putfsl(0x0FFFF, 0);
+		putfsl(0x0AA99, 0); // SYNC
+		putfsl(0x05566, 0); // SYNC
+
+		// Read the reconfiguration FPGA offset; we only need to read
+		// the upper register and see if it is 0.
+		putfsl(0x029C1, 0); // Read ID
+		// Add some safety noops
+		putfsl(0x02000, 0); // Type 1 NOP
+		putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
+		__udelay (1000);
+		  getfsl(id, 0); // Read the ICAP result
+		  ++ attempt_count;
+	} while ((val & ICAP_FSL_FAILED) != 0 && attempt_count < 10000);
+	id = (id & 0xFFFF) | ((val & 0xFFFF) << 16);
+#else
+	// Synchronize command bytes
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x0AA99); // SYNC
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x05566); // SYNC
+
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x029C1); // Read ID
+	// Add some safety noops
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	wrreg32(CONFIG_SYS_ICAP_WF, 0x02000); // Type 1 NOP
+	// Trigger the FSL peripheral to drain the FIFO into the ICAP
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_WRITE);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
+		;
+	// Read back the ICAP result
+	wrreg32(CONFIG_SYS_ICAP_SZ, 1); // Read 1 word
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_READ);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_READ) != 0)
+		;
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
+  printf("ICAP ID is 0x%08lx (FSL read value 0x%08lx, attempt count %d [expect 2])\n", id, val, attempt_count);
+  return 0;
+}
+
+U_BOOT_CMD(ridr, 2, 0, do_read_idreg,
+		"Read ICAP ID register.",
+		"Issue a command to the ICAP peripheral to read its ID register.");
+
+int do_read_icap(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	unsigned long int val;
+#ifdef USE_ICAP_FSL
+	getfsl(val, 0); // Read the ICAP result
+#else
+	val = rdreg32(CONFIG_SYS_ICAP_RF);
+#endif
+	printf("ICAP FSL register read value is 0x%08lx)\n", val);
+	return 0;
+}
+
+U_BOOT_CMD(ricap, 2, 0, do_read_icap,
+		"Raw read of ICAP readback register.",
+		"Issue a single fsl read instruction to the ICAP peripheral, "
+		"returning the current value in the readback register.");
+
+int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned long int val;
+  unsigned long int arg;
+  int attempt_count = 0;
+
+  if (argc < 2) {
+    cmd_usage(cmdtp);
+    return 1;
+  }
+
+  arg = simple_strtoul(argv[1], NULL, 16);
+
+#ifdef USE_ICAP_FSL
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
 
 	do {
 	  putfsl(0x0FFFF, 0); // Pad words
@@ -224,19 +295,16 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 	  // Write the supplied value to ICAP GP5.
 	  putfsl(0x032E1, 0); // Write GENERAL5
-	  putfsl(val, 0);
+	  putfsl(arg, 0);
 
 	  // Add some safety noops
 	  putfsl(0x02000, 0); // Type 1 NOP
 	  putfsl(FINISH_FSL_BIT | 0x02000, 0); // Type 1 NOP, and Trigger the FSL peripheral to drain the FIFO into the ICAP
 		__udelay (1000);
-		  getfsl(val, 0); // Read the ICAP result
-	} while ((val & ICAP_FSL_FAILED) != 0);
+		getfsl(val, 0); // Read the ICAP result
+		++attempt_count;
+	} while ((val & ICAP_FSL_FAILED) != 0 && attempt_count < 10000);
 #else
-	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
-	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
-			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
-		;
 	// Synchronize command bytes
 	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF); // Pad words
 	wrreg32(CONFIG_SYS_ICAP_WF, 0x0FFFF);
@@ -255,10 +323,45 @@ int do_write_icap5(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	while ((rdreg32(CONFIG_SYS_ICAP_CR) & XPAR_ICAP_CR_WRITE) != 0)
 		;
 #endif
+	  printf ("## Wrote 0x%08lX to ICAP GP5 (FSL read value 0x%08lx, attempt count %d)\n", arg, val, attempt_count);
+
   return 0;
 }
 
 U_BOOT_CMD(wg5, 2, 0, do_write_icap5,
 		"Write ICAP General Purpose register 5 with <value>.",
 		"Issue a command to the ICAP peripheral to write General Purpose Register 5.");
+
+int do_abort_icap(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned long int val;
+  int attempt_count = 0;
+
+#ifdef USE_ICAP_FSL
+	// It has been empirically determined that ICAP FSL doesn't always work
+	// the first time, but if retried enough times it does eventually work.
+	// Thus we keep hammering the operation we want and checking for failure
+	// until we finally succeed.  Somebody please fix ICAP!! <sigh>
+
+	// Abort anything in progress
+	do {
+	  putfslx(0x0FFFF, 0, FSL_CONTROL); // Control signal aborts, data doesn't matter
+	  udelay(1000);
+	  getfsl(val, 0); // Read the ICAP result
+	  ++attempt_count;
+	} while ((val & ICAP_FSL_FAILED) != 0 && attempt_count < 10000);
+#else
+	wrreg32(CONFIG_SYS_ICAP_CR, XPAR_ICAP_CR_ABORT);
+	while ((rdreg32(CONFIG_SYS_ICAP_CR) & (XPAR_ICAP_CR_ABORT | XPAR_ICAP_CR_RESET |
+			XPAR_ICAP_CR_FIFO_CLEAR | XPAR_ICAP_CR_READ | XPAR_ICAP_CR_WRITE)) != 0)
+		;
+#endif
+	printf ("## Issued Abort to ICAP peripheral, attempt count %d\n", attempt_count);
+  return 0;
+}
+
+U_BOOT_CMD(aicap, 2, 0, do_abort_icap,
+		"Abort ICAP peripheral.",
+		"Issue an Abort command to the ICAP peripheral, "
+		"resetting it to initialization idle state.");
 

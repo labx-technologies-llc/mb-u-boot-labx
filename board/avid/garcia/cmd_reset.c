@@ -29,7 +29,7 @@ void icap_reset(int resetProduction)
 
 	// Abort anything in progress
 	do {
-		putfslx(0x02000, 0, FSL_CONTROL); // Control signal aborts, NOP doesn't matter
+		putfslx(0x0FFFF, 0, FSL_CONTROL); // Control signal aborts, data doesn't matter
 		udelay(1000);
 		getfsl(val, 0); // Read the ICAP result
 	} while ((val & ICAP_FSL_FAILED) != 0);
