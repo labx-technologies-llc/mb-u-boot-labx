@@ -39,6 +39,15 @@ typedef struct
 FirmwareUpdateCtxt_t fwUpdateCtxt;
 
 /**
+ * Accessor for the ExecutingImageType attribute; this tells the client
+ * that we are in the bootloader, not the main image.
+ */
+FirmwareUpdate__ErrorCode get_ExecutingImageType(FirmwareUpdate__CodeImageType *value) {
+  *value = e_CODE_IMAGE_BOOT;
+  return(e_EC_SUCCESS);
+}
+
+/**
  * Start a firmware update session.
  *
  * cmd      - String u-boot shell command (i.e. run update_fpga, run update_linux, run update_fpga etc)
@@ -195,10 +204,10 @@ int ReadFWUpdateGPIO(void)
  * Check to see if a Firmware update is being request, if so 
  * carry out firmware update and return.
  *
- * Returns - Void - Will never return if FW update happens(Should be reset by host)
+ * Returns - Zero if no firmware update was performed, nonzero otherwise
  *
  */
-void CheckFirmwareUpdate(void)
+int CheckFirmwareUpdate(void)
 {
 
   u8 macaddr[16];
@@ -210,10 +219,16 @@ void CheckFirmwareUpdate(void)
 
   if (ReadFWUpdateGPIO())
   {
+    /* TEMPORARY DEBUG */
+#if 1
+    printf("Firmware Update Requested from HOST, SKIPPING Firmware Update!!!\n");
+    return(1);
+#else
     printf("Firmware Update Requested from HOST, starting Firmware Update\n");
     DoFirmwareUpdate();
     printf("Firmware Update Completed, waiting for reset from Host\n");
     while(1);
+#endif
   }
 
   printf("No Firmware update requested\n");
@@ -276,4 +291,6 @@ void CheckFirmwareUpdate(void)
     run_command("set fdtstart 0x88F40000", 0);
   }
 
+  /* No firmware update performed, return zero so no bootdelay occurs */
+  return(0);
 }

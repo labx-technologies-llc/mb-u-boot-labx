@@ -42,6 +42,10 @@ typedef enum {
   k_SC_sendDataPacket      = (MIN_SERVICE_CODE + 2),
 } FirmwareUpdateServiceCode;
 
+typedef enum {
+  k_AC_ExecutingImageType = (MIN_ATTRIBUTE_CODE    ),
+} FirmwareUpdateAttributeCode;
+
 /* Request buffer methods */
 extern void     setClassCode_req(RequestMessageBuffer_t msg, uint16_t classCode);
 extern void     setInstanceNumber_req(RequestMessageBuffer_t msg, uint16_t instanceNumber);

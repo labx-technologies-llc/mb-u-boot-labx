@@ -25,9 +25,9 @@ include $(TOPDIR)/config.mk
 
 LIB	= libidl.a
 
-CFLAGS  += -I..
-COBJS	= FirmwareUpdate_stub.o  FirmwareUpdate_type.o  FirmwareUpdate_unmarshal.o
-IDLSRC+= FirmwareUpdate.idl
+CFLAGS += -I..
+COBJS	= FirmwareUpdate_type.o  FirmwareUpdate_unmarshal.o
+IDLSRC += FirmwareUpdate.idl
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
