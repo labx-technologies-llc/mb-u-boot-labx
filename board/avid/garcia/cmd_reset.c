@@ -14,6 +14,8 @@ void icap_reset(int resetProduction)
 {
 	unsigned long int fpga_base;
 	u32 val;
+	// ICAP behavior is described (poorly) in Xilinx specification UG380.  Brave
+	// souls may look there for detailed guidance on what is being done here.
 	fpga_base = (resetProduction != 0) ? RUNTIME_FPGA_BASE : BOOT_FPGA_BASE;
 #ifdef CONFIG_SYS_GPIO
 	if ((rdreg32(CONFIG_SYS_GPIO_ADDR) &
@@ -41,6 +43,11 @@ void icap_reset(int resetProduction)
         putfsl(0x0AA99, 0); // SYNC
         putfsl(0x05566, 0); // SYNC
 
+        // Set the Mode register so that fallback images will be manipulated
+        // correctly.  Use bitstream mode instead of physical mode (required
+        // for configuration fallback) and set boot mode for BPI
+        putfsl(0x03301, 0); // Write MODE_REG
+        putfsl(0x02000, 0); // Value 0 allows u-boot to use production image
         // Write the reconfiguration FPGA offset; the base address of the
         // "run-time" FPGA is #defined as a byte address, but the ICAP needs
         // a 16-bit half-word address, so we shift right by one extra bit.
