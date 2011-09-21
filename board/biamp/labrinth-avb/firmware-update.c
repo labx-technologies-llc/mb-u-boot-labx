@@ -182,29 +182,16 @@ int DoFirmwareUpdate(void)
 /*
  * GPIO definition for reading the backplane GPIO pin
  */
-#define BP_GPIO_DATA (*((volatile unsigned long*) XPAR_XPS_GPIO_0_BASEADDR))
-#define BP_GPIO_BIT  (0x00000001)
-
-/**
- * Read the GPIO that tells if a FW update is requested from Host
- * processor
- *
- * Returns - 1 - If GPIO is set
- *           0 - GPIO not set
- **/
-int ReadFWUpdateGPIO(void)
-{
-  /* Examine the GPIO signal from the backplane to see if the host is
-   * initiating a firware update or not
-   */
-  return((BP_GPIO_DATA & BP_GPIO_BIT) != 0);
-}
+#define BP_GPIO_DATA   (*((volatile unsigned long*) XPAR_XPS_GPIO_0_BASEADDR))
+#define BP_GPIO_BIT    (0x00000001)
+#define BOOT_DELAY_BIT (0x00000008)
 
 /**
  * Check to see if a Firmware update is being request, if so 
  * carry out firmware update and return.
  *
- * Returns - Zero if no firmware update was performed, nonzero otherwise
+ * Returns - Zero if no firmware update was performed and no
+ *           boot delay desired, nonzero otherwise
  *
  */
 int CheckFirmwareUpdate(void)
@@ -216,22 +203,21 @@ int CheckFirmwareUpdate(void)
   char ubootmac[50];
   int fdt0 = 0;
   int fdt1 = 0;
+  int returnValue = 0;
 
-  if (ReadFWUpdateGPIO())
-  {
-    /* TEMPORARY DEBUG */
-#if 1
-    printf("Firmware Update Requested from HOST, SKIPPING Firmware Update!!!\n");
-    return(1);
-#else
+  /* Examine the GPIO signal from the backplane to see if the host is
+   * initiating a firware update or not.  If not, see if a boot delay
+   * is being requested by an installed jumper.
+   */
+  if((BP_GPIO_DATA & BP_GPIO_BIT) != 0) {
     printf("Firmware Update Requested from HOST, starting Firmware Update\n");
     DoFirmwareUpdate();
     printf("Firmware Update Completed, waiting for reset from Host\n");
     while(1);
-#endif
-  }
-
-  printf("No Firmware update requested\n");
+  } else if((BP_GPIO_DATA & BOOT_DELAY_BIT) == 0) {
+    printf("Boot delay requested\n");
+    returnValue = 1;
+  } else printf("No Firmware update requested\n");
 
   //read from magic location in memory
   memcpy(macaddr, (void *)0x87FE8000, 16);
@@ -291,6 +277,5 @@ int CheckFirmwareUpdate(void)
     run_command("set fdtstart 0x88F40000", 0);
   }
 
-  /* No firmware update performed, return zero so no bootdelay occurs */
-  return(0);
+  return(returnValue);
 }
