@@ -22,6 +22,9 @@ set fpganame45 GarciaFPGA-LX45.bin
 set fpganame45v2 GarciaFPGA-LX45_v2.bin
 set fpganame100 GarciaFPGA-LX100.bin
 set fpganame150 GarciaFPGA-LX150.bin
+set fpganame45ro GarciaFPGA-LX45-golden.bin
+set fpganame45v2ro GarciaFPGA-LX45_v2-golden.bin
+set fpganame100ro GarciaFPGA-LX100-golden.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
@@ -64,9 +67,12 @@ set try_load_fpga100 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobs
 set try_load_fpga150 'if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; else echo; fi'
 set try_load_fpga45v2 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; else echo; fi'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
-set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
 set update_fpga run try_load_fpga45 try_load_fpga100 try_load_fpga150 try_load_fpga45v2 install_fpga
-set update_fpga_ro run try_load_fpga45 try_load_fpga100 try_load_fpga150 try_load_fpga45v2 install_fpga_ro
+set try_load_fpga45_ro 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45ro}; else echo; fi'
+set try_load_fpga100_ro 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100ro}; else echo; fi'
+set try_load_fpga45v2_ro 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2ro}; else echo; fi'
+set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
+set update_fpga_ro run try_load_fpga45_ro try_load_fpga100_ro try_load_fpga150 try_load_fpga45v2_ro install_fpga_ro
 
 set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
