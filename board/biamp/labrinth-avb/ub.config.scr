@@ -10,43 +10,47 @@ echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
 echo Boot FPGA Configuration:
-set bootfpgasize 0x200000
+set bootfpgasize 0x00200000
 set bootfpgastart 0x87000000
 set bootfpganame Labrinth_Fpga_Boot.bin
 
 echo Bootloader Configuration:
-set bootsize 0x40000
+set bootsize 0x00040000
 set bootstart 0x87200000
-set bootenvsize 0x08000
+set bootenvsize 0x00008000
 set bootenvstart 0x87FE0000
 set boottextbase 0x88F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
-set fdtsize 0x20000
+set fdtsize 0x00020000
 set fdtstart 0x87240000
 set fdtname labrinth-avb.dtb
 
 echo Kernel Configuration:
-set kernsize 0x3C0000
+set kernsize 0x003C0000
 set kernstart 0x87260000
 
 echo Root Filesystem Configuration:
-set rootfssize 0x1E0000
+set rootfssize 0x001E0000
 set rootfsstart 0x87620000
 
 echo ROM Filesystem Configuration:
-set romfssize 0x3E0000
+set romfssize 0x003E0000
 set romfsstart 0x87800000
 
 echo FPGA Configuration:
-set fpgasize 0x200000
+set fpgasize 0x00200000
 set fpgastart 0x87BE0000
 set fpganame Labrinth_Fpga.bin
 
 echo Settings Filesystem Configuration:
-set settingsfssize 0x200000
+set settingsfssize 0x00200000
 set settingsfsstart 0x87DE0000
+
+echo Image CRC Configuration:
+set imagecrcssize 0x00008000
+set imagecrcsstart 0x87FE8000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
@@ -84,6 +88,8 @@ set update_fdt run load_fdt install_fdt
 set load_settingsfs 'tftp ${clobstart} settings.jffs2'
 set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${settingsfssize}'
 set update_settingsfs run load_settingsfs install_settingsfs
+
+set erase_imagecrcs 'protect off ${imagecrcsstart} +${imagecrcssize};erase ${imagecrcsstart} +${imagecrcssize}'
 
 echo Shortcuts for Development:
 set tempkernstart 0x88800000
