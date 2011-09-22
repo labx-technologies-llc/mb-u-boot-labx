@@ -6,6 +6,7 @@
 #include <linux/types.h>
 #include <common.h>
 #include <u-boot/crc.h>
+#include "microblaze_fsl.h"
 
 #ifndef TRUE
 #define TRUE 1
@@ -19,6 +20,12 @@
 
 
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
+
+/* Bit definition which kicks off a dump of the FIFO to the ICAP */
+#define FINISH_FSL_BIT (0x80000000)
+
+/* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
+#define GENERAL5_MAGIC (0x0ABCD)
 
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
@@ -125,15 +132,15 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
 }
 
 FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
-  int returnValue;
+  int returnValue = e_EC_SUCCESS;
 
   /* Invoke the HUSH parser on the command */
   /* printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd)); */
   if(parse_string_outer(cmd, (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
-    return e_EC_NOT_EXECUTED;
+    returnValue = e_EC_NOT_EXECUTED;
   }
 
-  return e_EC_SUCCESS;
+  return(returnValue);
 }
 
 /* Statically-allocated request and response buffers for use with IDL */
@@ -204,20 +211,61 @@ int CheckFirmwareUpdate(void)
   int fdt0 = 0;
   int fdt1 = 0;
   int returnValue = 0;
+  int doUpdate = 0;
+  u16 readValue;
 
-  /* Examine the GPIO signal from the backplane to see if the host is
+  /* Read the GENERAL5 register from the ICAP peripheral to determine
+   * whether the golden FPGA is still resident as the result of a re-
+   * configuration fallback
+   */
+  putfslx(0x0FFFF, 0, FSL_CONTROL_ATOMIC);
+  udelay(1000);
+
+  /* First determine whether a reconfiguration has already been attempted
+   * and failed (e.g. due to a corrupted run-time bitstream).  This is done
+   * by checking for the fallback bit in the ICAP status register.
+   *
+   * Next, examine the GPIO signal from the backplane to see if the host is
    * initiating a firware update or not.  If not, see if a boot delay
    * is being requested by an installed jumper.
    */
-  if((BP_GPIO_DATA & BP_GPIO_BIT) != 0) {
-    printf("Firmware Update Requested from HOST, starting Firmware Update\n");
-    DoFirmwareUpdate();
-    printf("Firmware Update Completed, waiting for reset from Host\n");
-    while(1);
+  putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
+  putfslx(0x0FFFF, 0, FSL_ATOMIC);
+  putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
+  putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+
+  // Read GENERAL5
+  putfslx(0x02AE1, 0, FSL_ATOMIC);
+
+  // Add some safety noops and wait briefly
+  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+  udelay(1000);
+
+  // Trigger the FSL peripheral to drain the FIFO into the ICAP.
+  // Wait briefly for the read to occur.
+  putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+  udelay(1000);
+  getfslx(readValue, 0, FSL_ATOMIC); // Read the ICAP result
+
+  if (readValue == GENERAL5_MAGIC) {
+    printf("Run-time FPGA reconfiguration failed\n");
+    doUpdate = 1;
+  } else if((BP_GPIO_DATA & BP_GPIO_BIT) != 0) {
+    printf("Firmware Update Requested from HOST\n");
+    doUpdate = 1;
   } else if((BP_GPIO_DATA & BOOT_DELAY_BIT) == 0) {
     printf("Boot delay requested\n");
     returnValue = 1;
   } else printf("No Firmware update requested\n");
+
+  // Perform an update if required for any reason
+  if(doUpdate) {
+    printf("Entering firmware update\n");
+    DoFirmwareUpdate();
+    printf("Firmware update completed, waiting for reset from host\n");
+    while(1);
+  }
 
   //read from magic location in memory
   memcpy(macaddr, (void *)0x87FE8000, 16);
