@@ -8,7 +8,7 @@ module FirmwareUpdate
 {
   typedef sequence<uint8_t> FwData;
 
-
+  /* Enumerated type for generic error codes which may be returned */
   enum ErrorCode
   {
     e_EC_SUCCESS,
@@ -20,6 +20,13 @@ module FirmwareUpdate
     e_EC_UPDATE_NOT_IN_PROGRESS,
     e_EC_CORRUPT_IMAGE,
     e_EC_NOT_EXECUTED
+  };
+
+  /* Enumerated type used to identify the context (bootloader or Linux) */
+  enum CodeImageType
+  {
+    e_CODE_IMAGE_BOOT,
+    e_CODE_IMAGE_MAIN
   };
 
   interface Services
@@ -56,6 +63,14 @@ module FirmwareUpdate
      *         firmware update context is in progress.
      */
     ErrorCode sendDataPacket(in FwData data);
+  };
+
+  interface Attributes
+  {
+    /**
+     * Attribute identifying the execution context
+     */
+    ErrorCode ExecutingImageType(out CodeImageType value);
   };
 };
 

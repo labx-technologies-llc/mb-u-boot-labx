@@ -30,7 +30,7 @@ COBJS	= $(BOARD).o firmware-update.o message-buffer.o spi-mailbox.o
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
 $(LIB):	do_idls $(OBJS) 
-	$(AR) $(ARFLAGS) $@ $(OBJS) IDL/FirmwareUpdate_stub.o IDL/FirmwareUpdate_type.o IDL/FirmwareUpdate_unmarshal.o
+	$(AR) $(ARFLAGS) $@ $(OBJS) IDL/FirmwareUpdate_type.o IDL/FirmwareUpdate_unmarshal.o
 
 do_idls:
 	$(MAKE) -C ./IDL do_idls

@@ -242,7 +242,7 @@ class CxxAttributesStaticVisitor (CxxAttributesInterfaceVisitor):
         return "RequestMessageBuffer_t request, ResponseMessageBuffer_t response"
 
     def getResultType(self):
-        return "void"
+        return "FirmwareUpdate__ErrorCode"
 
 # Output an interface declaration for a stub service operation
 class CxxStubMethodHeaderVisitor (CxxInterfaceVisitor):
@@ -275,7 +275,7 @@ class CxxStubMethodImplVisitor (CxxInterfaceVisitor):
         return ""
 
     def getOperationName(self, node):
-        return self.cn + "_stub" + CxxInterfaceVisitor.getOperationName(self, node)
+        return self.cn + "_stub_" + CxxInterfaceVisitor.getOperationName(self, node)
 
     def getOperationTerminator(self, node):
         return ""
@@ -297,7 +297,7 @@ class CxxAttributesStubMethodImplVisitor (CxxAttributesInterfaceVisitor):
         return ""
 
     def getOperationName(self, node):
-        return self.cn + "_stub::" + CxxAttributesInterfaceVisitor.getOperationName(self, node)
+        return self.cn + "_stub_" + CxxAttributesInterfaceVisitor.getOperationName(self, node)
 
     def getOperationTerminator(self, node):
         return ""
