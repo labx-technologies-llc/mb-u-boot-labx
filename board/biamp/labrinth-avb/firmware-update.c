@@ -27,20 +27,35 @@
 /* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
 #define GENERAL5_MAGIC (0x0ABCD)
 
+/* Buffer for constructing command strings */
+#define CMD_FORMAT_BUF_SZ (256)
+static char *commandBuffer[CMD_FORMAT_BUF_SZ];
+
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
+
+/**
+ * Structure storing the revision and CRC32 of each run-time image.
+ */
+typedef struct {
+  uint32_t revision;
+  uint32_t crc;
+} RuntimeImageRecord;
+
+/* Constant definition for a "blank" run-time image revision in Flash */
+#define BLANK_IMAGE_REVISION (0xFFFFFFFF)
 
 /**
  * Simple structure to encapsulate firmware update globals
  */
-typedef struct
-{
-    uint8_t  bUpdateInProgress;
-    uint32_t crc;
-    uint32_t length;
-    uint32_t bytesReceived;
-    uint8_t *fwImageBase;
-    uint8_t *fwImagePtr;
-    string_t cmd;
+typedef struct {
+  uint8_t             bUpdateInProgress;
+  uint32_t            imageIndex;
+  uint32_t            length;
+  RuntimeImageRecord  imageRecord;
+  uint32_t            bytesReceived;
+  uint8_t            *fwImageBase;
+  uint8_t            *fwImagePtr;
+  string_t            cmd;
 } FirmwareUpdateCtxt_t;
 
 FirmwareUpdateCtxt_t fwUpdateCtxt;
@@ -57,26 +72,37 @@ FirmwareUpdate__ErrorCode get_ExecutingImageType(FirmwareUpdate__CodeImageType *
 /**
  * Start a firmware update session.
  *
- * cmd      - String u-boot shell command (i.e. run update_fpga, run update_linux, run update_fpga etc)
- * length   - Size of the fw image that is going to be sent via SendDatacmd
- * crc      - The expected CRC value for the coming FW image
+ * @param image    - Enumerated value identifying which run-time image is
+ *                   being updated
+ * @param cmd      - String command to invoke after all data has been sent
+ * @param length   - Length, in bytes, of the data image which will be sent
+ * @param revision - Revision quadlet for the image
+ * @param crc      - Expected CRC32 for the data to be checked
  */
-FirmwareUpdate__ErrorCode startFirmwareUpdate(string_t cmd, uint32_t length, uint32_t crc)
-{
-  /*  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc); */
+FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType image,
+                                              string_t cmd,
+                                              uint32_t length,
+                                              uint32_t revision,
+                                              uint32_t crc) {
+  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc);
   if(fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_ALREADY_IN_PROGRESS;
 
   /* Initialize the firware update context; load the binary image to the "clobber"
    * region, which is at the start of DDR2.
    */
-  fwUpdateCtxt.bUpdateInProgress = TRUE;
-  fwUpdateCtxt.crc = crc;
-  fwUpdateCtxt.length = length;
-  fwUpdateCtxt.cmd = cmd;
-  fwUpdateCtxt.bytesReceived = 0;
-  fwUpdateCtxt.fwImageBase = (uint8_t *)XPAR_DDR2_CONTROL_MPMC_BASEADDR;
-  fwUpdateCtxt.fwImagePtr = fwUpdateCtxt.fwImageBase;
-  return e_EC_SUCCESS;
+  fwUpdateCtxt.bUpdateInProgress    = TRUE;
+  fwUpdateCtxt.imageIndex           = (uint32_t) image;
+  fwUpdateCtxt.length               = length;
+  fwUpdateCtxt.imageRecord.revision = revision;
+  fwUpdateCtxt.imageRecord.crc      = crc;
+  fwUpdateCtxt.cmd                  = cmd;
+  fwUpdateCtxt.bytesReceived        = 0;
+  fwUpdateCtxt.fwImageBase          = (uint8_t*) XPAR_DDR2_CONTROL_MPMC_BASEADDR;
+  fwUpdateCtxt.fwImagePtr           = fwUpdateCtxt.fwImageBase;
+
+  /* Sanity-check the image index */
+  return(((image >= e_IMAGE_FPGA) & (image <= e_IMAGE_SETTINGSFS)) ? 
+         e_EC_SUCCESS : e_EC_NOT_EXECUTED);
 }
 
 /**
@@ -87,6 +113,8 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(string_t cmd, uint32_t length, uin
  */
 FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 {
+  FirmwareUpdate__ErrorCode sendSuccess = e_EC_SUCCESS;
+
   if(!fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_NOT_IN_PROGRESS;
   memcpy(fwUpdateCtxt.fwImagePtr,data->m_data,data->m_size);
   fwUpdateCtxt.bytesReceived+=data->m_size;
@@ -96,24 +124,61 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
          data->m_size);
   */
 
-  if (fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.length)
-  {
-    /* We are done with the transfer, start the flash update process */
-    return executeFirmwareUpdate();
-  }
-  else
-  {
-    fwUpdateCtxt.fwImagePtr+=data->m_size;
-  }
+  if(fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.length) {
+    char *envString;
+    RuntimeImageRecord *recordPtr;
 
-  return e_EC_SUCCESS;
+    /* We are done with the transfer, start the flash update process */
+    printf("Received all %d bytes of image %d\n", 
+           fwUpdateCtxt.length, fwUpdateCtxt.imageIndex);
+
+    /* Before executing the command, ensure that the image CRC sector does
+     * not already have a revision recorded for this specific image.  The host
+     * should have erased the sector prior to commencing the update; therefore
+     * there should be nothing other than a "blank" revision code.
+     *
+     * Each image has two 32-bit words recorded as a struct:
+     *
+     * Revision word
+     * CRC32
+     */
+    envString  = getenv("imagecrcsstart");
+    recordPtr  = (RuntimeImageRecord*) simple_strtoul(envString, NULL, 16);
+    recordPtr += fwUpdateCtxt.imageIndex;
+    printf("Got recordPtr = 0x%08X\n", (uint32_t) recordPtr);
+
+    if(recordPtr->revision == BLANK_IMAGE_REVISION) {
+      /* No existing revision, begin executing the update command */
+      sendSuccess = executeFirmwareUpdate();
+
+      /* If the Flash update was successful, update the image CRC sector
+       * with the revision quadlet and CRC32 for the image.  This is done using
+       * the flash subcommand cp.b.
+       */
+      sprintf(commandBuffer, "cp.b 0x%08X 0x%08X 0x08X",
+              (uint32_t) &fwUpdateCtxt.imageRecord,
+              (uint32_t) recordPtr,
+              sizeof(fwUpdateCtxt.imageRecord));
+      commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
+
+      printf("Writing image record with \"%s\"\n", commandBuffer);
+      if(parse_string_outer(commandBuffer,
+                            (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
+        sendSuccess = e_EC_NOT_EXECUTED;
+      }
+    } else sendSuccess = e_EC_IMAGE_ALREADY_PRESENT;
+  }
+  else fwUpdateCtxt.fwImagePtr += data->m_size;
+
+  return(sendSuccess);
 }
 
 uint8_t doCrcCheck(void)
 {
   uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.length);
-  /* printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", crc, fwUpdateCtxt.crc); */
-  return (crc == fwUpdateCtxt.crc);
+  printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", 
+         crc, fwUpdateCtxt.imageRecord.crc);
+  return(crc == fwUpdateCtxt.imageRecord.crc);
 }
 
 
@@ -135,7 +200,7 @@ FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
   int returnValue = e_EC_SUCCESS;
 
   /* Invoke the HUSH parser on the command */
-  /* printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd)); */
+  printf("SPI sendCommand: \"%s\", strlen = %d\n", cmd, strlen(cmd));
   if(parse_string_outer(cmd, (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
     returnValue = e_EC_NOT_EXECUTED;
   }
