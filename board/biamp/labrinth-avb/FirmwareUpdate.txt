@@ -1,0 +1,38 @@
+Some general instructions for the firmware update scheme:
+
+There are two different categories of firmware image for
+the design: "golden" and "runtime".
+
+The golden images comprise a set of binaries which are
+only programmed at the time of manufacture, and therefore
+are always capable of performing a firmware update.  No
+other functionality is expected of them.  They include:
+
+Labrinth_Fpga_Boot.bin  (Golden FPGA image)
+u-boot.bin              (U-Boot bootloader)
+ub.config.img           (U-Boot environment)
+
+Each of the runtime-updateable firmware images is supplied
+prefixed with a header, which includes the firmware release
+version associated with the image, as well as its CRC32
+(which is calculated without the header).  They include:
+
+Labrinth_Fpga.tes  (Run-time FPGA image)
+linux.tes          (Linux kernel image)
+rootfs_romfs.tes   (Root filesystem image)
+usr_romfs.tes      (User applications image)
+settings_jffs2.tes (Settings filesystem image)
+
+
+Firmware updates must be performed in a coherent manner;
+that is to say, all run-time images must be updated at the
+same time, with a coherent revision number common to all.
+
+The first step in an update is to erase the Flash partition
+used to store revision and CRC information for each image.
+This is accomplished using the FirmwareUpdate::sendCommand()
+IDL interface method, with the argument "run erase_imagecrcs".
+
+After this, the various images may be uploaded and programmed
+by invoking the startFirmwareUpdate() and sendDataPacket()
+methods for each.
