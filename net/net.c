@@ -531,8 +531,11 @@ restart:
 
 				if(image_check_type((image_header_t *)load_addr, IH_TYPE_KERNEL)) {
 				        printf("   Verifying Checksum ... ");
+				        setenv("crcreturn", "0");
 					if (!image_check_dcrc ((image_header_t *)load_addr)) {
 					        printf("Bad Data CRC - please reboot and retry\n");
+				          setenv("crcreturn", "1");
+					        
 #ifdef CONFIG_SYS_GPIO
 						//Set the LEDs and then hang
 						wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A | 

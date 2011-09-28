@@ -7,6 +7,8 @@ echo Leaving ethaddr unconfigured
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
 
+set crcreturn 1
+
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
@@ -63,7 +65,7 @@ set update_fpga run load_fpga install_fpga
 
 set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
-set install_kernel 'sf probe 0:0 40000000 3;sf erase ${kernstart} ${kernsize};sf write ${clobstart} ${kernstart} ${filesize}'
+set install_kernel 'if test ${crcreturn} -eq 0; then sf probe 0:0 40000000 3;sf erase ${kernstart} ${kernsize};sf write ${clobstart} ${kernstart} ${filesize}; fi'
 set update_kernel run load_kernel install_kernel
 
 set load_uboot 'tftp ${clobstart} u-boot.bin'
@@ -91,7 +93,13 @@ set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 
+echo MeyerSound CAL Firmware Update
+set blobname MeyerSoundCAL.bin
+set blobrunstart 0x88000040
+set update_blob 'tftp ${clobstart} ${blobname};if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
+
 echo Saving Configurations...
 saveenv
+
 
 echo Configuration Completed

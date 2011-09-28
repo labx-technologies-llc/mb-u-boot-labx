@@ -226,9 +226,9 @@ static int spansion_write(struct spi_flash *flash,
 		cmd[2] = page_addr;
 		cmd[3] = byte_addr;
 
-//		printf
-//		    ("PP: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %d\n",
-//		     buf + actual, cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
+		//printf
+		    //("PP: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %d\n",
+		     //buf + actual, cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
 
 		ret = spi_flash_cmd(flash->spi, CMD_S25FLXX_WREN, NULL, 0);
 		if (ret < 0) {
@@ -280,7 +280,7 @@ int spansion_erase(struct spi_flash *flash, u32 offset, size_t len)
 	sector_size = spsn->params->page_size * spsn->params->pages_per_sector;
 	
 
-	if (offset % sector_size || len % sector_size) {
+if (offset % sector_size || len % sector_size) {
 		printf("SF: Erase offset/length not multiple of sector size\n");
 		return -1;
 	}
@@ -301,7 +301,7 @@ int spansion_erase(struct spi_flash *flash, u32 offset, size_t len)
 	ret = 0;
 	for (actual = 0; actual < len; actual++) {
 		cmd[1] = (offset + actual*sector_size)>>16;
-
+		//printf("Command: %02X, %02X, %02X, %02X\n", cmd[0], cmd[1], cmd[2], cmd[3]);
 		ret = spi_flash_cmd(flash->spi, CMD_S25FLXX_WREN, NULL, 0);
 		if (ret < 0) {
 			printf("SF: Enabling Write failed\n");

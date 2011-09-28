@@ -73,18 +73,16 @@ int fsl_init2 (void) {
 extern int labx_eth_initialize(bd_t *bis);
 int board_eth_init(bd_t *bis)
 {
+  int returnValue;
   /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
    * one of them for use with U-Boot.
    */
-  
-  return labx_eth_initialize(bis);
-}
-
 #ifdef CONFIG_MVSWITCH_6350R
-int labx_eth_board_init(bd_t *bis)
-{
   mvEthE6350RSwitchInit();
-  return 0;
-}
 #endif
+  returnValue = labx_eth_initialize(bis);
+  
+  mdelay(5000);
 
+  return returnValue;
+}
