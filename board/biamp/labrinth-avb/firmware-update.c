@@ -184,7 +184,10 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
        * with the revision quadlet and CRC32 for the image.  This is done using
        * the flash subcommand cp.b.
        */
-      sprintf(commandBuffer, "cp.b 0x%08X 0x%08X 0x%08X",
+      sprintf(commandBuffer, 
+              "protect off 0x%08X +0x%08X; cp.b 0x%08X 0x%08X 0x%08X",
+              (uint32_t) recordPtr,
+              (uint32_t) sizeof(fwUpdateCtxt.updateRecord),
               (uint32_t) &fwUpdateCtxt.updateRecord,
               (uint32_t) recordPtr,
               (uint32_t) sizeof(fwUpdateCtxt.updateRecord));
@@ -381,7 +384,7 @@ int CheckFirmwareUpdate(void)
       envString  = getenv(commandBuffer);
       imageStart = simple_strtoul(envString, NULL, 16);
 
-      printf("Checking image \"%s\" at 0x%08X...\n", 
+      printf("Checking image \"%s\" at 0x%08X...", 
              RuntimeImageNames[imageIndex], imageStart);
 
       // Get information from the image CRC sector; we need to know the
@@ -389,6 +392,7 @@ int CheckFirmwareUpdate(void)
       // looking at the revision; it should not be blank, nor disagree
       // with the previous image's revision, where applicable.
 #ifdef VERBOSE_DEBUG
+      printf("\n");
       printf("Image record : {\n");
       printf("  .revision = 0x%08X\n", recordPtr->revision);
       printf("  .length   = 0x%08X\n", recordPtr->length);
@@ -396,12 +400,12 @@ int CheckFirmwareUpdate(void)
       printf("}\n");
 #endif
       if(recordPtr->revision == BLANK_IMAGE_REVISION) {
-        printf("Image \"%s\" is missing (has a blank revision entry)\n",
+        printf("\nImage \"%s\" is missing (has a blank revision entry)\n",
                RuntimeImageNames[imageIndex]);
         doUpdate = 1;
         break;
       } else if((imageIndex > 0) & (recordPtr->revision != lastRevision)) {
-        printf("Image \"%s\" version (0x%08X) does not match image \"%s\" (0x%08X)\n",
+        printf("\nImage \"%s\" version (0x%08X) does not match image \"%s\" (0x%08X)\n",
                RuntimeImageNames[imageIndex],
                recordPtr->revision,
                RuntimeImageNames[imageIndex - 1],
@@ -412,6 +416,7 @@ int CheckFirmwareUpdate(void)
 
       // Made it past the revision check; remember the image's revision
       // for comparison against upcoming ones.
+      printf("good!\n");
       lastRevision = recordPtr->revision;
     }
   } else {
@@ -503,9 +508,10 @@ int CheckFirmwareUpdate(void)
 // image CRCs partition.  Used to fictitiously stick these values in
 // after a TFTP update during development, etc.
 int do_image_record(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
+  RuntimeUpdateRecord *recordPtr;
+  RuntimeUpdateRecord newRecord;
   u32 imageIndex;
-  u32 revisionQuad;
-  u32 imageLength;
+  u32 imageStart;
   char *envString;
   u32 maxLength;
   int returnValue = 0;
@@ -532,8 +538,8 @@ int do_image_record(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
   }
 
   // Convert the remaining, numeric arguments
-  revisionQuad = simple_strtoul(argv[IMG_RECORD_ARG_REV], NULL, 16);
-  imageLength  = simple_strtoul(argv[IMG_RECORD_ARG_LENGTH], NULL, 10);
+  newRecord.revision = simple_strtoul(argv[IMG_RECORD_ARG_REV], NULL, 16);
+  newRecord.length   = simple_strtoul(argv[IMG_RECORD_ARG_LENGTH], NULL, 10);
 
   // Sanity-check the length against the maximum for the image, using the
   // environment variables as the source
@@ -542,13 +548,46 @@ int do_image_record(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
   envString  = getenv(commandBuffer);
   maxLength = simple_strtoul(envString, NULL, 16);
 
-  if(imageLength > maxLength) {
+  // Fetch the image starting address in Flash from the environment
+  sprintf(commandBuffer, "%sstart", RuntimeImageNames[imageIndex]);
+  commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
+  envString  = getenv(commandBuffer);
+  imageStart = simple_strtoul(envString, NULL, 16);
+
+  if(newRecord.length > maxLength) {
     printf("  Length (%d) exceeds maximum of %d for image \"%s\"\n", 
-           imageLength, maxLength, RuntimeImageNames[imageIndex]);
+           newRecord.length, maxLength, RuntimeImageNames[imageIndex]);
     return(-1);
   }
 
-  printf("Doing do_image_record(%s, %s, %s)!\n", argv[1], argv[2], argv[3]);
+  // Compute the CRC of the image in flash, using the supplied length
+  newRecord.crc = crc32(0, (void*) imageStart, newRecord.length);
+
+  // Locate the address of the image's record in Flash
+  envString  = getenv("imagecrcsstart");
+  recordPtr  = (RuntimeUpdateRecord*) simple_strtoul(envString, NULL, 16);
+  recordPtr += imageIndex;
+
+  // Construct a command to copy the bytes of the newly-created image
+  // record to its location in Flash.
+  sprintf(commandBuffer, 
+          "protect off 0x%08X +0x%08X; cp.b 0x%08X 0x%08X 0x%08X",
+          (uint32_t) recordPtr,
+          (uint32_t) sizeof(newRecord),
+          (uint32_t) &newRecord,
+          (uint32_t) recordPtr,
+          (uint32_t) sizeof(newRecord));
+  commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
+ 
+  if(parse_string_outer(commandBuffer,
+                        (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
+    printf("  Failed to write image record for \"%s\"\n",
+           RuntimeImageNames[imageIndex]);
+    printf("  (is image CRC partition erased?)\n");
+    return(-1);
+  }
+ 
+  printf("Image record created using calculated CRC 0x%08X\n", newRecord.crc);
 
   return(returnValue);
 }
