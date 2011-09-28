@@ -84,8 +84,15 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
                                               uint32_t length,
                                               uint32_t revision,
                                               uint32_t crc) {
+  FirmwareUpdate__ErrorCode returnValue;
+
   printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc);
-  if(fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_ALREADY_IN_PROGRESS;
+
+  /* Return a distinct error code if this call supercedes an update which
+   * was already in progress.
+   */
+  returnValue = (fwUpdateCtxt.bUpdateInProgress ?
+                 e_EC_UPDATE_ALREADY_IN_PROGRESS : e_EC_SUCCESS);
 
   /* Initialize the firware update context; load the binary image to the "clobber"
    * region, which is at the start of DDR2.
@@ -101,8 +108,10 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
   fwUpdateCtxt.fwImagePtr           = fwUpdateCtxt.fwImageBase;
 
   /* Sanity-check the image index */
-  return(((image >= e_IMAGE_FPGA) & (image <= e_IMAGE_SETTINGSFS)) ? 
-         e_EC_SUCCESS : e_EC_NOT_EXECUTED);
+  if((image < e_IMAGE_FPGA) & (image > e_IMAGE_SETTINGSFS)) {
+    returnValue = e_EC_NOT_EXECUTED;
+  }
+  return(returnValue);
 }
 
 /**
@@ -167,6 +176,9 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
         sendSuccess = e_EC_NOT_EXECUTED;
       }
     } else sendSuccess = e_EC_IMAGE_ALREADY_PRESENT;
+   
+    /* The firmware update is now no longer in progress */
+    fwUpdateCtxt.bUpdateInProgress = FALSE;
   }
   else fwUpdateCtxt.fwImagePtr += data->m_size;
 
