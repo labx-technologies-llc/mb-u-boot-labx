@@ -29,7 +29,7 @@
 
 /* Buffer for constructing command strings */
 #define CMD_FORMAT_BUF_SZ (256)
-static char *commandBuffer[CMD_FORMAT_BUF_SZ];
+static char commandBuffer[CMD_FORMAT_BUF_SZ];
 
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
@@ -38,6 +38,7 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
  */
 typedef struct {
   uint32_t revision;
+  uint32_t length;
   uint32_t crc;
 } RuntimeImageRecord;
 
@@ -50,7 +51,6 @@ typedef struct {
 typedef struct {
   uint8_t             bUpdateInProgress;
   uint32_t            imageIndex;
-  uint32_t            length;
   RuntimeImageRecord  imageRecord;
   uint32_t            bytesReceived;
   uint8_t            *fwImageBase;
@@ -86,7 +86,7 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
                                               uint32_t crc) {
   FirmwareUpdate__ErrorCode returnValue;
 
-  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X\n", cmd, length, crc);
+  printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X)\n", cmd, length, crc);
 
   /* Return a distinct error code if this call supercedes an update which
    * was already in progress.
@@ -99,8 +99,8 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
    */
   fwUpdateCtxt.bUpdateInProgress    = TRUE;
   fwUpdateCtxt.imageIndex           = (uint32_t) image;
-  fwUpdateCtxt.length               = length;
   fwUpdateCtxt.imageRecord.revision = revision;
+  fwUpdateCtxt.imageRecord.length   = length;
   fwUpdateCtxt.imageRecord.crc      = crc;
   fwUpdateCtxt.cmd                  = cmd;
   fwUpdateCtxt.bytesReceived        = 0;
@@ -133,13 +133,13 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
          data->m_size);
   */
 
-  if(fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.length) {
+  if(fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.imageRecord.length) {
     char *envString;
     RuntimeImageRecord *recordPtr;
 
     /* We are done with the transfer, start the flash update process */
     printf("Received all %d bytes of image %d\n", 
-           fwUpdateCtxt.length, fwUpdateCtxt.imageIndex);
+           fwUpdateCtxt.imageRecord.length, fwUpdateCtxt.imageIndex);
 
     /* Before executing the command, ensure that the image CRC sector does
      * not already have a revision recorded for this specific image.  The host
@@ -164,10 +164,10 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
        * with the revision quadlet and CRC32 for the image.  This is done using
        * the flash subcommand cp.b.
        */
-      sprintf(commandBuffer, "cp.b 0x%08X 0x%08X 0x08X",
+      sprintf(commandBuffer, "cp.b 0x%08X 0x%08X 0x%08X",
               (uint32_t) &fwUpdateCtxt.imageRecord,
               (uint32_t) recordPtr,
-              sizeof(fwUpdateCtxt.imageRecord));
+              (uint32_t) sizeof(fwUpdateCtxt.imageRecord));
       commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
 
       printf("Writing image record with \"%s\"\n", commandBuffer);
@@ -187,7 +187,7 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 
 uint8_t doCrcCheck(void)
 {
-  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.length);
+  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.imageRecord.length);
   printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", 
          crc, fwUpdateCtxt.imageRecord.crc);
   return(crc == fwUpdateCtxt.imageRecord.crc);
