@@ -27,20 +27,39 @@
 /* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
 #define GENERAL5_MAGIC (0x0ABCD)
 
+/* Location of MAC addresses in Flash */
+#define MAC_ADDRESSES_LOCATION (0x87FE8000)
+
 /* Buffer for constructing command strings */
 #define CMD_FORMAT_BUF_SZ (256)
 static char commandBuffer[CMD_FORMAT_BUF_SZ];
 
 FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
 
+/* Structure capturing the information for each update-able runtime
+ * firmware image for use in pre-boot check.
+ */
+typedef struct {
+  char     *imageName;
+} RuntimeImageType;
+
+/* Array of strings containing the base name of each run-time image.
+ * This is used to determine the environment strings to inspect for
+ * the base address and maximum size of each image.
+ */
+static const char *RuntimeImageNames[e_IMAGE_NUM_TYPES] = {
+  "fpga", "kern", "rootfs", "romfs", "settingsfs", "fdt"
+};
+
 /**
- * Structure storing the revision and CRC32 of each run-time image.
+ * Structure storing the revision and CRC32 of each updated 
+ * run-time image.
  */
 typedef struct {
   uint32_t revision;
   uint32_t length;
   uint32_t crc;
-} RuntimeImageRecord;
+} RuntimeUpdateRecord;
 
 /* Constant definition for a "blank" run-time image revision in Flash */
 #define BLANK_IMAGE_REVISION (0xFFFFFFFF)
@@ -49,13 +68,13 @@ typedef struct {
  * Simple structure to encapsulate firmware update globals
  */
 typedef struct {
-  uint8_t             bUpdateInProgress;
-  uint32_t            imageIndex;
-  RuntimeImageRecord  imageRecord;
-  uint32_t            bytesReceived;
-  uint8_t            *fwImageBase;
-  uint8_t            *fwImagePtr;
-  string_t            cmd;
+  uint8_t              bUpdateInProgress;
+  uint32_t             imageIndex;
+  RuntimeUpdateRecord  updateRecord;
+  uint32_t             bytesReceived;
+  uint8_t             *fwImageBase;
+  uint8_t             *fwImagePtr;
+  string_t             cmd;
 } FirmwareUpdateCtxt_t;
 
 FirmwareUpdateCtxt_t fwUpdateCtxt;
@@ -97,18 +116,18 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
   /* Initialize the firware update context; load the binary image to the "clobber"
    * region, which is at the start of DDR2.
    */
-  fwUpdateCtxt.bUpdateInProgress    = TRUE;
-  fwUpdateCtxt.imageIndex           = (uint32_t) image;
-  fwUpdateCtxt.imageRecord.revision = revision;
-  fwUpdateCtxt.imageRecord.length   = length;
-  fwUpdateCtxt.imageRecord.crc      = crc;
-  fwUpdateCtxt.cmd                  = cmd;
-  fwUpdateCtxt.bytesReceived        = 0;
-  fwUpdateCtxt.fwImageBase          = (uint8_t*) XPAR_DDR2_CONTROL_MPMC_BASEADDR;
-  fwUpdateCtxt.fwImagePtr           = fwUpdateCtxt.fwImageBase;
+  fwUpdateCtxt.bUpdateInProgress     = TRUE;
+  fwUpdateCtxt.imageIndex            = (uint32_t) image;
+  fwUpdateCtxt.updateRecord.revision = revision;
+  fwUpdateCtxt.updateRecord.length   = length;
+  fwUpdateCtxt.updateRecord.crc      = crc;
+  fwUpdateCtxt.cmd                   = cmd;
+  fwUpdateCtxt.bytesReceived         = 0;
+  fwUpdateCtxt.fwImageBase           = (uint8_t*) XPAR_DDR2_CONTROL_MPMC_BASEADDR;
+  fwUpdateCtxt.fwImagePtr            = fwUpdateCtxt.fwImageBase;
 
   /* Sanity-check the image index */
-  if((image < e_IMAGE_FPGA) & (image > e_IMAGE_SETTINGSFS)) {
+  if((image < e_IMAGE_FPGA) & (image >= e_IMAGE_NUM_TYPES)) {
     returnValue = e_EC_NOT_EXECUTED;
   }
   return(returnValue);
@@ -133,13 +152,13 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
          data->m_size);
   */
 
-  if(fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.imageRecord.length) {
+  if(fwUpdateCtxt.bytesReceived >= fwUpdateCtxt.updateRecord.length) {
     char *envString;
-    RuntimeImageRecord *recordPtr;
+    RuntimeUpdateRecord *recordPtr;
 
     /* We are done with the transfer, start the flash update process */
     printf("Received all %d bytes of image %d\n", 
-           fwUpdateCtxt.imageRecord.length, fwUpdateCtxt.imageIndex);
+           fwUpdateCtxt.updateRecord.length, fwUpdateCtxt.imageIndex);
 
     /* Before executing the command, ensure that the image CRC sector does
      * not already have a revision recorded for this specific image.  The host
@@ -152,7 +171,7 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
      * CRC32
      */
     envString  = getenv("imagecrcsstart");
-    recordPtr  = (RuntimeImageRecord*) simple_strtoul(envString, NULL, 16);
+    recordPtr  = (RuntimeUpdateRecord*) simple_strtoul(envString, NULL, 16);
     recordPtr += fwUpdateCtxt.imageIndex;
     printf("Got recordPtr = 0x%08X\n", (uint32_t) recordPtr);
 
@@ -165,9 +184,9 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
        * the flash subcommand cp.b.
        */
       sprintf(commandBuffer, "cp.b 0x%08X 0x%08X 0x%08X",
-              (uint32_t) &fwUpdateCtxt.imageRecord,
+              (uint32_t) &fwUpdateCtxt.updateRecord,
               (uint32_t) recordPtr,
-              (uint32_t) sizeof(fwUpdateCtxt.imageRecord));
+              (uint32_t) sizeof(fwUpdateCtxt.updateRecord));
       commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
 
       printf("Writing image record with \"%s\"\n", commandBuffer);
@@ -187,10 +206,10 @@ FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 
 uint8_t doCrcCheck(void)
 {
-  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.imageRecord.length);
+  uint32_t crc = crc32(0, fwUpdateCtxt.fwImageBase, fwUpdateCtxt.updateRecord.length);
   printf("Calculated CRC32 = 0x%08X, supplied CRC32 = 0x%08X\n", 
-         crc, fwUpdateCtxt.imageRecord.crc);
-  return(crc == fwUpdateCtxt.imageRecord.crc);
+         crc, fwUpdateCtxt.updateRecord.crc);
+  return(crc == fwUpdateCtxt.updateRecord.crc);
 }
 
 
@@ -290,6 +309,7 @@ int CheckFirmwareUpdate(void)
   int returnValue = 0;
   int doUpdate = 0;
   u16 readValue;
+  u32 imageIndex;
 
   /* Read the GENERAL5 register from the ICAP peripheral to determine
    * whether the golden FPGA is still resident as the result of a re-
@@ -336,6 +356,67 @@ int CheckFirmwareUpdate(void)
     returnValue = 1;
   } else printf("No Firmware update requested\n");
 
+  // Check each of the firmware images required for run-time boot
+  // for a coherent version number and data integrity.  Skip this
+  // check if a boot delay has been requested.
+  if(returnValue == 0) {
+    char *envString;
+    RuntimeUpdateRecord *recordPtr;
+    u32 lastRevision = 0x00000000;
+
+    printf("Checking run-time images for integrity and coherence...\n");
+
+    // Initialize a pointer to the image CRC partition
+    envString  = getenv("imagecrcsstart");
+    recordPtr  = (RuntimeUpdateRecord*) simple_strtoul(envString, NULL, 16);
+
+    // Iterate through each of the images, checking for a revision.
+    for(imageIndex = 0; imageIndex < e_IMAGE_NUM_TYPES; imageIndex++, recordPtr++) {
+      u32 imageStart;
+      
+      // Fetch the image starting address in Flash from the environment
+      sprintf(commandBuffer, "%sstart", RuntimeImageNames[imageIndex]);
+      commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
+      envString  = getenv(commandBuffer);
+      imageStart = simple_strtoul(envString, NULL, 16);
+
+      printf("Checking image \"%s\" at 0x%08X...\n", 
+             RuntimeImageNames[imageIndex], imageStart);
+
+      // Get information from the image CRC sector; we need to know the
+      // revision, length, and expected CRC32 for the image.  Begin by
+      // looking at the revision; it should not be blank, nor disagree
+      // with the previous image's revision, where applicable.
+#ifdef VERBOSE_DEBUG
+      printf("Image record : {\n");
+      printf("  .revision = 0x%08X\n", recordPtr->revision);
+      printf("  .length   = 0x%08X\n", recordPtr->length);
+      printf("  .crc      = 0x%08X\n", recordPtr->crc);
+      printf("}\n");
+#endif
+      if(recordPtr->revision == BLANK_IMAGE_REVISION) {
+        printf("Image \"%s\" is missing (has a blank revision entry)\n",
+               RuntimeImageNames[imageIndex]);
+        doUpdate = 1;
+        break;
+      } else if((imageIndex > 0) & (recordPtr->revision != lastRevision)) {
+        printf("Image \"%s\" version (0x%08X) does not match image \"%s\" (0x%08X)\n",
+               RuntimeImageNames[imageIndex],
+               recordPtr->revision,
+               RuntimeImageNames[imageIndex - 1],
+               lastRevision);
+        doUpdate = 1;
+        break;
+      }
+
+      // Made it past the revision check; remember the image's revision
+      // for comparison against upcoming ones.
+      lastRevision = recordPtr->revision;
+    }
+  } else {
+    printf("Skipping run-time image check\n");
+  }
+
   // Perform an update if required for any reason
   if(doUpdate) {
     printf("Entering firmware update\n");
@@ -344,17 +425,19 @@ int CheckFirmwareUpdate(void)
     while(1);
   }
 
-  //read from magic location in memory
-  memcpy(macaddr, (void *)0x87FE8000, 16);
+  // Read MAC addresses from magic location in memory
+  memcpy(macaddr, (void *) MAC_ADDRESSES_LOCATION, 16);
 
-  //printf("MAC addresses (with prefix) are:\n");
-  //printf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", macaddr[0], macaddr[1],
-  //	 macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
-  //printf("%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", macaddr[8], macaddr[9],
-  //	 macaddr[10], macaddr[11], macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
+  printf("Flash-based MAC addresses (with prefix bytes) are:\n");
+  printf("eth0: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
+         macaddr[0], macaddr[1], macaddr[2], macaddr[3], 
+         macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+  printf("eth1: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
+         macaddr[8], macaddr[9], macaddr[10], macaddr[11], 
+         macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
 
-  //TODO: Bytes 0 and 1 may be updated to some OUI
-  //check that result 0 is valid
+  // TODO: Bytes 0 and 1 may be updated to some OUI
+  // Check that result 0 is valid
   if (macaddr[0] == 0 && macaddr[1] == 0 &&
       ((macaddr[2] != 0 && macaddr[2] != 0xFF) ||
        (macaddr[3] != 0 && macaddr[3] != 0xFF) ||
@@ -364,7 +447,8 @@ int CheckFirmwareUpdate(void)
        (macaddr[7] != 0 && macaddr[7] != 0xFF) )) {
     fdt0 = 1;
   }
-  //check that result 1 is valid
+
+  // Check that result 1 is valid
   if (macaddr[8] == 0 && macaddr[9] == 0 &&
       ((macaddr[10] != 0 && macaddr[10] != 0xFF) ||
        (macaddr[11] != 0 && macaddr[11] != 0xFF) ||
@@ -402,5 +486,7 @@ int CheckFirmwareUpdate(void)
     run_command("set fdtstart 0x88F40000", 0);
   }
 
+  // Return, supplying a nonzero value if a boot delay was requested;
+  // if a firmware update was requested, we will never get here.
   return(returnValue);
 }
