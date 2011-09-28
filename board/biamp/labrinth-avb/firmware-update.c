@@ -4,6 +4,7 @@
 #include "FirmwareUpdate.h"
 #include "xparameters.h"
 #include <linux/types.h>
+#include <command.h>
 #include <common.h>
 #include <u-boot/crc.h>
 #include "microblaze_fsl.h"
@@ -490,3 +491,74 @@ int CheckFirmwareUpdate(void)
   // if a firmware update was requested, we will never get here.
   return(returnValue);
 }
+
+// Constants for the image_record command
+#define IMG_RECORD_ARG_CMD    0
+#define IMG_RECORD_ARG_IMAGE  1
+#define IMG_RECORD_ARG_REV    2
+#define IMG_RECORD_ARG_LENGTH 3
+#define IMG_RECORD_NUM_ARGS   4
+
+// U-Boot command to "fake" the record for a run-time image in the
+// image CRCs partition.  Used to fictitiously stick these values in
+// after a TFTP update during development, etc.
+int do_image_record(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
+  u32 imageIndex;
+  u32 revisionQuad;
+  u32 imageLength;
+  char *envString;
+  u32 maxLength;
+  int returnValue = 0;
+
+  // Sanity-check the input arguments
+  if(argc != IMG_RECORD_NUM_ARGS) {
+    printf("  Usage: image_record <image_name> <image_revision> <image_length>\n");
+    printf("  <image_name>     - ");
+    for(imageIndex = 0; imageIndex < e_IMAGE_NUM_TYPES; imageIndex++) {
+      printf("%s ", RuntimeImageNames[imageIndex]);
+    }
+    printf("\n  <image_revision> - Hexadecimal revision quadlet");
+    printf("\n  <image_length>   - Decimal length of valid image in Flash\n");
+    return(-1);
+  }
+
+  for(imageIndex = 0; imageIndex < e_IMAGE_NUM_TYPES; imageIndex++) {
+    if(strcmp(argv[IMG_RECORD_ARG_IMAGE], RuntimeImageNames[imageIndex]) == 0) break;
+  }
+
+  if(imageIndex >= e_IMAGE_NUM_TYPES) {
+    printf("  Image name \"%s\" unrecognized\n", argv[IMG_RECORD_ARG_IMAGE]);
+    return(-1);
+  }
+
+  // Convert the remaining, numeric arguments
+  revisionQuad = simple_strtoul(argv[IMG_RECORD_ARG_REV], NULL, 16);
+  imageLength  = simple_strtoul(argv[IMG_RECORD_ARG_LENGTH], NULL, 10);
+
+  // Sanity-check the length against the maximum for the image, using the
+  // environment variables as the source
+  sprintf(commandBuffer, "%ssize", RuntimeImageNames[imageIndex]);
+  commandBuffer[CMD_FORMAT_BUF_SZ - 1] = '\0';
+  envString  = getenv(commandBuffer);
+  maxLength = simple_strtoul(envString, NULL, 16);
+
+  if(imageLength > maxLength) {
+    printf("  Length (%d) exceeds maximum of %d for image \"%s\"\n", 
+           imageLength, maxLength, RuntimeImageNames[imageIndex]);
+    return(-1);
+  }
+
+  printf("Doing do_image_record(%s, %s, %s)!\n", argv[1], argv[2], argv[3]);
+
+  return(returnValue);
+}
+
+U_BOOT_CMD(image_record, IMG_RECORD_NUM_ARGS, 1, do_image_record,
+	"Fake out an image record for Labrinth",
+	"\n    - Generate a firmware update record for a run-time\n"
+    "        image for development purposes.  During normal use\n"
+    "        images are updated by the backplane via SPI, and these\n"
+    "        records are automatically programmed.\n\n"
+    "        The imagecrcs partition must be erased before first use.\n"
+);
+
