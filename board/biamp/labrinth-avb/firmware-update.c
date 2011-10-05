@@ -28,9 +28,6 @@
 /* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
 #define GENERAL5_MAGIC (0x0ABCD)
 
-/* Location of MAC addresses in Flash */
-#define MAC_ADDRESSES_LOCATION (0x87FE8000)
-
 /* Buffer for constructing command strings */
 #define CMD_FORMAT_BUF_SZ (256)
 static char commandBuffer[CMD_FORMAT_BUF_SZ];
@@ -49,7 +46,7 @@ typedef struct {
  * the base address and maximum size of each image.
  */
 static const char *RuntimeImageNames[e_IMAGE_NUM_TYPES] = {
-  "fpga", "kern", "rootfs", "romfs", "settingsfs", "fdt"
+  "fpga", "kern", "rootfs", "romfs", "fdt"
 };
 
 /**
@@ -315,6 +312,7 @@ int CheckFirmwareUpdate(void)
   int doUpdate = 0;
   u16 readValue;
   u32 imageIndex;
+  char *envString;
 
   /* Read the GENERAL5 register from the ICAP peripheral to determine
    * whether the golden FPGA is still resident as the result of a re-
@@ -365,7 +363,6 @@ int CheckFirmwareUpdate(void)
   // for a coherent version number and data integrity.  Skip this
   // check if a boot delay has been requested.
   if(returnValue == 0) {
-    char *envString;
     RuntimeUpdateRecord *recordPtr;
     u32 lastRevision = 0x00000000;
 
@@ -450,7 +447,13 @@ int CheckFirmwareUpdate(void)
       }
 
       printf("good!\n");
-    }
+    } // for(each runtime image)
+
+    if(doUpdate == 0) printf("Booting runtime images, release revision %d.%d.%d.%d\n",
+                             ((lastRevision >> 24) & 0x0FF),
+                             ((lastRevision >> 16) & 0x0FF),
+                             ((lastRevision >>  8) & 0x0FF),
+                             (lastRevision & 0x0FF));
   } else {
     printf("Skipping run-time image check\n");
   }
@@ -463,65 +466,75 @@ int CheckFirmwareUpdate(void)
     while(1);
   }
 
-  // Read MAC addresses from magic location in memory
-  memcpy(macaddr, (void *) MAC_ADDRESSES_LOCATION, 16);
+  // Read MAC addresses from Flash; get the specific location from
+  // the environment.
+  envString  = getenv("macsstart");
+  if(envString != NULL) {
+    u32 macsStart = simple_strtoul(envString, NULL, 16);
 
-  printf("Flash-based MAC addresses (with prefix bytes) are:\n");
-  printf("eth0: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
-         macaddr[0], macaddr[1], macaddr[2], macaddr[3], 
-         macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
-  printf("eth1: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
-         macaddr[8], macaddr[9], macaddr[10], macaddr[11], 
-         macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
+    memcpy(macaddr, (void *) macsStart, 16);
 
-  // TODO: Bytes 0 and 1 may be updated to some OUI
-  // Check that result 0 is valid
-  if (macaddr[0] == 0 && macaddr[1] == 0 &&
-      ((macaddr[2] != 0 && macaddr[2] != 0xFF) ||
-       (macaddr[3] != 0 && macaddr[3] != 0xFF) ||
-       (macaddr[4] != 0 && macaddr[4] != 0xFF) ||
-       (macaddr[5] != 0 && macaddr[5] != 0xFF) ||
-       (macaddr[6] != 0 && macaddr[6] != 0xFF) ||
-       (macaddr[7] != 0 && macaddr[7] != 0xFF) )) {
-    fdt0 = 1;
-  }
+    printf("Flash-based MAC addresses (with prefix bytes) are:\n");
+    printf("eth0: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
+           macaddr[0], macaddr[1], macaddr[2], macaddr[3], 
+           macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+    printf("eth1: %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X\n", 
+           macaddr[8], macaddr[9], macaddr[10], macaddr[11], 
+           macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
 
-  // Check that result 1 is valid
-  if (macaddr[8] == 0 && macaddr[9] == 0 &&
-      ((macaddr[10] != 0 && macaddr[10] != 0xFF) ||
-       (macaddr[11] != 0 && macaddr[11] != 0xFF) ||
-       (macaddr[12] != 0 && macaddr[12] != 0xFF) ||
-       (macaddr[13] != 0 && macaddr[13] != 0xFF) ||
-       (macaddr[14] != 0 && macaddr[14] != 0xFF) ||
-       (macaddr[15] != 0 && macaddr[15] != 0xFF) )) {
-    fdt1 = 1;
-  }
+    // TODO: Bytes 0 and 1 may be updated to some OUI
+    // Check that result 0 is valid
+    if (macaddr[0] == 0 && macaddr[1] == 0 &&
+        ((macaddr[2] != 0 && macaddr[2] != 0xFF) ||
+         (macaddr[3] != 0 && macaddr[3] != 0xFF) ||
+         (macaddr[4] != 0 && macaddr[4] != 0xFF) ||
+         (macaddr[5] != 0 && macaddr[5] != 0xFF) ||
+         (macaddr[6] != 0 && macaddr[6] != 0xFF) ||
+         (macaddr[7] != 0 && macaddr[7] != 0xFF) )) {
+      fdt0 = 1;
+    }
+
+    // Check that result 1 is valid
+    if (macaddr[8] == 0 && macaddr[9] == 0 &&
+        ((macaddr[10] != 0 && macaddr[10] != 0xFF) ||
+         (macaddr[11] != 0 && macaddr[11] != 0xFF) ||
+         (macaddr[12] != 0 && macaddr[12] != 0xFF) ||
+         (macaddr[13] != 0 && macaddr[13] != 0xFF) ||
+         (macaddr[14] != 0 && macaddr[14] != 0xFF) ||
+         (macaddr[15] != 0 && macaddr[15] != 0xFF) )) {
+      fdt1 = 1;
+    }
   
-  //only bother loading up the device tree and booting from it if there is a valid address
-  if(fdt0 || fdt1) {
-    run_command("cp.b 0x87240000 0x88F40000 0x00020000", 0);
-    run_command("fdt addr 0x88F40000 0x00020000", 0);
+    //only bother loading up the device tree and booting from it if there is a valid address
+    if(fdt0 || fdt1) {
+      run_command("cp.b 0x87240000 0x88F40000 0x00020000", 0);
+      run_command("fdt addr 0x88F40000 0x00020000", 0);
     
-    if(fdt0) {
-      //special case for fdt0: also modify MAC address in u-boot
-      sprintf(ubootmac, "setenv ethaddr %02X:%02X:%02X:%02X:%02X:%02X",
-	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
-      run_command(ubootmac, 0);
+      if(fdt0) {
+        //special case for fdt0: also modify MAC address in u-boot
+        sprintf(ubootmac, "setenv ethaddr %02X:%02X:%02X:%02X:%02X:%02X",
+                macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+        run_command(ubootmac, 0);
 
-      sprintf(fdtmac0, "fdt set /plb@0/ethernet@82050000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
-	      macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
+        sprintf(fdtmac0, "fdt set /plb@0/ethernet@82050000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
+                macaddr[2], macaddr[3], macaddr[4], macaddr[5], macaddr[6], macaddr[7]);
     
-      //modify fdt
-      run_command(fdtmac0, 0);
+        //modify fdt
+        run_command(fdtmac0, 0);
+      }
+      if(fdt1) {
+        sprintf(fdtmac1, "fdt set /plb@0/ethernet@82070000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
+                macaddr[10], macaddr[11], macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
+        //modify fdt
+        run_command(fdtmac1, 0);
+      }
+      //change the boot FDT location
+      run_command("set bootfdt 0x88F40000", 0);
     }
-    if(fdt1) {
-      sprintf(fdtmac1, "fdt set /plb@0/ethernet@82070000 local-mac-address [%02x %02x %02x %02x %02x %02x]",
-	      macaddr[10], macaddr[11], macaddr[12], macaddr[13], macaddr[14], macaddr[15]);
-      //modify fdt
-      run_command(fdtmac1, 0);
-    }
-    //change the fdstart location
-    run_command("set fdtstart 0x88F40000", 0);
+  } else {
+    // Couldn't even determine where to look for Flash-based MACs;
+    // just keep the default.
+    printf("Couldn't locate Flash location of MAC addresses\n");
   }
 
   // Return, supplying a nonzero value if a boot delay was requested;
