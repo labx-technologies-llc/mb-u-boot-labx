@@ -6,7 +6,13 @@
 
 extern void icap_reset(int resetProduction);
 
-static int isProductionBoot(void)
+enum eBootType {
+	eIsGoldenBoot = 0,
+	eIsProductionBoot = 1,
+	eIsFallbackBoot = 2
+};
+
+static enum eBootType isProductionBoot(void)
 {
 	unsigned long int val;
 	// First find out if we had to use a fallback image
@@ -68,8 +74,10 @@ static int isProductionBoot(void)
 	// FALLBACK_0 is Bit 1 and FALLBACK_1 is bit 7
 	if ((val & 0x82) != 0) {
 		printf("Booted from fallback image.  Boot status register = 0x%lx\n", val);
-		return 0;
+		__udelay (5000);
+		return eIsFallbackBoot;
 	}
+	printf("Boot status register (0x%lx) is OK\n", val);
 
 	// Next find out if the primary image was the production image
 #ifdef USE_ICAP_FSL
@@ -120,10 +128,10 @@ static int isProductionBoot(void)
 	printf("FPGA boot image at address 0x%04lxxxxx, ICAP GP2 0x%08lx\n", ((val << 1) & 0xFFFF), val);
 	__udelay (5000);
 	val &= 0xFFFF;
-	return (val != 0);
+	return ((val == 0) ? eIsGoldenBoot : eIsProductionBoot);
 }
 
-int isICAPUpdateRequested(void)
+static int isICAPUpdateRequested(void)
 {
 	unsigned long int val;
 
@@ -215,13 +223,17 @@ int CheckFirmwareUpdate(void)
 	}
 	if ((gpioReg & (GARCIA_FPGA_LX100_ID | GARCIA_FPGA_LX150_ID)) !=
 					GARCIA_FPGA_LX150_ID && // An LX-150 must not load production because it has no production image
-			!updateRequired &&              // We stay with golden image to do updates
-			!isProductionBoot()) {          // We're booted into golden image
-		printf("ICAP reset to production image\n");
-		__udelay(2000);
-		icap_reset(1); // "Golden" boot immediately loads production boot
+			!updateRequired) {
+		enum eBootType bootType = isProductionBoot();
+		if (bootType == eIsGoldenBoot) {          // We're booted into golden image
+			printf("ICAP reset to production image\n");
+			__udelay(2000);
+			icap_reset(1); // "Golden" boot immediately loads production boot
+		} else { // "Fallback" boot needs update, "Production" boot does not.
+			updateRequired = (bootType == eIsProductionBoot) ? 0 : 1;
+		}
 	}
 
-	// OK, now we're production boot and know if we need to do an update
+	// OK, now we know if we need to do an update
 	return (updateRequired != 0); // "Golden" boot with an update request
 }
