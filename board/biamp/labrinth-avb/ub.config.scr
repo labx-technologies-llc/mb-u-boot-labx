@@ -25,6 +25,7 @@ set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart}
 echo Flattened Device Tree Configuration:
 set fdtsize 0x00020000
 set fdtstart 0x87240000
+set bootfdt 0x87240000
 set fdtname labrinth-avb.dtb
 
 echo Kernel Configuration:
@@ -48,12 +49,16 @@ echo Settings Filesystem Configuration:
 set settingsfssize 0x00200000
 set settingsfsstart 0x87DE0000
 
+echo MAC Addresses Configuration:
+set macssize 0x00008000
+set macsstart 0x87FE8000
+
 echo Image CRC Configuration:
 set imagecrcssize 0x00008000
-set imagecrcsstart 0x87FE8000
+set imagecrcsstart 0x87FF0000
 
 echo Boot Configuration:
-set bootcmd 'bootm ${kernstart} - ${fdtstart}'
+set bootcmd 'bootm ${kernstart} - ${bootfdt}'
 set bootdelay 3
 
 set load_boot_fpga 'tftp ${clobstart} ${bootfpganame}'
@@ -90,6 +95,8 @@ set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase 
 set update_settingsfs run load_settingsfs install_settingsfs
 
 set erase_imagecrcs 'protect off ${imagecrcsstart} +${imagecrcssize};erase ${imagecrcsstart} +${imagecrcssize}'
+
+set erase_macs 'protect off ${macsstart} +${macssize};erase ${macsstart} +${macssize}'
 
 echo Shortcuts for Development:
 set tempkernstart 0x88800000

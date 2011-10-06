@@ -19,7 +19,8 @@ module FirmwareUpdate
     e_EC_UPDATE_ALREADY_IN_PROGRESS,
     e_EC_UPDATE_NOT_IN_PROGRESS,
     e_EC_CORRUPT_IMAGE,
-    e_EC_NOT_EXECUTED
+    e_EC_NOT_EXECUTED,
+    e_EC_IMAGE_ALREADY_PRESENT
   };
 
   /* Enumerated type used to identify the context (bootloader or Linux) */
@@ -27,6 +28,20 @@ module FirmwareUpdate
   {
     e_CODE_IMAGE_BOOT,
     e_CODE_IMAGE_MAIN
+  };
+
+  /* Enumerated type identifying each of the run-time images which may
+   * may be updated for the board.
+   */
+  enum RuntimeImageType
+  {
+    e_IMAGE_FPGA,
+    e_IMAGE_KERNEL,
+    e_IMAGE_ROOTFS,
+    e_IMAGE_USER_ROMFS,
+    e_IMAGE_SETTINGSFS,
+    e_IMAGE_DEVICE_TREE,
+    e_IMAGE_NUM_TYPES
   };
 
   interface Services
@@ -41,17 +56,30 @@ module FirmwareUpdate
     ErrorCode sendCommand(in string cmd);
 
     /**
-     * Begins a firmware update command, which consists of this call, followed by mutiple
-     * calls to sendDataPacket().  Once "length" bytes of data have been sent in packets,
-     * the command specified within "cmd" is invoked within U-Boot.
+     * Begins a firmware update of a single run-time image, which consists of 
+     * this call, followed by mutiple calls to sendDataPacket().  Once "length"
+     * bytes of data have been sent in packets, the command specified within 
+     * "cmd" is invoked within U-Boot.
      *
-     * @param cmd    - String command to send to U-Boot after all data has been sent
-     * @param length - Length, in bytes, of the data image which will be sent
-     * @param crc    - Expected CRC-32 of the data to be checked
+     * After the command has been invoked, the imagecrcs sector is updated
+     * with the firmware revision and CRC32 for the image.  During a normal
+     * boot, this sector is checked for coherent revisions, and each image
+     * in Flash is checked against its declared CRC32.
+     *
+     * @param image    - Enumerated value identifying which run-time image is
+     *                   being updated
+     * @param cmd      - String command to invoke after all data has been sent
+     * @param length   - Length, in bytes, of the data image which will be sent
+     * @param revision - Revision quadlet for the image
+     * @param crc      - Expected CRC32 for the data to be checked
      *
      * @return e_EC_SUCCESS upon success, e_EC_CORRUPT_IMAGE if CRC check failed.
      */
-    ErrorCode startFirmwareUpdate(in string cmd, in uint32_t length, in uint32_t crc);
+    ErrorCode startFirmwareUpdate(in RuntimeImageType image,
+                                  in string cmd, 
+                                  in uint32_t length, 
+                                  in uint32_t revision,
+                                  in uint32_t crc);
 
     /**
      * Sends a packet of data for a firmware image using a sequence type.

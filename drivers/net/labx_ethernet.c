@@ -707,6 +707,7 @@ static void labx_eth_restart(void)
   labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_ENABLE | TX_VLAN_TAGS_ENABLE);
 }
 
+
 static int labx_eth_init(struct eth_device *dev, bd_t *bis)
 {
   struct labx_eth_private *lp = (struct labx_eth_private *)dev->priv;

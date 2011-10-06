@@ -31,6 +31,7 @@
 #include <asm/asm.h>
 #include <net.h>
 #include <netdev.h>
+#include "mvSwitch_6350R.h"
 
 void do_reset (void)
 {
@@ -72,8 +73,16 @@ int fsl_init2 (void) {
 extern int labx_eth_initialize(bd_t *bis);
 int board_eth_init(bd_t *bis)
 {
+  int returnValue;
   /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
    * one of them for use with U-Boot.
    */
-  return(labx_eth_initialize(bis));
+#ifdef CONFIG_MVSWITCH_6350R
+  mvEthE6350RSwitchInit();
+#endif
+  returnValue = labx_eth_initialize(bis);
+  
+  mdelay(5000);
+
+  return returnValue;
 }

@@ -126,15 +126,18 @@
 # define ENV_HEADER_SIZE	(sizeof(uint32_t))
 #endif
 
-
-#define ENV_SIZE (CONFIG_ENV_SIZE - ENV_HEADER_SIZE)
+#ifdef CONFIG_ENV_SIZE
+# define ENV_SIZE (CONFIG_ENV_SIZE - ENV_HEADER_SIZE)
+#endif
 
 typedef	struct environment_s {
 	uint32_t	crc;		/* CRC32 over data bytes	*/
 #ifdef CONFIG_SYS_REDUNDAND_ENVIRONMENT
 	unsigned char	flags;		/* active/obsolete flags	*/
 #endif
+#ifdef ENV_SIZE
 	unsigned char	data[ENV_SIZE]; /* Environment data		*/
+#endif
 } env_t;
 
 /* Function that returns a character from the environment */

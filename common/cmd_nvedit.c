@@ -333,12 +333,14 @@ int _do_setenv (int flag, int argc, char *argv[])
 	for (i=2; i<argc; ++i) {
 		len += strlen(argv[i]) + 1;
 	}
+
 	if (len > (&env_data[ENV_SIZE]-env)) {
 		printf ("## Error: environment overflow, \"%s\" deleted\n", name);
 		return 1;
 	}
 	while ((*env = *name++) != '\0')
 		env++;
+
 	for (i=2; i<argc; ++i) {
 		char *val = argv[i];
 
@@ -346,7 +348,6 @@ int _do_setenv (int flag, int argc, char *argv[])
 		while ((*++env = *val++) != '\0')
 			;
 	}
-
 	/* end is marked with double '\0' */
 	*++env = '\0';
 

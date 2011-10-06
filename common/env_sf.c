@@ -121,9 +121,9 @@ void env_relocate_spec(void)
 
 	env_flash = spi_flash_probe(CONFIG_ENV_SPI_BUS, CONFIG_ENV_SPI_CS,
 			CONFIG_ENV_SPI_MAX_HZ, CONFIG_ENV_SPI_MODE);
+  
 	if (!env_flash)
 		goto err_probe;
-
 	ret = spi_flash_read(env_flash, CONFIG_ENV_OFFSET, CONFIG_ENV_SIZE, env_ptr);
 	if (ret)
 		goto err_read;
