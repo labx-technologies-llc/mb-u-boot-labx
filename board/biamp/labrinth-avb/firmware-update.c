@@ -46,7 +46,22 @@ typedef struct {
  * the base address and maximum size of each image.
  */
 static const char *RuntimeImageNames[e_IMAGE_NUM_TYPES] = {
-  "fpga", "kern", "rootfs", "romfs", "fdt"
+  "fpga", "kern", "rootfs", "romfs", "settingsfs", "fdt"
+};
+
+/* Array indicating which runtime images require a CRC check;
+ * the settings filesystem does not, as it is read / write
+ * for configuration settings, etc.
+ */
+#define NO_CRC_CHECK   (0)
+#define NEED_CRC_CHECK (1)
+static const uint32_t RuntimeCrcRequired[e_IMAGE_NUM_TYPES] = {
+  NEED_CRC_CHECK, 
+  NEED_CRC_CHECK, 
+  NEED_CRC_CHECK, 
+  NEED_CRC_CHECK, 
+  NO_CRC_CHECK, 
+  NEED_CRC_CHECK
 };
 
 /**
@@ -435,16 +450,18 @@ int CheckFirmwareUpdate(void)
       }
 
       // Next, compute the CRC from the stored image and compare against
-      // its image record.
-      imageCrc = crc32(0, (void*) imageStart, recordPtr->length);
-      if(imageCrc != recordPtr->crc) {
-        printf("\nImage \"%s\" CRC (0x%08X) does not match stored record (0x%08X)\n",
-               RuntimeImageNames[imageIndex],
-               imageCrc,
-               recordPtr->crc);
-        doUpdate = 1;
-        break;
-      }
+      // its image record; skip any image for which this is not required.
+      if(RuntimeCrcRequired[imageIndex]) {
+        imageCrc = crc32(0, (void*) imageStart, recordPtr->length);
+        if(imageCrc != recordPtr->crc) {
+          printf("\nImage \"%s\" CRC (0x%08X) does not match stored record (0x%08X)\n",
+                 RuntimeImageNames[imageIndex],
+                 imageCrc,
+                 recordPtr->crc);
+          doUpdate = 1;
+          break;
+        }
+      } else printf("(No CRC)...");
 
       printf("good!\n");
     } // for(each runtime image)

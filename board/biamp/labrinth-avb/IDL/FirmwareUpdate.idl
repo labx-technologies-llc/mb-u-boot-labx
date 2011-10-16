@@ -39,6 +39,7 @@ module FirmwareUpdate
     e_IMAGE_KERNEL,
     e_IMAGE_ROOTFS,
     e_IMAGE_USER_ROMFS,
+    e_IMAGE_SETTINGSFS,
     e_IMAGE_DEVICE_TREE,
     e_IMAGE_NUM_TYPES
   };

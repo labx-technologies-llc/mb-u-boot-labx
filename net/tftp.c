@@ -385,6 +385,14 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 				puts ("\n\t ");
 			}
 		}
+#ifdef GARCIA_FPGA_STATUS_LED_A
+		// If TFTP timeout caused LED to turn flashing red, go back to flashing green
+		if (TftpTimeoutCount >= 2) {
+		  wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_B |
+		          GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
+		  TftpTimeoutCount = 0;
+		}
+#endif
 
 		if (TftpState == STATE_RRQ)
 			debug("Server did not acknowledge timeout option!\n");
@@ -491,7 +499,7 @@ TftpHandler (uchar * pkt, unsigned dest, unsigned src, unsigned len)
 		case TFTP_ERR_FILE_NOT_FOUND:
 		case TFTP_ERR_ACCESS_DENIED:
 			puts("Not retrying...\n");
-#ifdef CONFIG_SYS_GPIO
+#ifdef GARCIA_FPGA_STATUS_LED_A
 			wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A |
 				GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
 #endif
@@ -521,7 +529,7 @@ TftpTimeout (void)
 {
 	if (++TftpTimeoutCount > TftpTimeoutCountMax) {
 		puts ("\nRetry count exceeded; starting again\n");
-#ifdef CONFIG_SYS_GPIO
+#ifdef GARCIA_FPGA_STATUS_LED_A
 		if(++TftpRetryCount > RETRY_COUNT) {
 		        printf("Too many retries; quitting\n");  
 			wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A | 
@@ -535,6 +543,13 @@ TftpTimeout (void)
 		NetStartAgain ();
 	} else {
 		puts ("T ");
+#ifdef GARCIA_FPGA_STATUS_LED_A
+		// TFTP timeout causes LED to turn flashing red after 2 tries
+		if (TftpTimeoutCount >= 2) {
+		  wrreg32(CONFIG_SYS_GPIO_ADDR, GARCIA_FPGA_STATUS_LED_A |
+		          GARCIA_FPGA_STATUS_LED_FLASH | GARCIA_FPGA_POWER_LED_B);
+		}
+#endif
 		NetSetTimeout (TftpTimeoutMSecs, TftpTimeout);
 		TftpSend ();
 	}
