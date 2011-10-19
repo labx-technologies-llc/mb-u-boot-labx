@@ -3578,6 +3578,10 @@ meyer_sound_CAL_ICS_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze CAL_ICS meyer_sound
 
+beyerdynamic_avb_sp605_config:   unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 beyerdynamic
+
 #========================================================================
 # Blackfin
 #========================================================================
