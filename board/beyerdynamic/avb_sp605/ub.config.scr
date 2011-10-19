@@ -1,4 +1,4 @@
-echo Setting up Riedel Artist environment
+echo Setting up BeyerDynamic AVB_SP605 environment
 echo -----------------------------------
 echo Network Configuration
 set autoload no
@@ -12,20 +12,19 @@ set clobstart 0x88000000
 echo Boot FPGA Configuration:
 set bootfpgasize 0x200000
 set bootfpgastart 0x87000000
-set bootfpganame ArtistFPGA-failsafe.bin
+set bootfpganame avbgenerator-top.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
 set bootstart 0x87200000
 set bootenvsize 0x08000
-set bootenvstart 0x87FE0000
-set boottextbase 0x88F00000
+set bootenvstart 0x88FF8000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
 set fdtstart 0x87240000
-set fdtname artist.dtb
+set fdtname avbgenerator.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
@@ -38,15 +37,6 @@ set rootfsstart 0x87620000
 echo ROM Filesystem Configuration:
 set romfssize 0x3E0000
 set romfsstart 0x87800000
-
-echo FPGA Configuration:
-set fpgasize 0x200000
-set fpgastart 0x87BE0000
-set fpganame ArtistFPGA.bin
-
-echo Settings Filesystem Configuration:
-set settingsfssize 0x200000
-set settingsfsstart 0x87DE0000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
@@ -81,15 +71,10 @@ set load_fdt 'tftp ${clobstart} ${fdtname}'
 set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
 set update_fdt run load_fdt install_fdt
 
-set load_settingsfs 'tftp ${clobstart} settings.jffs2'
-set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
-set update_settingsfs run load_settingsfs install_settingsfs
-
 echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
-set update 'tftp 0x88000000 artistUpdate.bin; source 0x88000040'
 
 echo Saving Configurations...
 saveenv

@@ -122,13 +122,13 @@
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/beyerdynamic/avb_sp605/ub.config.scr!
- *        These definitions locate the environment within the last few
- *        top-boot parameter sectors on the Flash.
+ *        These definitions locate the environment within the last top-boot
+ *        sector on the Flash.
  */
 #define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
+#define	CONFIG_ENV_SECT_SIZE	0x08000	/* 32KiB */
 #define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
-#define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
+#define	CONFIG_ENV_SIZE		0x08000 /* 32KiB */
 
 /* Perform the normal bootdelay checking */
 #define CONFIG_BOOTDELAY 1
