@@ -83,7 +83,7 @@
 /* gpio */
 #ifdef XPAR_GPIO_0_BASEADDR
 #  define	CONFIG_SYS_GPIO_0		1
-#  define	CONFIG_SYS_GPIO_0_ADDR		XILINX_GPIO_BASEADDR
+#  define	CONFIG_SYS_GPIO_0_ADDR		XILINX_GPIO_0_BASEADDR
 #endif
 
 /* interrupt controller */
@@ -131,25 +131,25 @@
 
 /* Flash memory is always present on this board */
 
-#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR
-#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)
-#define	CONFIG_SYS_FLASH_CFI		1
-#define	CONFIG_FLASH_CFI_DRIVER		1
-#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
-#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
-#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
-#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
-#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
+#define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR                                               
+#define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)       
+/*#define	CONFIG_SYS_FLASH_CFI		1                                                                                */
+/*#define	CONFIG_FLASH_CFI_DRIVER		1                                                                              */
+/*#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	  */                 /* ?empty sector */
+/*#define	CONFIG_SYS_MAX_FLASH_BANKS	1	  */                 /* max number of memory banks */
+/*#define	CONFIG_SYS_MAX_FLASH_SECT	512	  */                 /* max number of sectors on one chip */
+/*#define	CONFIG_SYS_FLASH_PROTECTION		  */                 /* hardware flash protection */
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/riedel/artist/ub.config.scr!
+ *        variables in ../../board/meyer_sound/CAL_ICS/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
-#define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
-#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
-#define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
+/*#define	CONFIG_ENV_IS_IN_FLASH	1   */
+#define	CONFIG_ENV_SECT_SIZE	0x40000	 /* 256K */
+/*#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      */
+#define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
+#define CONFIG_ENV_OFFSET	0xE40000	
 
 /* Enable support of SPI Flash */
 #define CONFIG_SYS_NO_FLASH
@@ -200,8 +200,8 @@
 #endif
 
 #define CONFIG_CMD_ECHO
-#define CONFIG_CMD_FLASH
-#define CONFIG_CMD_IMLS
+//#define CONFIG_CMD_FLASH
+//#define CONFIG_CMD_IMLS
 #define CONFIG_CMD_JFFS2
 
 #define CONFIG_CMD_SAVEENV
@@ -210,7 +210,7 @@
 /* JFFS2 partitions */
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
 #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
-#define CONFIG_FLASH_CFI_MTD
+//#define CONFIG_FLASH_CFI_MTD
 
 /* Miscellaneous configurable options */
 #define	CONFIG_SYS_PROMPT	"U-Boot> "

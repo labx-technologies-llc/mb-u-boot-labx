@@ -3582,6 +3582,10 @@ beyerdynamic_avb_sp605_config:   unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 beyerdynamic
 
+harman_avbx_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx harman
+
 #========================================================================
 # Blackfin
 #========================================================================
