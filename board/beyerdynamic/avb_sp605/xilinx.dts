@@ -41,7 +41,7 @@
 		serial0 = &RS232_Uart_1;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(bootfpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),3968K(romfs) root=mtd4 rootfstype=romfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2048K(bootfpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),3968K(romfs) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@84000000";
 	} ;
 	cpus {
@@ -406,10 +406,10 @@
 			xlnx,kind-of-intr = <0x45>;
 			xlnx,num-intr-inputs = <0x7>;
 		} ;
-		xps_mch_emc_0: flash@87000000 {
+		xps_mch_emc_0: flash@86000000 {
 			bank-width = <2>;
 			compatible = "xlnx,xps-mch-emc-3.01.a", "cfi-flash";
-			reg = < 0x87000000 0x1000000 >;
+			reg = < 0x86000000 0x2000000 >;
 			xlnx,family = "spartan6";
 			xlnx,include-datawidth-matching-0 = <0x1>;
 			xlnx,include-datawidth-matching-1 = <0x0>;

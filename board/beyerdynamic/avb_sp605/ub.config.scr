@@ -11,32 +11,32 @@ set clobstart 0x88000000
 
 echo Boot FPGA Configuration:
 set bootfpgasize 0x200000
-set bootfpgastart 0x87000000
+set bootfpgastart 0x86000000
 set bootfpganame avbgenerator-top.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
-set bootstart 0x87200000
+set bootstart 0x86200000
 set bootenvsize 0x08000
 set bootenvstart 0x88FF8000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
 set fdtsize 0x20000
-set fdtstart 0x87240000
+set fdtstart 0x86240000
 set fdtname avbgenerator.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
-set kernstart 0x87260000
+set kernstart 0x86260000
 
 echo Root Filesystem Configuration:
 set rootfssize 0x1E0000
-set rootfsstart 0x87620000
+set rootfsstart 0x86620000
 
 echo ROM Filesystem Configuration:
 set romfssize 0x3E0000
-set romfsstart 0x87800000
+set romfsstart 0x86800000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
