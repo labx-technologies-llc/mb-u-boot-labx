@@ -26,11 +26,12 @@ include $(TOPDIR)/config.mk
 LIB	= $(obj)lib$(BOARD).a
 CFLAGS	+= -I./IDL -I. 
 COBJS	= $(BOARD).o firmware-update.o message-buffer.o spi-mailbox.o 
+COBJS  += labrinth-legacy-bridge.o 
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
 $(LIB):	do_idls $(OBJS) 
-	$(AR) $(ARFLAGS) $@ $(OBJS) IDL/FirmwareUpdate_type.o IDL/FirmwareUpdate_unmarshal.o
+	$(AR) $(ARFLAGS) $@ $(OBJS) IDL/*.o
 
 do_idls:
 	$(MAKE) -C ./IDL do_idls

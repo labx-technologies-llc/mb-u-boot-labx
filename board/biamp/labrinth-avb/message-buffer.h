@@ -11,6 +11,8 @@ typedef unsigned char MessageBuffer_t[MAX_MSG_BUF_SIZE];
 
 typedef char * string_t;
 
+typedef uint32_t bool;
+
 typedef struct 
 {
   uint32_t m_size;
@@ -25,10 +27,12 @@ typedef struct
 #define MIN_SERVICE_CODE    (0x1000)
 #define MIN_ATTRIBUTE_CODE  (0x8000)
 
-// Define a hard class code for firmware update.  This maps beyond the
+// Define a hard class code for firmware update and configuring
+// the legacy packet bridge.  This maps beyond the
 // Labrinth-specific IDL class codes used within Linux.
 typedef enum {
-  k_CC_FirmwareUpdate = 256
+  k_CC_FirmwareUpdate  = 256,
+  k_CC_BackplaneBridge = 255,
 } ClassCode;
 
 typedef enum {
@@ -45,6 +49,16 @@ typedef enum {
 typedef enum {
   k_AC_ExecutingImageType = (MIN_ATTRIBUTE_CODE    ),
 } FirmwareUpdateAttributeCode;
+
+typedef enum {
+  k_SC_configureBridge  = (MIN_SERVICE_CODE    ),
+  k_SC_enableMatchUnit  = (MIN_SERVICE_CODE + 1),
+  k_SC_disableMatchUnit = (MIN_SERVICE_CODE + 2),
+} BackplaneBridgeServiceCode;
+
+typedef enum {
+  k_AC_numMatchUnits = (MIN_ATTRIBUTE_CODE    ),
+} BackplaneBridgeAttributeCode;
 
 /* Request buffer methods */
 extern void     setClassCode_req(RequestMessageBuffer_t msg, uint16_t classCode);
@@ -75,6 +89,6 @@ extern uint32_t uint16_t_marshal(MessageBuffer_t msg, uint32_t offset, uint16_t 
 extern uint32_t uint16_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint16_t *value);
 extern uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t value);
 extern uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *value);
-extern uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value);
-
+extern uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool value);
+extern uint32_t bool_unmarshal(MessageBuffer_t msg, uint32_t offset, bool *value);
 #endif

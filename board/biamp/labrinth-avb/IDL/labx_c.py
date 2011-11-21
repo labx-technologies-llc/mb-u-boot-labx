@@ -751,7 +751,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("#include <linux/types.h>\n");
         st.inc_indent()
 
-        st.out("extern AvbDefs__ErrorCode @n@_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);\n", n=node.identifier())
+        st.out("extern AvbDefs__ErrorCode @n@__unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);\n", n=node.identifier())
         st.dec_indent()
         st.out("#endif // __@nsu@_UNMARSHAL_H__\n", nsu = node.identifier().upper())
         st.close()
@@ -894,7 +894,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("}\n")
 
     def outputUnmarshal(self, st, node):
-        st.out("AvbDefs__ErrorCode @n@_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)", n=node.identifier()) # unmarshal
+        st.out("AvbDefs__ErrorCode @n@__unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)", n=node.identifier()) # unmarshal
         st.out("{")
         st.inc_indent()
         st.out("switch(getServiceCode_req(request))")
