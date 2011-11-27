@@ -332,7 +332,8 @@ static int labx_eth_phy_ctrl(void)
     id_high = read_phy_register(phy_addr, 2);
     id_low = read_phy_register(phy_addr, 3);
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
-    if (id_high == BCM548x_ID_HIGH && (id_low & BCM548x_ID_LOW_MASK) == (BCM5481_ID_LOW || BCM5482_ID_LOW))
+    if (id_high == BCM548x_ID_HIGH && (((id_low & BCM548x_ID_LOW_MASK) == BCM5481_ID_LOW) 
+		|| ((id_low & BCM548x_ID_LOW_MASK) == BCM5482_ID_LOW)))
     {
     	/* RGMII Transmit Clock Delay: The RGMII transmit timing can be adjusted
 		 * by software control. TXD-to-GTXCLK clock delay time can be increased
