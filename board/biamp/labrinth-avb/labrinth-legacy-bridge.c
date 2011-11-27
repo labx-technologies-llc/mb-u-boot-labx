@@ -70,7 +70,7 @@ void wait_match_config(uint32_t whichPort) {
   do {
     statusWord = BRIDGE_READ_REG(BRIDGE_PORT_REG_ADDRESS(BRIDGE_BASE, whichPort, FILTER_CTRL_STAT_REG));
     if (timeout-- == 0) {
-      printf("depacketizer: wait_match_config timeout!\n");
+      //printf("depacketizer: wait_match_config timeout!\n");
       break;
     }
   } while(statusWord & FILTER_LOAD_ACTIVE);
@@ -132,7 +132,7 @@ void load_unified_matcher(uint32_t whichPort,
     if(wordIndex == 0) {
       set_matcher_loading_mode(whichPort, LOADING_LAST_WORD);
     }
-    printf("MAC LOAD %08X\n", configWord);
+    //printf("MAC LOAD %08X\n", configWord);
     BRIDGE_WRITE_REG(BRIDGE_PORT_REG_ADDRESS(BRIDGE_BASE, whichPort, FILTER_LOAD_REG), configWord);
     wait_match_config(whichPort);
   }
@@ -145,20 +145,20 @@ void select_matchers(uint32_t whichPort,
   switch(selectionMode) {
   case SELECT_NONE:
     /* De-select all the match units */
-    printf("MAC SELECT %08X\n", 0);
+    //printf("MAC SELECT %08X\n", 0);
     BRIDGE_WRITE_REG(BRIDGE_PORT_REG_ADDRESS(BRIDGE_BASE, whichPort, FILTER_SELECT_REG),
                      FILTER_SELECT_NONE);
     break;
 
   case SELECT_SINGLE:
     /* Select a single unit */
-    printf("MAC SELECT %08X\n", 1 << matchUnit);
+    //printf("MAC SELECT %08X\n", 1 << matchUnit);
     BRIDGE_WRITE_REG(BRIDGE_PORT_REG_ADDRESS(BRIDGE_BASE, whichPort, FILTER_SELECT_REG), (1 << matchUnit));
     break;
 
   default:
     /* Select all match units at once */
-    printf("MAC SELECT %08X\n", 0xFFFFFFFF);
+    //printf("MAC SELECT %08X\n", 0xFFFFFFFF);
     BRIDGE_WRITE_REG(BRIDGE_PORT_REG_ADDRESS(BRIDGE_BASE, whichPort, FILTER_SELECT_REG),
                      FILTER_SELECT_ALL);
     break;
@@ -193,7 +193,7 @@ void clear_selected_matchers(uint32_t whichPort) {
  * traffic in the other direction.
  */
 void reset_legacy_bridge(void) {
-  printf("Resetting legacy bridge\n");
+  //printf("Resetting legacy bridge\n");
 
   /* Clear out all of the Rx filter match units for both ports */
   select_matchers(AVB_PORT_0, SELECT_ALL, 0);
@@ -237,19 +237,19 @@ void configureBridgePorts(bool bridgeActive,
     
     /* Actively bridging, configure appropriately */
     if(portsConfig.rxPortSelection == RX_PORT_1_SELECT) {
-      printf("Bridging backplane legacy Rx to port 1\n");
+      //printf("Bridging backplane legacy Rx to port 1\n");
       bridgeConfigWord |= BRIDGE_RX_PORT_1;
     } else {
-      printf("Bridging backplane legacy Rx to port 0\n");
+      //printf("Bridging backplane legacy Rx to port 0\n");
     }
 
     if(portsConfig.txPortsEnable[0] == TX_PORT_ENABLED) {
-      printf("Bridging backplane legacy Tx to port 0\n");
+      //printf("Bridging backplane legacy Tx to port 0\n");
       bridgeConfigWord |= BRIDGE_TX_EN_PORT_0;
     }
 
     if(portsConfig.txPortsEnable[1] == TX_PORT_ENABLED) {
-      printf("Bridging backplane legacy Tx to port 1\n");
+      //printf("Bridging backplane legacy Tx to port 1\n");
       bridgeConfigWord |= BRIDGE_TX_EN_PORT_1;
     }
     BRIDGE_WRITE_REG(BRIDGE_REG_ADDRESS(BRIDGE_BASE, BRIDGE_CTRL_REG), bridgeConfigWord);
@@ -268,14 +268,14 @@ void configure_mac_filter(uint32_t whichPort,
   select_matchers(whichPort, SELECT_SINGLE, unitNum);
 
   if (mode == MAC_MATCH_NONE) {
-    printf("Config port %d, match unit %d disabled\n",
-               whichPort, unitNum);
+    //printf("Config port %d, match unit %d disabled\n",
+               //whichPort, unitNum);
 
     clear_selected_matchers(whichPort);
   } else {
-    printf("Config port %d, match unit %d address: %02X:%02X:%02X:%02X:%02X:%02X\n",
-               whichPort, unitNum,
-               mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    //printf("Config port %d, match unit %d address: %02X:%02X:%02X:%02X:%02X:%02X\n",
+               //whichPort, unitNum,
+               //mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
     /* Set the loading mode to disable as we load the first word */
     set_matcher_loading_mode(whichPort, LOADING_MORE_WORDS);
@@ -295,7 +295,7 @@ AvbDefs__ErrorCode configureBridge(bool bridgeEnabled,
 
   // Translate the call into the native method
   PortSelection selectedPort =
-  ((whichPort == e_AVB_PORT_1) ?
+  ((whichPort == e_AVB_PORT_0) ?
     BRIDGE_AVB_PORT_0 : BRIDGE_AVB_PORT_1);
   configureBridgePorts(bridgeEnabled, selectedPort);
 

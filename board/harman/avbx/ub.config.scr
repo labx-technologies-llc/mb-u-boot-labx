@@ -15,7 +15,7 @@ set clobstart 0x88000000
 echo Boot FPGA Configuration:
 set bootfpgasize 0x200000
 set bootfpgastart 0x0
-set bootfpganame AVBX_FPGA-failsafe.bin
+set bootfpganame Avbx_Fpga-failsafe.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
@@ -28,7 +28,7 @@ set eraseenv 'sf probe 0:0 40000000 3;sf erase ${bootenvstart} ${bootenvsize}'
 echo Flattened Device Tree Configuration:
 set fdtsize 0x40000
 set fdtstart 0x240000
-set fdtname AVBX.dtb
+set fdtname avbx.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
@@ -45,7 +45,7 @@ set romfsstart 0x840000
 echo FPGA Configuration:
 set fpgasize 0x200000
 set fpgastart 0xA40000
-set fpganame AVBX.bin
+set fpganame Avbx_Fpga.bin
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000

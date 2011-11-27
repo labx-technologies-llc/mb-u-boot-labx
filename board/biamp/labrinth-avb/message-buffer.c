@@ -173,6 +173,11 @@ uint16_t getClassCode_req(RequestMessageBuffer_t msg)
   return get_uint16_t(msg,4); 
 }
 
+void setStatusCode_reg(RequestMessageBuffer_t msg, uint16_t statusCode)
+{
+  set_uint16_t(msg, 2, statusCode);
+}
+
 uint16_t getInstanceNumber_req(RequestMessageBuffer_t msg)  
 { 
   return get_uint16_t(msg,6); 

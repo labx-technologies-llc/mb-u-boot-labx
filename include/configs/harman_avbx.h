@@ -36,8 +36,8 @@
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
 #define	CONFIG_XILINX_UARTLITE
-#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_1_BASEADDR
-#define	CONFIG_BAUDRATE		XPAR_UARTLITE_1_BAUDRATE
+#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_2_BASEADDR
+#define	CONFIG_BAUDRATE		XPAR_UARTLITE_2_BAUDRATE
 #define	CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
 
 /* Ethernet port */
@@ -165,6 +165,19 @@
 #define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
 #define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
 #define CONFIG_SPI_FLASH_SPANSION 1
+
+/* Definitions for peripheral FLASH_CONTROL */
+#define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1
+
+/* Definitions for peripheral FLASH_CONTROL */
+#define XPAR_FLASH_CONTROL_MEM0_BASEADDR XPAR_SPI_0_BASEADDR 
+#define XPAR_FLASH_CONTROL_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
+
+/* Canonical definitions for peripheral FLASH_CONTROL */
+#define XPAR_EMC_0_NUM_BANKS_MEM 1
+#define XPAR_EMC_0_MEM0_BASEADDR XPAR_SPI_0_BASEADDR
+#define XPAR_EMC_0_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
+#define XPAR_XPS_MCH_EMC
 
 /* Perform the normal bootdelay checking */
 #define CONFIG_BOOTDELAY 1

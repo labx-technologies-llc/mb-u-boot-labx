@@ -184,12 +184,14 @@
 #define ADVERTISE_ALL (ADVERTISE_10HALF | ADVERTISE_10FULL |	\
                        ADVERTISE_100HALF | ADVERTISE_100FULL)
 
+/* Upper ID for BCM548x parts */
+#define BCM548x_ID_HIGH 0x0143
+#define BCM548x_ID_LOW_MASK 0xFFF0
+
 /* Special stuff for setting up a BCM5481.  Note that LS nibble of low ID
  * is revision number, and will vary.
  */
-#define BCM5481_ID_HIGH 0x0143
 #define BCM5481_ID_LOW 0xBCA0
-#define BCM5481_ID_LOW_MASK 0xFFF0
 #define BCM5481_RX_SKEW_REGISTER_SEL         0x7007
 #define BCM5481_RX_SKEW_ENABLE               0x0100
 #define BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL 0x0C00
@@ -198,6 +200,11 @@
 #define BCM5481_AUTO_NEGOTIATE_ENABLE        0x1000
 #define BCM5481_HIGH_PERFORMANCE_ENABLE      0x0040
 #define BCM5481_HPE_REGISTER_SELECT          0x0002
+
+/* Special stuff for setting up a BCM5482.  Not that LS nibble of low ID
+ * is revision number, and will vary.
+ */
+#define BCM5482_ID_LOW 0xBCB0
 
 /* As mentioned above, the Lab X Ethernet hardware mimics the
  * Xilinx LocalLink FIFO peripheral
@@ -325,8 +332,7 @@ static int labx_eth_phy_ctrl(void)
     id_high = read_phy_register(phy_addr, 2);
     id_low = read_phy_register(phy_addr, 3);
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
-    if (id_high == BCM5481_ID_HIGH &&
-    		(id_low & BCM5481_ID_LOW_MASK) == BCM5481_ID_LOW)
+    if (id_high == BCM548x_ID_HIGH && (id_low & BCM548x_ID_LOW_MASK) == (BCM5481_ID_LOW || BCM5482_ID_LOW))
     {
     	/* RGMII Transmit Clock Delay: The RGMII transmit timing can be adjusted
 		 * by software control. TXD-to-GTXCLK clock delay time can be increased

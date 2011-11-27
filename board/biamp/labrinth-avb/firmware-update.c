@@ -291,6 +291,10 @@ int DoFirmwareUpdate(void)
       BackplaneBridge__unmarshal(request, response);
       break;
 
+    default:
+      // Report a malformed request
+      setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
+      setLength_resp(response, getPayloadOffset_resp(response));
     }
 
     /* Write the response out to the mailbox; before doing so, artificially

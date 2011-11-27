@@ -28,11 +28,11 @@ typedef struct
 #define MIN_ATTRIBUTE_CODE  (0x8000)
 
 // Define a hard class code for firmware update and configuring
-// the legacy packet bridge.  This maps beyond the
-// Labrinth-specific IDL class codes used within Linux.
+// the legacy packet bridge.  The class code for firmware update
+// maps beyond the Labrinth-specific IDL class codes used within Linux.
 typedef enum {
   k_CC_FirmwareUpdate  = 256,
-  k_CC_BackplaneBridge = 255,
+  k_CC_BackplaneBridge = 201,
 } ClassCode;
 
 typedef enum {
@@ -76,6 +76,7 @@ extern uint16_t getAttributeCode_req(RequestMessageBuffer_t msg);
 extern uint16_t getLength_resp(ResponseMessageBuffer_t msg);
 extern void     setLength_resp(ResponseMessageBuffer_t msg, uint16_t length);
 extern uint16_t getStatusCode_resp(ResponseMessageBuffer_t msg); 
+extern void     setStatusCode_resp(ResponseMessageBuffer_t msg, uint16_t statusCode);
 extern uint16_t getPayloadOffset_resp(ResponseMessageBuffer_t msg);
 
 extern uint16_t sequence_t_uint8_t_marshal(ResponseMessageBuffer_t request, uint32_t offset, sequence_t_uint8_t *data);
