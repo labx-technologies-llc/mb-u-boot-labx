@@ -39,7 +39,7 @@
 		serial1 = &host_serial;
 	} ;
 	chosen {
-		bootargs = "console=ttyS0 root=/dev/ram";
+		bootargs = "console=ttyUL0 mtdparts=spi32766.0:2048K(bootfpga),256K(boot),256K(fdt),3840K(image),2048K(rootfs),2048K(romfs),2048K(fpga),2048K(settingsfs),256K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -329,7 +329,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 3 2 2 2 17 2 >;
-			local-mac-address = [ 00 0a 35 e8 cd 00 ];
+			local-mac-address = [ 00 0a 35 34 82 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -372,7 +372,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 5 2 4 2 >;
-			local-mac-address = [ 00 0a 35 e8 a4 01 ];
+			local-mac-address = [ 00 0a 35 34 4c 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -588,12 +588,12 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
-			device@0{
-                                compatible = "spidev,spidev";
-                                reg = <0>;
-                                spi-max-frequency = <500000>;
-                                linux,modalias = "spidev";
-                        };
+			eeprom@0 {
+                		compatible = "spsn,m25p80";
+	                	reg = < 0 > ;
+	        	        spi-max-frequency = < 104000000 >;
+        	        	linux,modalias = "m25p80";
+      			} ;
 		} ;
 	} ;
 }  ;
