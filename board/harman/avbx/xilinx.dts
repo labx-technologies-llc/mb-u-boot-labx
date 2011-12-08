@@ -50,12 +50,12 @@
 			clock-frequency = <62500000>;
 			compatible = "xlnx,microblaze-8.20.a";
 			d-cache-baseaddr = <0x88000000>;
-			d-cache-highaddr = <0x8bffffff>;
+			d-cache-highaddr = <0x8fffffff>;
 			d-cache-line-size = <0x10>;
 			d-cache-size = <0x2000>;
 			device_type = "cpu";
 			i-cache-baseaddr = <0x88000000>;
-			i-cache-highaddr = <0x8bffffff>;
+			i-cache-highaddr = <0x8fffffff>;
 			i-cache-line-size = <0x10>;
 			i-cache-size = <0x2000>;
 			model = "microblaze,8.20.a";
@@ -274,7 +274,7 @@
 	} ;
 	ddr2_control: memory@88000000 {
 		device_type = "memory";
-		reg = < 0x88000000 0x4000000 >;
+		reg = < 0x88000000 0x8000000 >;
 	} ;
 	peripheral_bus: plb@0 {
 		#address-cells = <1>;
@@ -294,7 +294,7 @@
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "DMA_NPI";
 			xlnx,internal-params = <0x1>;
-			xlnx,microcode-words = <0x200>;
+			xlnx,microcode-words = <0x400>;
 			xlnx,mplb-awidth = <0x20>;
 			xlnx,mplb-clk-period-ps = <0x2710>;
 			xlnx,mplb-dwidth = <0x80>;
@@ -588,6 +588,12 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x4>;
+			eeprom@0 {
+				compatible = "spsn,m25p80";
+				reg = < 0 >;
+				spi-max-frequency = < 104000000 >;
+				linux,modalias = "m25p80";
+			} ;
 		} ;
 	} ;
 }  ;
