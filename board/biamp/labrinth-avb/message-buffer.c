@@ -120,12 +120,17 @@ uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *valu
   return 4; 
 }
 
-uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value)
+uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool value)
 { 
   set_uint32_t(msg,offset, (value) ? 0xFFFFFFFF : 0x00000000); 
   return 4; 
 }
     
+uint32_t bool_unmarshal(MessageBuffer_t msg, uint32_t offset, bool *value)
+{ 
+  *value = get_uint32_t(msg,offset); 
+  return 4; 
+}
 
 /* RequestMessageBuffer_t  routines */
 void setLength_req(RequestMessageBuffer_t msg,uint16_t length)
@@ -166,6 +171,11 @@ uint16_t getLength_req(RequestMessageBuffer_t msg)
 uint16_t getClassCode_req(RequestMessageBuffer_t msg)       
 { 
   return get_uint16_t(msg,4); 
+}
+
+void setStatusCode_reg(RequestMessageBuffer_t msg, uint16_t statusCode)
+{
+  set_uint16_t(msg, 2, statusCode);
 }
 
 uint16_t getInstanceNumber_req(RequestMessageBuffer_t msg)  

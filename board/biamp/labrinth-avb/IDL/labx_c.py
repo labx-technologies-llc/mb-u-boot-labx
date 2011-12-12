@@ -1,6 +1,6 @@
 from omniidl import idlast, idlvisitor, idlutil, idltype
 from omniidl_be.cxx import output
-import sys, string, copy
+import sys, string, copy, os
 
 # Function types
 eNone, eGetter, eSetter = range(3)
@@ -242,7 +242,7 @@ class CxxAttributesStaticVisitor (CxxAttributesInterfaceVisitor):
         return "RequestMessageBuffer_t request, ResponseMessageBuffer_t response"
 
     def getResultType(self):
-        return "FirmwareUpdate__ErrorCode"
+        return "AvbDefs__ErrorCode"
 
 # Output an interface declaration for a stub service operation
 class CxxStubMethodHeaderVisitor (CxxInterfaceVisitor):
@@ -406,7 +406,8 @@ class CxxTypeHeaderVisitor (CxxTypeVisitor):
     def outputStruct(self, node, name):
         attr = ""
         ma = ""
-        self.st.out("extern uint32_t @sn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@sn@ *value);", sn = "FirmwareUpdate__"+node.identifier(), name=name, attr=attr, ma=ma)
+        typename = idlutil.ccolonName(node.scopedName())
+        self.st.out("extern uint32_t @sn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@sn@ *value);", sn = string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma)
 
     def visitEnum(self, node):
         self.outputEnum(node, "marshal")
@@ -419,7 +420,8 @@ class CxxTypeHeaderVisitor (CxxTypeVisitor):
         if name == "unmarshal":
             ref="*"
         
-        self.st.out("extern uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value);", tn = "FirmwareUpdate__"+node.identifier(), name=name, attr=attr, ma=ma,ref=ref)
+        typename = idlutil.ccolonName(node.scopedName())
+        self.st.out("extern uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value);", tn = string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma,ref=ref)
 
     def visitTypedef(self, node):
         self.outputTypedef(node, "marshal")
@@ -434,7 +436,8 @@ class CxxTypeHeaderVisitor (CxxTypeVisitor):
         for d in node.declarators():
             n = 0
             idx = ""
-            self.st.out("extern uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ *value);", tn="FirmwareUpdate__"+d.identifier(), name=name, attr=attr, ma=ma)
+            typename = idlutil.ccolonName(d.scopedName())
+            self.st.out("extern uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ *value);", tn=string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma)
 
 # output a type implementation for marshalling/unmarshalling
 class CxxTypeImplVisitor (CxxTypeVisitor):
@@ -449,10 +452,15 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
     def outputStruct(self, node, name):
         attr = ""
         ma = ""
-        self.st.out("uint32_t @sn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@sn@ *value)", sn = "FirmwareUpdate__" + node.identifier(), name=name, attr=attr, ma=ma)
+        ref = ""
+        if(name == "unmarshal"):
+            ref = "&"
+        typename = idlutil.ccolonName(node.scopedName())
+        self.st.out("uint32_t @sn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@sn@ *value)", sn=string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma)
         self.st.out("{")
         self.st.inc_indent()
         self.st.out("uint32_t structOffset = 4;")
+        self.st.out("uint32_t idx;")
         for m in node.members():
             m.memberType().accept(self)
             type = self.getResultType()
@@ -463,17 +471,17 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
                 n = 0
                 idx = ""
                 for s in d.sizes():
-                    self.st.out("for (uint32_t i@n@=0; i@n@<@s@; i@n@++)", n=n, s=s)
+                    self.st.out("for (idx=0; idx<@s@; idx++)", n=n, s=s)
                     self.st.out("{")
                     self.st.inc_indent()
-                    idx = idx + "[i" + str(n) + "]"
+                    idx = idx + "[idx]"
                     n=n+1
-                self.st.out("structOffset += @type@_@name@(buffer, offset+structOffset, value.@id@@idx@);", type=type, id=d.identifier(), name=name, idx=idx)
+                self.st.out("structOffset += @type@_@name@(buffer, offset+structOffset, @ref@(value->@id@@idx@));", type=type, id=d.identifier(), name=name, idx=idx, ref=ref)
                 for s in d.sizes():
                     self.st.dec_indent()
                     self.st.out("}")
         if (name == "marshal"):
-            self.st.out("(void) uint32_t (buffer, offset, structOffset); // struct length")
+            self.st.out("(void) uint32_t_marshal(buffer, offset, structOffset); // struct length")
         self.st.out("return structOffset;")
         self.st.dec_indent()
         self.st.out("}\n")
@@ -488,7 +496,8 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
         ref = ""
         if name == "unmarshal":
             ref="*"
-        self.st.out("uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value)", tn = "FirmwareUpdate__"+node.identifier(), name=name, attr=attr, ma=ma,ref=ref)
+        typename = idlutil.ccolonName(node.scopedName())
+        self.st.out("uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value)", tn = string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma,ref=ref)
         self.st.out("{")
         self.st.inc_indent()
         if name == "marshal":
@@ -497,7 +506,7 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
         else:
             self.st.out("uint32_t valueInt;")
             self.st.out("uint32_t size = uint32_t_@name@(buffer, offset, &valueInt);", name=name)
-            self.st.out("*value = (@tn@)valueInt;",tn="FirmwareUpdate__"+node.identifier())
+            self.st.out("*value = (@tn@)valueInt;",tn=string.replace(typename, ":", "_"))
             self.st.out("return size;")
         self.st.dec_indent()
         self.st.out("}\n")
@@ -518,15 +527,17 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
         for d in node.declarators():
             n = 0
             idx = ""
-            self.st.out("uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ *value)", tn="FirmwareUpdate__"+d.identifier(), name=name, attr=attr, ma=ma)
+            typename = idlutil.ccolonName(d.scopedName())
+            self.st.out("uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ *value)", tn=string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma)
             self.st.out("{")
             self.st.inc_indent()
             self.st.out("uint32_t typeOffset = 0;")
+            self.st.out("uint32_t idx;")
             for s in d.sizes():
-                self.st.out("for (uint32_t i@n@=0; i@n@<@s@; i@n@++)", n=n, s=s)
+                self.st.out("for (idx=0; idx<@s@; idx++)", n=n, s=s)
                 self.st.out("{")
                 self.st.inc_indent()
-                idx = idx + "[i" + str(n) + "]"
+                idx = idx + "[idx]"
                 n=n+1
             self.st.out("typeOffset += @type@_@name@(buffer, offset + typeOffset, value@idx@);", type=type, name=name, idx=idx)
             for s in d.sizes():
@@ -543,6 +554,7 @@ class CxxTypeDeclVisitor (CxxTypeVisitor):
         self.st = st
 
     def visitStruct(self, node):
+        typename = idlutil.ccolonName(node.scopedName())
         self.st.out("typedef struct")
         self.st.out("{")
         self.st.inc_indent()
@@ -556,9 +568,10 @@ class CxxTypeDeclVisitor (CxxTypeVisitor):
                 arr = self.getResultArray()
                 self.st.out("@type@ @id@@arr@;", type=type, id=d.identifier(), arr=arr)
         self.st.dec_indent()
-        self.st.out("} @sn@;\n", sn=node.identifier())
+        self.st.out("} @sn@;\n", sn=string.replace(typename, ":", "_"))
 
     def visitEnum(self, node):
+        typename = idlutil.ccolonName(node.scopedName())
         self.st.out("typedef enum")
         self.st.out("{")
         self.st.inc_indent()
@@ -566,7 +579,8 @@ class CxxTypeDeclVisitor (CxxTypeVisitor):
         for e in node.enumerators(): enuml.append(e.identifier())
         self.st.out(string.join(enuml, ", "))
         self.st.dec_indent()
-        self.st.out("} FirmwareUpdate__@en@;\n", en=node.identifier())
+
+        self.st.out("} @en@;\n", en=string.replace(typename, ":", "_"))
 
     def visitTypedef(self, node):
         if node.constrType():
@@ -577,7 +591,8 @@ class CxxTypeDeclVisitor (CxxTypeVisitor):
         for d in node.declarators():
             d.accept(self)
             arr = self.getResultArray()
-            self.st.out("typedef @type@ FirmwareUpdate__@id@@arr@;\n", type=type, id=d.identifier(), arr=arr);
+            typename = idlutil.ccolonName(d.scopedName())
+            self.st.out("typedef @type@ @id@@arr@;\n", type=type, id=string.replace(typename, ":", "_"), arr=arr);
 
 class CxxInterfaceUnmarshalStaticForwardVisitor (idlvisitor.AstVisitor):
 
@@ -692,6 +707,11 @@ class CxxInterfaceSetUnmarshalBodyVisitor (idlvisitor.AstVisitor):
 class CxxTreeVisitor (idlvisitor.AstVisitor):
 
     def visitAST(self, node):
+        self.includefiles = set()
+        for n in node.declarations():
+            path, filename = os.path.split(n.file())
+            if ((n.mainFile() != filename) and ("CommonTypes.idl" != filename)):
+                self.includefiles.add(filename)
         for n in node.declarations():
             n.accept(self)
 
@@ -706,6 +726,10 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("#define __@nsu@_H__\n", nsu = node.identifier().upper())
         st.out("#include \"message-buffer.h\"\n");
         st.out("#include <linux/types.h>\n");
+        for f in self.includefiles:
+            st.out("#include \"@fn@\"", fn = string.replace(f, ".idl", ".h"))
+        st.out("")
+
         st.inc_indent()
         visitor = CxxTypeDeclVisitor(st)
         for n in node.definitions():
@@ -723,10 +747,11 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("#ifndef __@nsu@_UNMARSHAL_H__", nsu = node.identifier().upper())
         st.out("#define __@nsu@_UNMARSHAL_H__\n", nsu = node.identifier().upper())
         st.out("#include \"message-buffer.h\"\n")
-        st.out("#include \"FirmwareUpdate.h\"\n")
+        st.out("#include \"AvbDefs.h\"\n")
         st.out("#include <linux/types.h>\n");
         st.inc_indent()
-        st.out("extern FirmwareUpdate__ErrorCode  unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);\n")
+
+        st.out("extern AvbDefs__ErrorCode @n@__unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);\n", n=node.identifier())
         st.dec_indent()
         st.out("#endif // __@nsu@_UNMARSHAL_H__\n", nsu = node.identifier().upper())
         st.close()
@@ -740,8 +765,8 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.inc_indent()
         st.out("")
         # Forward declarations
-        st.out("static FirmwareUpdate__ErrorCode get_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);");
-        st.out("static FirmwareUpdate__ErrorCode set_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);");
+        st.out("static AvbDefs__ErrorCode get_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);");
+        st.out("static AvbDefs__ErrorCode set_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response);");
         visitor = CxxInterfaceUnmarshalStaticForwardVisitor(st)
         for n in node.definitions():
             n.accept(visitor)
@@ -831,7 +856,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.dec_indent()
 
     def outputGetUnmarshal(self, st, node):
-        st.out("FirmwareUpdate__ErrorCode get_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)")
+        st.out("AvbDefs__ErrorCode get_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)")
         st.out("{")
         st.inc_indent()
         st.out("switch(getAttributeCode_req(request))")
@@ -850,7 +875,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("}\n")
 
     def outputSetUnmarshal(self, st, node):
-        st.out("FirmwareUpdate__ErrorCode set_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)")
+        st.out("AvbDefs__ErrorCode set_unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)")
         st.out("{")
         st.inc_indent()
         st.out("switch(getAttributeCode_req(request))")
@@ -869,7 +894,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         st.out("}\n")
 
     def outputUnmarshal(self, st, node):
-        st.out("FirmwareUpdate__ErrorCode unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)") # unmarshal
+        st.out("AvbDefs__ErrorCode @n@__unmarshal(RequestMessageBuffer_t request, ResponseMessageBuffer_t response)", n=node.identifier()) # unmarshal
         st.out("{")
         st.inc_indent()
         st.out("switch(getServiceCode_req(request))")

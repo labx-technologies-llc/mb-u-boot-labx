@@ -1,6 +1,7 @@
 #include "hush.h"
 #include "spi-mailbox.h"
 #include "FirmwareUpdate_unmarshal.h"
+#include "BackplaneBridge_unmarshal.h"
 #include "FirmwareUpdate.h"
 #include "xparameters.h"
 #include <linux/types.h>
@@ -32,7 +33,7 @@
 #define CMD_FORMAT_BUF_SZ (256)
 static char commandBuffer[CMD_FORMAT_BUF_SZ];
 
-FirmwareUpdate__ErrorCode executeFirmwareUpdate(void);
+AvbDefs__ErrorCode executeFirmwareUpdate(void);
 
 /* Structure capturing the information for each update-able runtime
  * firmware image for use in pre-boot check.
@@ -96,7 +97,7 @@ FirmwareUpdateCtxt_t fwUpdateCtxt;
  * Accessor for the ExecutingImageType attribute; this tells the client
  * that we are in the bootloader, not the main image.
  */
-FirmwareUpdate__ErrorCode get_ExecutingImageType(FirmwareUpdate__CodeImageType *value) {
+AvbDefs__ErrorCode get_ExecutingImageType(FirmwareUpdate__CodeImageType *value) {
   *value = e_CODE_IMAGE_BOOT;
   return(e_EC_SUCCESS);
 }
@@ -111,12 +112,12 @@ FirmwareUpdate__ErrorCode get_ExecutingImageType(FirmwareUpdate__CodeImageType *
  * @param revision - Revision quadlet for the image
  * @param crc      - Expected CRC32 for the data to be checked
  */
-FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType image,
+AvbDefs__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType image,
                                               string_t cmd,
                                               uint32_t length,
                                               uint32_t revision,
                                               uint32_t crc) {
-  FirmwareUpdate__ErrorCode returnValue;
+  AvbDefs__ErrorCode returnValue;
 
   printf("Got startFirmwareUpdate(\"%s\", %d, 0x%08X)\n", cmd, length, crc);
 
@@ -152,9 +153,9 @@ FirmwareUpdate__ErrorCode startFirmwareUpdate(FirmwareUpdate__RuntimeImageType i
  *
  * data - Data that contains the datapacket. 
  */
-FirmwareUpdate__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
+AvbDefs__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 {
-  FirmwareUpdate__ErrorCode sendSuccess = e_EC_SUCCESS;
+  AvbDefs__ErrorCode sendSuccess = e_EC_SUCCESS;
 
   if(!fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_NOT_IN_PROGRESS;
   memcpy(fwUpdateCtxt.fwImagePtr,data->m_data,data->m_size);
@@ -230,7 +231,7 @@ uint8_t doCrcCheck(void)
 }
 
 
-FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
+AvbDefs__ErrorCode executeFirmwareUpdate(void)
 {
   if (doCrcCheck() == FALSE)
     return e_EC_CORRUPT_IMAGE;
@@ -244,7 +245,7 @@ FirmwareUpdate__ErrorCode executeFirmwareUpdate(void)
   return e_EC_SUCCESS;
 }
 
-FirmwareUpdate__ErrorCode sendCommand(string_t cmd) {
+AvbDefs__ErrorCode sendCommand(string_t cmd) {
   int returnValue = e_EC_SUCCESS;
 
   /* Invoke the HUSH parser on the command */
@@ -261,7 +262,8 @@ static RequestMessageBuffer_t request;
 static ResponseMessageBuffer_t response;
 
 /**
- * Perform a firmware update throught he SPI mailbox interface
+ * Perform a firmware update or configure the legacy packet bridge
+ * through the SPI mailbox interface
  *
  * Return 1 - Success
  *        0 - No Success
@@ -279,7 +281,21 @@ int DoFirmwareUpdate(void)
   /* Continuously read request messages from the host and unmarshal them */
   while (ReadSPIMailbox(request, &reqSize)) {
     /* Unmarshal the received request */
-    unmarshal(request, response);
+    switch(getClassCode_req(request)) {
+
+    case k_CC_FirmwareUpdate:
+      FirmwareUpdate__unmarshal(request, response);
+      break;
+
+    case k_CC_BackplaneBridge:
+      BackplaneBridge__unmarshal(request, response);
+      break;
+
+    default:
+      // Report a malformed request
+      setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
+      setLength_resp(response, getPayloadOffset_resp(response));
+    }
 
     /* Write the response out to the mailbox; before doing so, artificially
      * increase the response length by four to accommodate the four garbage bytes

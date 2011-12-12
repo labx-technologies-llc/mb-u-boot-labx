@@ -26,13 +26,20 @@ include $(TOPDIR)/config.mk
 LIB	= libidl.a
 
 CFLAGS += -I..
-COBJS	= FirmwareUpdate_type.o  FirmwareUpdate_unmarshal.o
+COBJS   = AvbDefs_type.o
+COBJS  += FirmwareUpdate_type.o
+COBJS  += FirmwareUpdate_unmarshal.o 
+COBJS  += BackplaneBridge_type.o
+COBJS  += BackplaneBridge_unmarshal.o
+
+IDLSRC  = AvbDefs.idl
 IDLSRC += FirmwareUpdate.idl
+IDLSRC += BackplaneBridge.idl
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
 $(LIB):	$(OBJS)
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+	$(AR) $(ARFLAGS)s $@ $(OBJS)
 
 do_idls: $(IDLSRC:.idl=.h) 
 

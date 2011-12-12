@@ -3,25 +3,11 @@
 #define __FIRMWARE_UPDATE_IDL__
 
 #include "AvbDefs.idl"
+#include "CommonTypes.idl"
 
 module FirmwareUpdate
 {
   typedef sequence<uint8_t> FwData;
-
-  /* Enumerated type for generic error codes which may be returned */
-  enum ErrorCode
-  {
-    e_EC_SUCCESS,
-    e_EC_INVALID_CLASS_CODE,
-    e_EC_INVALID_INSTANCE,
-    e_EC_INVALID_SERVICE_CODE,
-    e_EC_INVALID_ATTRIBUTE_CODE,
-    e_EC_UPDATE_ALREADY_IN_PROGRESS,
-    e_EC_UPDATE_NOT_IN_PROGRESS,
-    e_EC_CORRUPT_IMAGE,
-    e_EC_NOT_EXECUTED,
-    e_EC_IMAGE_ALREADY_PRESENT
-  };
 
   /* Enumerated type used to identify the context (bootloader or Linux) */
   enum CodeImageType
@@ -53,7 +39,7 @@ module FirmwareUpdate
      *
      * @param cmd - String command to send to U-Boot immediately
      */
-    ErrorCode sendCommand(in string cmd);
+    AvbDefs::ErrorCode sendCommand(in string cmd);
 
     /**
      * Begins a firmware update of a single run-time image, which consists of 
@@ -75,7 +61,7 @@ module FirmwareUpdate
      *
      * @return e_EC_SUCCESS upon success, e_EC_CORRUPT_IMAGE if CRC check failed.
      */
-    ErrorCode startFirmwareUpdate(in RuntimeImageType image,
+    AvbDefs::ErrorCode startFirmwareUpdate(in RuntimeImageType image,
                                   in string cmd, 
                                   in uint32_t length, 
                                   in uint32_t revision,
@@ -90,7 +76,7 @@ module FirmwareUpdate
      * @return e_EC_SUCCESS upon success, e_EC_UPDATE_NOT_IN_PROGRESS if no
      *         firmware update context is in progress.
      */
-    ErrorCode sendDataPacket(in FwData data);
+    AvbDefs::ErrorCode sendDataPacket(in FwData data);
   };
 
   interface Attributes
@@ -98,7 +84,7 @@ module FirmwareUpdate
     /**
      * Attribute identifying the execution context
      */
-    ErrorCode ExecutingImageType(out CodeImageType value);
+    AvbDefs::ErrorCode ExecutingImageType(out CodeImageType value);
   };
 };
 
