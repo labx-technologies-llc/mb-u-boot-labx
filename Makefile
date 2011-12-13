@@ -3586,6 +3586,10 @@ harman_avbx_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx harman
 
+harman_ithd_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze ithd harman
+
 #========================================================================
 # Blackfin
 #========================================================================
