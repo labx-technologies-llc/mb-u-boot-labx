@@ -206,6 +206,16 @@
  */
 #define BCM5482_ID_LOW 0xBCB0
 
+#define MII_BCM54XX_EXP_DATA    0x15    /* Expansion register data */
+#define MII_BCM54XX_EXP_SEL     0x17    /* Expansion register select */
+#define MII_BCM54XX_EXP_SEL_SSD 0x0e00  /* Secondary SerDes select */
+#define MII_BCM54XX_EXP_SEL_ER  0x0f00  /* Expansion register select */
+
+#define MII_BCM54XX_SHD         0x1c    /* 0x1c shadow registers */
+#define MII_BCM54XX_SHD_WRITE   0x8000
+#define MII_BCM54XX_SHD_VAL(x)  ((x & 0x1f) << 10)
+#define MII_BCM54XX_SHD_DATA(x) ((x & 0x3ff) << 0)
+
 /* As mentioned above, the Lab X Ethernet hardware mimics the
  * Xilinx LocalLink FIFO peripheral
  */
@@ -284,6 +294,45 @@ static unsigned int read_phy_register(int phy_addr, int reg_addr)
   return(readValue);
 }
 
+/*
+ * Indirect register access functions for the 1000BASE-T/100BASE-TX/10BASE-T
+ * 0x1c shadow registers.
+ */
+static int bcm54xx_shadow_read(int phy_addr, int shadow)
+{
+  write_phy_register(phy_addr, MII_BCM54XX_SHD, MII_BCM54XX_SHD_VAL(shadow));
+  return MII_BCM54XX_SHD_DATA(read_phy_register(phy_addr, MII_BCM54XX_SHD));
+}
+
+static void bcm54xx_shadow_write(int phy_addr, int shadow, int phy_data)
+{
+  write_phy_register(phy_addr, MII_BCM54XX_SHD,
+                     MII_BCM54XX_SHD_WRITE |
+                     MII_BCM54XX_SHD_VAL(shadow) |
+                     MII_BCM54XX_SHD_DATA(phy_data));
+}
+
+/* Indirect register access functions for the Expansion Registers */
+static void bxm54xx_exp_read(int phy_addr, int reg_addr)
+{
+  write_phy_register(phy_addr, MII_BCM54XX_EXP_SEL, reg_addr);
+
+  read_phy_register(phy_addr, MII_BCM54XX_EXP_DATA);
+
+  /* Restore default value.  It's O.K. if this write fails */
+  write_phy_register(phy_addr, MII_BCM54XX_EXP_SEL, 0);
+}
+
+static void bcm54xx_exp_write(int phy_addr, int reg_addr, int phy_data)
+{
+  write_phy_register(phy_addr, MII_BCM54XX_EXP_SEL, reg_addr);
+
+  write_phy_register(phy_addr, MII_BCM54XX_EXP_DATA, phy_data);
+
+  /* Restore default value.  It's O.K. if this write fails. */
+  write_phy_register(phy_addr, MII_BCM54XX_EXP_SEL, 0);
+}
+
 /* Writes a value to a MAC register */
 static void labx_eth_write_mac_reg(int reg_offset, int reg_data)
 {
@@ -357,6 +406,7 @@ static int labx_eth_phy_ctrl(void)
 	printf("Auto-Negotiate Enable: %d (0x%04X) => %d\n",
 	                ((result & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0), result,
 	                ((read_phy_register(phy_addr, 0x00) & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0));
+
 	result = read_phy_register(phy_addr, 0x18);
 	result = result | BCM5481_SHADOW_WRITE | BCM5481_HPE_REGISTER_SELECT;
 	result = result & ~BCM5481_HIGH_PERFORMANCE_ENABLE;
