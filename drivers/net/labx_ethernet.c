@@ -32,6 +32,8 @@
 #include <malloc.h>
 #include <asm/processor.h>
 
+DECLARE_GLOBAL_DATA_PTR;
+
 #ifndef LABX_PRIMARY_ETH_BASEADDR
 #  error "Missing board definition for Ethernet peripheral base address"
 #endif
@@ -285,6 +287,7 @@ static unsigned int read_phy_register(int phy_addr, int reg_addr)
 
   /* Write to the MDIO control register to initiate the read */
   addr = (LABX_MDIO_ETH_BASEADDR + MDIO_CONTROL_REG);
+
   *((volatile unsigned int *) addr) = 
     (PHY_MDIO_READ | ((phy_addr & PHY_ADDR_MASK) << PHY_ADDR_SHIFT) |
      (reg_addr & PHY_REG_ADDR_MASK));
@@ -851,3 +854,186 @@ int labx_eth_initialize(bd_t *bis)
   
   return(0);
 }
+
+int do_dump_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned long int val;
+  if (argc != 1) {
+    cmd_usage(cmdtp);
+    return 1;
+  }
+
+  if (first) {
+    eth_init(gd->bd);
+  }
+  val = (unsigned long int)read_phy_register(phy_addr, 0x02) << 16 | read_phy_register(phy_addr, 0x03);
+  printf("Ethernet PHY registers for eth%d, ID 0x%08lx:\n"
+      "==============================================\n", WHICH_ETH_PORT, val);
+  val = read_phy_register(phy_addr, 0x00);
+  printf("0x00 - MII Control register:                           0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x01);
+  printf("0x01 - MII Status  register:                           0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x04);
+  printf("0x04 - Auto-negotiation Advertisement register:        0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x05);
+  printf("0x05 - Auto-negotiation Link Partner Ability register: 0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x06);
+  printf("0x06 - Auto-negotiation Expansion register:            0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x07);
+  printf("0x07 - Next page Transmit register:                    0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x08);
+  printf("0x08 - Link Partner Received Next Page register:       0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x09);
+  printf("0x09 - 1000Base-T Control register:                    0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x0A);
+  printf("0x0A - 1000Base-T Status register:                     0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x0F);
+  printf("0x0F - IEEE Extended Status register:                  0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x10);
+  printf("0x10 - IEEE Extended Control register:                 0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x11);
+  printf("0x11 - PHY Extended Status register:                   0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x12);
+  printf("0x12 - Receive Error Counter register:                 0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x13);
+  printf("0x13 - False Carrier Sense Counter register:           0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x14);
+  printf("0x14 - Receiver NOT_OK Counter register:               0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x17);
+  printf("0x17 - Expansion and Secondary SerDES Access register: 0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x18, 0x0007);
+  val = read_phy_register(phy_addr, 0x18);
+  printf("0x18:0 - Auxilary Control register:                    0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x18, 0x1007);
+  val = read_phy_register(phy_addr, 0x18);
+  printf("0x18:1 - 10BaseT register:                             0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x18, 0x2007);
+  val = read_phy_register(phy_addr, 0x18);
+  printf("0x18:2 - Power MII Control register:                   0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x18);
+  write_phy_register(phy_addr, 0x18, 0x4007);
+  printf("0x18:4 - Misc Test register:                           0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x18, 0x7007);
+  val = read_phy_register(phy_addr, 0x18);
+  printf("0x18:7 - Misc Control register:                        0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x19);
+  printf("0x19 - Auxilary Status Summary register:               0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x1A);
+  printf("0x1A - Interrupt Status register:                      0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x1B);
+  printf("0x1B - Interrupt Mask register:                        0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x0800);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:2 - Spare Control 1 register:                     0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x0C00);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:3 - Clock Alignment Control register:             0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x1000);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:4 - Spare Control 2 register:                     0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x1400);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:5 - Spare Control 3 register:                     0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x2000);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:8 - LED Status register:                          0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x2400);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:9 - LED Control register:                         0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x2800);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:A - Auto Power-down register:                     0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x3400);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:D - LED Selector 1 register:                      0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x3800);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:E - LED Selector 2 register:                      0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x3C00);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:F - LED GPIO Control/Status register:             0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x4C00);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:13 - SerDES 100BASE-FX Control register:          0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x5400);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:15 - SGMII Slave register:                        0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x6000);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:18 - SGMII/Media Converter register:              0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x6800);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1A - Auto-negotiation Debug register:             0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x6C00);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1B - Auxilary 1000BASE-X Control register:        0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x7000);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1C - Auxilary 1000BASE-X Status register:         0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x7400);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1D - Misc 1000BASE-X Status register:             0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x7800);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1E - Copper/Fiber Auto-detect Medium register:    0x%04lx\n", val);
+  write_phy_register(phy_addr, 0x1C, 0x7C00);
+  val = read_phy_register(phy_addr, 0x1C);
+  printf("0x1C:1F - Mode Control register:                       0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x1D);
+  printf("0x1D - PHY Extended Status register:                   0x%04lx\n", val);
+  val = read_phy_register(phy_addr, 0x1E);
+  printf("0x1E - HCD Sumary register:                            0x%04lx\n", val);
+  return(0);
+}
+
+U_BOOT_CMD(phydump, 1, 0, do_dump_phy_reg,
+		"Dump Ethernet PHY registers",
+		"Dump all PHY registers.  Appropriate for BCM-54xx, may be less so for other PHYs");
+
+int do_read_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned int addr;
+  unsigned int val;
+  if (argc < 2) {
+    cmd_usage(cmdtp);
+    return 1;
+  }
+
+  if (first) {
+    eth_init(gd->bd);
+  }
+  addr = simple_strtoul(argv[1], NULL, 0);
+  val = read_phy_register(phy_addr, addr);
+  printf("0x%04x\n", val);
+  return(0);
+}
+
+U_BOOT_CMD(phyrd, 2, 0, do_read_phy_reg,
+		"Read an Ethernet PHY register",
+		"Read a value from the Ethernet PHY register specified.  "
+		"The value returned is from the specified register of Ethernet PHY 0");
+
+int do_write_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+  unsigned int addr;
+  unsigned int val;
+  if (argc < 3) {
+    cmd_usage(cmdtp);
+    return 1;
+  }
+
+  if (first) {
+    eth_init(gd->bd);
+  }
+  addr = simple_strtoul(argv[1], NULL, 0);
+  val = simple_strtoul(argv[2], NULL, 0);
+  write_phy_register(phy_addr, addr, val);
+  // printf("0x%04x => 0x%x\n", val, addr);
+  return(0);
+}
+
+U_BOOT_CMD(phywr, 3, 0, do_write_phy_reg,
+		"Write an Ethernet PHY register",
+		"Write a value to the Ethernet PHY register specified.  "
+		"The value  is written to the specified register of Ethernet PHY 0");
+
