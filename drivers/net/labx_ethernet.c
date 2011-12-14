@@ -198,7 +198,10 @@ DECLARE_GLOBAL_DATA_PTR;
 #define BCM5481_RX_SKEW_ENABLE               0x0100
 #define BCM5481_CLOCK_ALIGNMENT_REGISTER_SEL 0x0C00
 #define BCM5481_SHADOW_WRITE                 0x8000
+#define BCM5481_DUPLEX_MODE                  0x0100
 #define BCM5481_XMIT_CLOCK_DELAY             0x0200
+#define BCM5481_ADV_1000BASE_T_HDX_CAP       0x0100
+#define BCM5481_ADV_1000BASE_T_FDX_CAP       0x0200
 #define BCM5481_AUTO_NEGOTIATE_ENABLE        0x1000
 #define BCM5481_HIGH_PERFORMANCE_ENABLE      0x0040
 #define BCM5481_HPE_REGISTER_SELECT          0x0002
@@ -375,6 +378,7 @@ static int first = 1;
 static int labx_eth_phy_ctrl(void)
 {
   unsigned int result;
+  unsigned int readback;
 
   if(first) {
     unsigned int id_high;
@@ -404,11 +408,24 @@ static int labx_eth_phy_ctrl(void)
     			((read_phy_register(phy_addr, 0x1C)& BCM5481_XMIT_CLOCK_DELAY) != 0));
 
 	result = read_phy_register(phy_addr, 0x00);
-	result = result | BCM5481_AUTO_NEGOTIATE_ENABLE;
+	result = result | (BCM5481_AUTO_NEGOTIATE_ENABLE | BCM5481_DUPLEX_MODE);
 	write_phy_register(phy_addr, 0x00, result);
-	printf("Auto-Negotiate Enable: %d (0x%04X) => %d\n",
+	readback = read_phy_register(phy_addr, 0x00);
+	printf("Auto-Negotiate Enable: %d (0x%04X) => %d, Duplex Mode %d => %d\n",
 	                ((result & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0), result,
-	                ((read_phy_register(phy_addr, 0x00) & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0));
+	                ((readback & BCM5481_AUTO_NEGOTIATE_ENABLE) != 0),
+	                ((result & BCM5481_DUPLEX_MODE) != 0),
+	                ((readback & BCM5481_DUPLEX_MODE) != 0));
+
+	result = read_phy_register(phy_addr, 0x09);
+	result = (result & ~BCM5481_ADV_1000BASE_T_HDX_CAP) | BCM5481_ADV_1000BASE_T_FDX_CAP;
+	write_phy_register(phy_addr, 0x09, result);
+	readback = read_phy_register(phy_addr, 0x09);
+	printf("Advertise Half Duplex: %d (0x%04X) => %d, Advertise Full Duplex %d => %d\n",
+	                ((result & BCM5481_ADV_1000BASE_T_HDX_CAP) != 0), result,
+	                ((readback & BCM5481_ADV_1000BASE_T_HDX_CAP) != 0),
+	                ((result & BCM5481_ADV_1000BASE_T_FDX_CAP) != 0),
+	                ((readback & BCM5481_ADV_1000BASE_T_FDX_CAP) != 0));
 
 	result = read_phy_register(phy_addr, 0x18);
 	result = result | BCM5481_SHADOW_WRITE | BCM5481_HPE_REGISTER_SELECT;
