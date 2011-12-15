@@ -15,7 +15,7 @@ set clobstart 0x88000000
 echo Boot FPGA Configuration:
 set bootfpgasize 0x200000
 set bootfpgastart 0x0
-set bootfpganame ITHD_FPGA-failsafe.bin
+set bootfpganame ITHD_Fpga-failsafe.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
