@@ -303,8 +303,8 @@
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,num-cache-interfaces = <0x2>;
 			xlnx,num-param-interfaces = <0x2>;
-			xlnx,param-address-width = <0x9>;
-			xlnx,param-words = <0x200>;
+			xlnx,param-address-width = <0x10>;
+			xlnx,param-words = <0x400>;
 			xlnx,parameter-interlock-fifo = <0x1>;
 		} ;
 		eth01_audio_packetizer: labx-audio-packetizer@82090000 {
@@ -365,7 +365,7 @@
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
-			xlnx,param-address-width = <0x9>;
+			xlnx,param-address-width = <0x10>;
 		} ;
 		eth1: ethernet@82070000 {
 			compatible = "xlnx,labx-ethernet-1.02.a";
@@ -408,7 +408,7 @@
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
-			xlnx,param-address-width = <0x9>;
+			xlnx,param-address-width = <0x10>;
 		} ;
 		host_serial: serial@82040000 {
 			clock-frequency = <62500000>;
