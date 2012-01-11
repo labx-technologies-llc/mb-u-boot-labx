@@ -365,7 +365,7 @@
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
-			xlnx,param-address-width = <0x10>;
+			xlnx,param-address-width = <0xa>;
 		} ;
 		eth1: ethernet@82070000 {
 			compatible = "xlnx,labx-ethernet-1.02.a";
