@@ -1,0 +1,85 @@
+
+#ifndef __FIRMWARE_UPDATE_IDL__
+#define __FIRMWARE_UPDATE_IDL__
+
+#include "AvbDefs.idl"
+#include "CommonTypes.idl"
+
+module FirmwareUpdate
+{
+  typedef sequence<uint8_t> FwData;
+
+  /* Enumerated type used to identify the context (bootloader or Linux) */
+  enum CodeImageType
+  {
+    e_CODE_IMAGE_BOOT,
+    e_CODE_IMAGE_MAIN
+  };
+
+  interface Services
+  {
+      
+    /**
+     * Issues an arbitrary string command to U-Boot, independent of any firmware
+     * update context.
+     *
+     * @param cmd - String command to send to U-Boot immediately
+     */
+    AvbDefs::ErrorCode sendCommand(in string cmd);
+
+    /**
+     * Begins a firmware update of a single run-time image, which consists of 
+     * this call, followed by mutiple calls to sendDataPacket().  Once "length"
+     * bytes of data have been sent in packets, the command specified within 
+     * "cmd" is invoked within U-Boot.
+     *
+     * @param cmd      - String command to invoke after all data has been sent
+     * @param length   - Length, in bytes, of the data image which will be sent
+     *
+     * @return e_EC_SUCCESS upon success, e_EC_CORRUPT_IMAGE if CRC check failed.
+     */
+    AvbDefs::ErrorCode startFirmwareUpdate(in string cmd, 
+                                  in uint32_t length);
+
+    /**
+     * Sends a packet of data for a firmware image using a sequence type.
+     * This must only be called as a followup to a previous invocation of startFirmwareUpdate().
+     *
+     * @param data - Byte sequence constituting the packet of image data being sent
+     *
+     * @return e_EC_SUCCESS upon success, e_EC_UPDATE_NOT_IN_PROGRESS if no
+     *         firmware update context is in progress.
+     */
+    AvbDefs::ErrorCode sendDataPacket(in FwData data);
+
+    /**
+     * Requests the platform to remain in the bootloader, waiting for startFirmwareUpdate()
+     * to be initiated
+     *
+     * @return e_EC_SUCCESS upon success
+     */
+    AvbDefs::ErrorCode remainInBootloader( );
+
+    /**
+     * Requests the platform to remain in the bootloader, leaving control at the console
+     *
+     * @return e_EC_SUCCESS upon success
+     */
+    AvbDefs::ErrorCode requestBootDelay( );
+
+  };
+
+  interface Attributes
+  {
+    /**
+     * Attribute identifying the execution context
+     */
+    AvbDefs::ErrorCode ExecutingImageType(out CodeImageType value);
+
+  };
+};
+
+#endif // __FIRMWARE_UPDATE_IDL__
+
+// vi:set ai sw=4 expandtab ts=4:
+

@@ -87,7 +87,7 @@
 #define TX_PORT_DISABLED  (0)
 #define TX_PORT_ENABLED   (1)
 
-/* Low-level macros for read and write from / to the mailbox */
+/* Low-level macros for read and write from / to the bridge */
 #define BRIDGE_READ_REG(reg) ( *((volatile unsigned long *)reg) )
 #define BRIDGE_WRITE_REG(reg,val) ( *((volatile unsigned long *)reg) = val )
 

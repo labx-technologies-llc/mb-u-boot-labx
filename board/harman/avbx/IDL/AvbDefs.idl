@@ -1,0 +1,40 @@
+
+#ifndef __AVB_IDL__
+#define __AVB_IDL__
+
+#include "CommonTypes.idl"
+
+module AvbDefs
+{
+  /* Enumerated type for generic error codes which may be returned */
+  enum ErrorCode
+  {
+    e_EC_SUCCESS,                    /**< Command successful */
+    e_EC_MALFORMED_REQUEST,          /**< Request message was malformed */
+    e_EC_CAUGHT_EXCEPTION,           /**< Exception was caught remotely */
+    e_EC_INVALID_CLASS_CODE,         /**< An invalid class code was given */
+    e_EC_INVALID_INSTANCE,           /**< An invalid instance number was given */
+    e_EC_INVALID_SERVICE_CODE,       /**< An invalid service code was given */
+    e_EC_INVALID_ATTRIBUTE_CODE,     /**< An invalid attribute code was given */
+    e_EC_INVALID_PARAMETER,          /**< An invalid parameter was given */
+    e_EC_UNREGISTERED_CLIENT,        /**< The client which posted this request is not registered */
+    e_EC_UPDATE_ALREADY_IN_PROGRESS, /**< A firmware update context has already been initiated */
+    e_EC_UPDATE_NOT_IN_PROGRESS,     /**< Image data was sent without a firmware update context started */
+    e_EC_CORRUPT_IMAGE,              /**< CRC check failed on the firmware image */
+    e_EC_NOT_EXECUTED                /**< A request was made in the incorrect execution context */
+  };
+
+  /** 
+   * Type definition for an Ethernet MAC address
+   */
+  struct MacAddress
+  {
+    uint8_t mac[6];
+  };
+
+};
+
+#endif // __AVB_IDL__
+        
+// vi:set ai sw=4 expandtab ts=4:
+
