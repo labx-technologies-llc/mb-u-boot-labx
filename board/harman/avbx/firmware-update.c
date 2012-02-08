@@ -16,7 +16,7 @@
 #define FALSE 0 
 #endif
 
-//#define _LABXDEBUG
+#define _LABXDEBUG
 
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
 

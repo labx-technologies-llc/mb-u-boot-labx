@@ -88,14 +88,15 @@ int ReadLabXMailbox(uint8_t *buffer, uint32_t *size, uint8_t pollForMsg)
  */
 void WriteLabXMailbox(uint8_t *buffer, uint32_t size)
 {
-  int widx, bidx = 0;
+  int widx = 0; 
+  int bidx = 0;
   uint32_t requestWord;
 
   /* Write the response words into the data buffer */
   for(widx = 0; widx < (size + 3) / 4; widx++) {
     requestWord = buffer[bidx+3] | (buffer[bidx+2]<<8) | (buffer[bidx+1]<<16) | (buffer[bidx]<<24); 
     ((uint32_t *) LABX_MBOX_DATA)[widx] = requestWord;
-    bidx=+4;
+    bidx+=4;
   }
   
   /* Commit the response message to the host */
