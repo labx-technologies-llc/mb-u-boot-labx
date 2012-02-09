@@ -16,7 +16,7 @@
 #define FALSE 0 
 #endif
 
-#define _LABXDEBUG
+//#define _LABXDEBUG
 
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
 
@@ -247,6 +247,7 @@ int DoFirmwareUpdate(void)
        setLength_resp(response, respSize);
        WriteLabXMailbox(response, respSize);
        TrigAsyncLabXMailbox(); 
+       executeUpdate = FALSE;
 #ifdef _LABXDEBUG
       printf("Response Length: 0x%02X\n", respSize);
       printf("Response Code: 0x%04X\n", getStatusCode_resp(response));
