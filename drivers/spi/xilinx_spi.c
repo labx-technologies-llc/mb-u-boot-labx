@@ -131,8 +131,8 @@ int spi_xfer(struct spi_slave *slave, unsigned int bitlen, const void *dout,
 	const uchar *txp = dout;
 	uchar *rxp = din;
 
-//	debug("%s: bus:%i cs:%i bitlen:%i bytes:%i flags:%lx\n", __func__,
-//		slave->bus, slave->cs, bitlen, bytes, flags);
+	//debug("%s: bus:%i cs:%i bitlen:%i bytes:%i flags:%lx data:%02X\n", __func__,
+		//slave->bus, slave->cs, bitlen, bytes, flags, *((uint8_t*)dout));
 	if (bitlen == 0)
 		goto done;
 

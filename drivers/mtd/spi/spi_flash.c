@@ -65,6 +65,10 @@ int spi_flash_cmd_write(struct spi_slave *spi, const u8 *cmd, size_t cmd_len,
 	unsigned long flags = SPI_XFER_BEGIN;
 	int ret;
 
+	//printf
+	//    ("CW: cmd = { 0x%02x } Len = %d, Buf = 0x%02X\n",
+	//      cmd, data_len, *(uint8_t*)data);
+
 	if (data_len == 0)
 		flags |= SPI_XFER_END;
 

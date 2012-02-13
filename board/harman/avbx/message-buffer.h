@@ -30,6 +30,7 @@ typedef struct
 // Define a hard class code for firmware update.  The class code for firmware 
 // update maps directly to the AVBX-specific IDL class codes used within Linux.
 typedef enum {
+  k_CC_AvbSystem = 101,
   k_CC_FirmwareUpdate  = 109,
 } ClassCode;
 
@@ -49,6 +50,14 @@ typedef enum {
 typedef enum {
   k_AC_ExecutingImageType = (MIN_ATTRIBUTE_CODE    ),
 } FirmwareUpdateAttributeCode;
+
+typedef enum {
+  k_AC_eventQueueEnabled        = (MIN_ATTRIBUTE_CODE + 2),
+  k_AC_eventQueueDepth          = (MIN_ATTRIBUTE_CODE + 3),
+  k_AC_eventQueueOverflowPolicy = (MIN_ATTRIBUTE_CODE + 4),
+  k_AC_nextQueuedEvent          = (MIN_ATTRIBUTE_CODE + 5),
+} AvbSystemAttributeCode;
+
 
 /* Request buffer methods */
 extern void     setClassCode_req(RequestMessageBuffer_t msg, uint16_t classCode);
@@ -74,12 +83,12 @@ extern uint16_t sequence_t_uint8_t_unmarshal(ResponseMessageBuffer_t request, ui
 extern uint16_t string_t_unmarshal(ResponseMessageBuffer_t request, uint32_t offset, string_t *str);
 
 /* Marshalling utility methods */
-extern uint32_t uint8_t_marshal(MessageBuffer_t msg, uint32_t offset, uint8_t value);
+extern uint32_t uint8_t_marshal(MessageBuffer_t msg, uint32_t offset, const uint8_t *value);
 extern uint32_t uint8_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint8_t *value);
-extern uint32_t uint16_t_marshal(MessageBuffer_t msg, uint32_t offset, uint16_t value);
+extern uint32_t uint16_t_marshal(MessageBuffer_t msg, uint32_t offset, uint16_t *value);
 extern uint32_t uint16_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint16_t *value);
-extern uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t value);
+extern uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t *value);
 extern uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *value);
-extern uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool value);
+extern uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool *value);
 extern uint32_t bool_unmarshal(MessageBuffer_t msg, uint32_t offset, bool *value);
 #endif

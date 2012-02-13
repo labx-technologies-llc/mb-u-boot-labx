@@ -7,13 +7,46 @@
 
 module FirmwareUpdate
 {
+  /**
+   * Type definition for a firmware update packet
+   */
   typedef sequence<uint8_t> FwData;
+
+  /**
+   * Type definition for a generic sequence of event data
+   */
+  typedef sequence<uint8_t> EventData;
 
   /* Enumerated type used to identify the context (bootloader or Linux) */
   enum CodeImageType
   {
     e_CODE_IMAGE_BOOT,
     e_CODE_IMAGE_MAIN
+  };
+
+  /**
+   * Structure abstracting a generic event; events are always received
+   * generically first in this manner.
+   */
+  struct GenericEvent
+  {
+    uint32_t  eventCode;
+    EventData data;
+  };
+
+  /**
+   * Enumeration for execution states
+   */
+  enum FirmwareUpdateExecutionState {
+    UPDATE_SUCCESS,
+    UPDATE_CORRUPT_IMAGE,
+    UPDATE_NOT_EXECUTED,
+    UPDATE_NUM_STATES
+  };
+
+  struct FirmwareUpdateEvent
+  {
+    FirmwareUpdateExecutionState executionState;
   };
 
   interface Services
@@ -73,8 +106,29 @@ module FirmwareUpdate
   {
     /**
      * Attribute identifying the execution context
+     *
+     * @param value - The current operating context being returned
      */
     AvbDefs::ErrorCode ExecutingImageType(out CodeImageType value);
+
+    /**
+     * Attribute controlling whether the event queue for each type
+     * of event is enabled or not.
+     *
+     * @param eventCode - Specific type of event to modify the queue for
+     * @param enabled   - True if events of the type are to be enqueued,
+     *                    false otherwise.
+     */
+    AvbDefs::ErrorCode eventQueueEnabled(in uint32_t eventCode,
+                                         inout boolean enabled);
+
+    /**
+     * Attribute used to obtain the next enqueued event.  The event is
+     * returned generically, and may encapsulate any event type.
+     *
+     * @param event - The event instance being returned
+     */
+    AvbDefs::ErrorCode nextQueuedEvent(out GenericEvent event);
 
   };
 };

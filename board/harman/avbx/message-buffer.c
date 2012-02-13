@@ -17,14 +17,14 @@ void set_uint8_t(MessageBuffer_t msg, uint32_t offset, uint8_t value)
 void set_uint16_t(MessageBuffer_t msg, uint32_t offset, uint16_t value)
 { 
   /* Pack big-endian */
-  msg[offset] = value >> 8; 
+  msg[offset] = value >> 8;
   msg[offset+1] = value; 
 }
 
 void set_uint32_t(MessageBuffer_t msg, uint32_t offset, uint32_t value)
 { 
   set_uint16_t(msg, offset, value >> 16); 
-  set_uint16_t(msg, offset+2, value); 
+  set_uint16_t(msg, offset+2, value);
 }
 
 uint8_t* get_bytes(MessageBuffer_t msg, uint32_t offset) 
@@ -51,7 +51,7 @@ uint16_t sequence_t_uint8_t_marshal(RequestMessageBuffer_t request, uint32_t off
 {
   uint16_t sequenceOffset = 0;
 
-  sequenceOffset += uint32_t_marshal(request, offset, data->m_size);
+  sequenceOffset += uint32_t_marshal(request, offset, &(data->m_size));
   memcpy(&request[offset + sequenceOffset], data->m_data, data->m_size);
   sequenceOffset += data->m_size;
   return sequenceOffset;
@@ -84,9 +84,9 @@ uint16_t sequence_t_uint8_t_unmarshal(RequestMessageBuffer_t request, uint32_t o
   return sequenceOffset;
 }
 
-uint32_t uint8_t_marshal(MessageBuffer_t msg, uint32_t offset, const uint8_t value)
+uint32_t uint8_t_marshal(MessageBuffer_t msg, uint32_t offset, const uint8_t *value)
 {
-  set_uint8_t(msg,offset,value);
+  set_uint8_t(msg,offset,*value);
   return 1; 
 }
 
@@ -96,9 +96,9 @@ uint32_t uint8_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint8_t *value)
   return 1; 
 }
 
-uint32_t uint16_t_marshal(MessageBuffer_t msg, uint32_t offset, uint16_t value)
+uint32_t uint16_t_marshal(MessageBuffer_t msg, uint32_t offset, uint16_t *value)
 { 
-  set_uint16_t(msg,offset, value); 
+  set_uint16_t(msg,offset, *value); 
   return 2; 
 }
 
@@ -108,9 +108,9 @@ uint32_t uint16_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint16_t *valu
   return 2; 
 }
 
-uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t value)
-{ 
-  set_uint32_t(msg,offset, value); 
+uint32_t uint32_t_marshal(MessageBuffer_t msg, uint32_t offset, uint32_t *value)
+{
+  set_uint32_t(msg,offset, *value); 
   return 4; 
 }
 
@@ -120,9 +120,9 @@ uint32_t uint32_t_unmarshal(MessageBuffer_t msg, uint32_t offset, uint32_t *valu
   return 4; 
 }
 
-uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool value)
+uint32_t bool_marshal(MessageBuffer_t msg, uint32_t offset, bool *value)
 { 
-  set_uint32_t(msg,offset, (value) ? 0xFFFFFFFF : 0x00000000); 
+  set_uint32_t(msg,offset, (*value) ? 0xFFFFFFFF : 0x00000000); 
   return 4; 
 }
     

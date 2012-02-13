@@ -44,6 +44,8 @@
 #define CMD_S25FLXX_BE		0xc7	/* Bulk Erase */
 #define CMD_S25FLXX_DP		0xb9	/* Deep Power-down */
 #define CMD_S25FLXX_RES		0xab	/* Release from DP, and Read Signature */
+#define CMD_S25FLXX_OTPP        0x42    /* Program one bye of data in OTP */
+#define CMD_S25FLXX_OTPR        0x4B    /* Read data in the OTP memory space */
 
 #define SPSN_ID_S25FL008A	0x0213
 #define SPSN_ID_S25FL016A	0x0214
@@ -195,6 +197,71 @@ static int spansion_read_fast(struct spi_flash *flash,
 	return spi_flash_read_common(flash, cmd, sizeof(cmd), buf, len);
 }
 
+static int spansion_write_otp(struct spi_flash *flash,
+			 u32 offset, size_t len, const void *buf)
+{
+	int ret;
+	u8 cmd[4];
+
+	ret = spi_claim_bus(flash->spi);
+	if (ret) {
+		printf("SF: Unable to claim SPI bus\n");
+		return ret;
+	}
+
+	ret = 0;
+		
+	cmd[0] = CMD_S25FLXX_OTPP;
+	cmd[1] = offset >> 16;
+	cmd[2] = offset >> 8;
+	cmd[3] = offset;
+
+	//printf
+	//    ("WOTP: cmd = { 0x%02x 0x%02x%02x%02x } Len = %d, Buf = 0x%02X\n",
+	//      cmd[0], cmd[1], cmd[2], cmd[3], len, *(uint8_t*)buf);
+
+	ret = spi_flash_cmd(flash->spi, CMD_S25FLXX_WREN, NULL, 0);
+	if (ret < 0) {
+		printf("SF: Enabling Write failed\n");
+		return ret;
+	}
+
+	ret = spi_flash_cmd_write(flash->spi, cmd, 4,
+				  buf, 1);
+	if (ret < 0) {
+		printf("SF: SPANSION Page Program failed\n");
+		return ret;
+	}
+
+	ret = spansion_wait_ready(flash, SPI_FLASH_PROG_TIMEOUT);
+	if (ret < 0) {
+		printf("SF: SPANSION page programming timed out\n");
+		return ret;
+	}
+
+	spi_release_bus(flash->spi);
+	return ret;
+}
+
+	
+static int spansion_read_otp(struct spi_flash *flash,
+			     u32 offset, size_t len, void *buf)
+{
+	u8 cmd[5];
+
+	cmd[0] = CMD_S25FLXX_OTPR;
+	cmd[1] = offset >> 16;
+	cmd[2] = offset >> 8;
+	cmd[3] = offset;
+	cmd[4] = 0x00;
+
+	//printf
+	//	("READ: 0x%x => cmd = { 0x%02x 0x%02x%02x%02x%02x } len = 0x%x\n",
+	//	 offset, cmd[0], cmd[1], cmd[2], cmd[3], cmd[4], len);
+
+	return spi_flash_read_common(flash, cmd, sizeof(cmd), buf, len);
+}
+
 static int spansion_write(struct spi_flash *flash,
 			 u32 offset, size_t len, const void *buf)
 {
@@ -227,8 +294,8 @@ static int spansion_write(struct spi_flash *flash,
 		cmd[3] = byte_addr;
 
 		//printf
-		    //("PP: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %d\n",
-		     //buf + actual, cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
+		//    ("PP: 0x%p => cmd = { 0x%02x 0x%02x%02x%02x } chunk_len = %d\n",
+		//     buf + actual, cmd[0], cmd[1], cmd[2], cmd[3], chunk_len);
 
 		ret = spi_flash_cmd(flash->spi, CMD_S25FLXX_WREN, NULL, 0);
 		if (ret < 0) {
@@ -267,8 +334,6 @@ int spansion_erase(struct spi_flash *flash, u32 offset, size_t len)
 	size_t actual;
 	int ret;
 	u8 cmd[4];
-	u8 reg;
-	u8 *regcmd;
 
 	/*
 	 * This function currently uses sector erase only.
@@ -323,7 +388,7 @@ if (offset % sector_size || len % sector_size) {
 	}
 
 
-	printf("SF: SPANSION: Successfully erased %u bytes @ 0x%x\n",
+	printf("SF: SPANSION: Successfully erased %lu bytes @ 0x%x\n",
 	      len * sector_size, offset);
 
 	spi_release_bus(flash->spi);
@@ -366,6 +431,8 @@ struct spi_flash *spi_flash_probe_spansion(struct spi_slave *spi, u8 *idcode)
 	spsn->flash.write = spansion_write;
 	spsn->flash.erase = spansion_erase;
 	spsn->flash.read = spansion_read_fast;
+	spsn->flash.wotp = spansion_write_otp;
+	spsn->flash.rotp = spansion_read_otp;
 	spsn->flash.size = params->page_size * params->pages_per_sector
 	    * params->nr_sectors;
 

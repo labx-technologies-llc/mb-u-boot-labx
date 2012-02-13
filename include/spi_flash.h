@@ -44,6 +44,10 @@ struct spi_flash {
 				size_t len, const void *buf);
 	int		(*erase)(struct spi_flash *flash, u32 offset,
 				size_t len);
+	int		(*wotp)(struct spi_flash *flash, u32 offset,
+				size_t len, const void *buf);
+	int		(*rotp)(struct spi_flash *flash, u32 offset,
+				size_t len, void *buf);
 };
 
 struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
@@ -68,4 +72,15 @@ static inline int spi_flash_erase(struct spi_flash *flash, u32 offset,
 	return flash->erase(flash, offset, len);
 }
 
+static inline int spi_flash_write_otp(struct spi_flash *flash, u32 offset,
+		size_t len, const void *buf)
+{
+	return flash->wotp(flash, offset, len, buf);
+} 
+
+static inline int spi_flash_read_otp(struct spi_flash *flash, u32 offset,
+		size_t len, void *buf)
+{
+	return flash->rotp(flash, offset, len, buf);
+} 
 #endif /* _SPI_FLASH_H_ */

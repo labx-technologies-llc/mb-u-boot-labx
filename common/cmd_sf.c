@@ -17,6 +17,22 @@
 # define CONFIG_SF_DEFAULT_MODE		SPI_MODE_3
 #endif
 
+#ifdef CFG_SPI_OTP
+#define MAC_ADDR_BYTES 6
+#define MAX_MAC_STRING_CHAR 17
+#define OTP_BASE_ADDR 0x114
+#define OTP_LOCK_REGION1_BASE 0x112
+#define OTP_REGION_OFFSET 0x010
+#define OTP_REGION_INSET 0x02
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 static struct spi_flash *flash;
 
 static int do_spi_flash_probe(int argc, char *argv[])
@@ -176,10 +192,181 @@ static int do_spi_flash(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	if (strcmp(cmd, "erase") == 0)
 		return do_spi_flash_erase(argc - 1, argv + 1);
 
+	return 0;
 usage:
 	cmd_usage(cmdtp);
 	return 1;
 }
+
+#ifdef CFG_SPI_OTP
+int char_to_hex(char ch) 
+{
+  	int ret_Value = -1;
+  	if((ch >= '0') & (ch <= '9')) {
+    		ret_Value = (ch - '0');
+  	} else if((ch >= 'A') & (ch <= 'F')){
+    		ret_Value = (ch - 'A' + 10);
+  	} else if((ch >= 'a') & (ch <= 'f')) {
+    		ret_Value = (ch - 'a' + 10);
+	}
+  	return(ret_Value);
+}
+
+int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	int i = 0;
+        int j = 0; 
+        int ret = 0;
+	const char *ethintf = argv[1];
+	const char *mac = argv[2];
+	uint8_t macbyte[8];
+	uint8_t stored_macbyte[8];
+	uint8_t lockbits;
+	int skip_colon = TRUE; 
+        int idx = 2;
+	int ethnum = char_to_hex(ethintf[3]);
+
+	if (argc < 3)
+		goto usage;
+
+	if(ethnum > (NUM_ETH_PORTS-1))
+	{  
+		printf("Interface eth%d exceeds number of available ports\n", ethnum);
+		goto fail;
+	}
+	else if (strlen(argv[2]) != MAX_MAC_STRING_CHAR)
+	{
+		puts("Invalid MAC address, please use format - xx:xx:xx:xx:xx:xx\n");
+		goto fail;
+	}
+
+	puts ("Writing MAC to OTP flash...\n");
+
+	// Convert colon delimited MAC address into byte array
+	for(j = 0; j < MAX_MAC_STRING_CHAR; j++)
+	{	
+		if(mac[j] == ':')
+		{	
+			// Skip colon character
+			skip_colon = TRUE;
+			// Increment MAC byte index
+			idx++;
+		}
+		else
+		{
+			if(skip_colon)
+			{
+				macbyte[idx] = char_to_hex(mac[j]);
+				skip_colon = FALSE;
+			}
+			else
+			{
+				macbyte[idx] <<= 4;
+				macbyte[idx] += char_to_hex(mac[j]);
+			}
+		}
+	}
+
+	// Set the first two bytes to 0x00 for identification	
+	macbyte[0] = 0x00;
+	macbyte[1] = 0x00;
+
+	// Probe SPI flash device
+	run_command(getenv("spiprobe"), flag);
+	
+	ulong otp_addr = (ulong)(OTP_BASE_ADDR + (ethnum * OTP_REGION_OFFSET));
+	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION1_BASE;
+	uint8_t lockmask = 0x01 << ethnum;
+	
+	ret = spi_flash_read_otp(flash, otp_lock_addr, 1, (void*)&lockbits);
+	
+	if((lockbits & lockmask) != 0) 
+	{ 
+		lockmask = lockmask ^ 0xFF;
+		for(i = 0; i < (MAC_ADDR_BYTES+OTP_REGION_INSET); i++) 
+		{
+        		ret = spi_flash_write_otp(flash, (otp_addr+i), 1, (void*)&macbyte[i]);
+		}
+
+		// Read MAC written to OTP and verify
+		ret = spi_flash_read_otp(flash, otp_addr, (MAC_ADDR_BYTES+OTP_REGION_INSET), (void*)stored_macbyte); 
+		
+		for(i = 0; i < (MAC_ADDR_BYTES+OTP_REGION_INSET); i++) {
+			if(stored_macbyte[i] != macbyte[i]) goto fail;			
+		}
+
+		// Lock MAC address OTP region
+		ret = spi_flash_write_otp(flash, otp_lock_addr, 1, (void*)&lockmask);  
+	} else 
+	{
+		printf("OTP region for %s is locked\n", ethintf);
+		goto fail;
+	}
+	
+	if (ret) {
+		printf("SPI flash %s failed\n", argv[0]);
+		return 1;
+	}
+	else {
+		printf("Successfully programmed %s and locked OTP region\n", ethintf);
+	}
+
+	return 0;
+
+usage:
+	cmd_usage(cmdtp);
+fail:
+	return 1;
+}
+
+int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	int i = 0;
+        int ret = 0;
+	int ethnum = 0;
+	const char *ethintf;
+        uint8_t macbyte[6];
+
+	if (argc < 2)
+		goto usage;
+
+	ethintf = argv[1]; 
+	ethnum = char_to_hex(ethintf[3]);
+
+	if(ethnum > (NUM_ETH_PORTS-1))
+	{  
+		printf("Interface eth%d exceeds number of available ports\n", ethnum);
+		goto fail;
+	}
+	
+	puts ("Reading MAC from OTP flash...\n");
+	
+	// Probe SPI flash device
+	run_command(getenv("spiprobe"), flag);
+	
+	ulong otp_addr = (ulong)(OTP_BASE_ADDR + (ethnum * OTP_REGION_OFFSET) + OTP_REGION_INSET);
+	printf("eth%d MAC: ", ethnum);
+	ret = spi_flash_read_otp(flash, otp_addr, MAC_ADDR_BYTES, (void*)macbyte); 
+	for(i = 0; i < MAC_ADDR_BYTES; i++) { 
+		if(i == (MAC_ADDR_BYTES-1)) {
+		  printf("%02X\n", macbyte[i]); 
+		} else
+		  printf("%02X:", macbyte[i]);
+	}
+
+	if (ret) {
+		printf("SPI read %s failed\n", argv[0]);
+		return 1;
+	}
+
+	return 0;
+
+usage:
+	cmd_usage(cmdtp);
+fail:
+	return 1;
+}
+#endif
 
 U_BOOT_CMD(
 	sf,	5,	1,	do_spi_flash,
@@ -190,5 +377,20 @@ U_BOOT_CMD(
 	"				  `offset' to memory at `addr'\n"
 	"sf write addr offset len	- write `len' bytes from memory\n"
 	"				  at `addr' to flash at `offset'\n"
-	"sf erase offset len		- erase `len' bytes from `offset'"
+	"sf erase offset len		- erase `len' bytes from `offset'\n"
+         
 );
+
+#ifdef CFG_SPI_OTP
+U_BOOT_CMD(
+	setmac,		3,	1,	do_setmac,
+	"Write MAC address to SPI flash OTP area",
+	"interface MAC (format: XX:XX:XX:XX:XX:XX) - set permanent MAC for interface\n"
+);
+
+U_BOOT_CMD(
+	readmac,	2,	1,	do_getmac,
+	"Read MAC address from SPI flash OTP area",
+	"interface - read permanent MAC for interface\n"
+);
+#endif     

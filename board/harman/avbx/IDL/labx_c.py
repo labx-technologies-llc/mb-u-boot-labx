@@ -416,9 +416,7 @@ class CxxTypeHeaderVisitor (CxxTypeVisitor):
     def outputEnum(self, node, name):
         attr = ""
         ma = ""
-        ref = ""
-        if name == "unmarshal":
-            ref="*"
+        ref = "*"
         
         typename = idlutil.ccolonName(node.scopedName())
         self.st.out("extern uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value);", tn = string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma,ref=ref)
@@ -452,9 +450,7 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
     def outputStruct(self, node, name):
         attr = ""
         ma = ""
-        ref = ""
-        if(name == "unmarshal"):
-            ref = "&"
+        ref = "&"
         typename = idlutil.ccolonName(node.scopedName())
         self.st.out("uint32_t @sn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@sn@ *value)", sn=string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma)
         self.st.out("{")
@@ -481,7 +477,7 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
                     self.st.dec_indent()
                     self.st.out("}")
         if (name == "marshal"):
-            self.st.out("(void) uint32_t_marshal(buffer, offset, structOffset); // struct length")
+            self.st.out("(void) uint32_t_marshal(buffer, offset, &structOffset); // struct length")
         self.st.out("return structOffset;")
         self.st.dec_indent()
         self.st.out("}\n")
@@ -493,16 +489,14 @@ class CxxTypeImplVisitor (CxxTypeVisitor):
     def outputEnum(self, node, name):
         attr = ""
         ma = ""
-        ref = ""
-        if name == "unmarshal":
-            ref="*"
+        ref = "*"
         typename = idlutil.ccolonName(node.scopedName())
         self.st.out("uint32_t @tn@_@name@(@ma@MessageBuffer_t buffer, uint32_t offset, @attr@@tn@ @ref@value)", tn = string.replace(typename, ":", "_"), name=name, attr=attr, ma=ma,ref=ref)
         self.st.out("{")
         self.st.inc_indent()
         if name == "marshal":
-            self.st.out("uint32_t valueInt = (uint32_t)value;")
-            self.st.out("return uint32_t_@name@(buffer, offset, valueInt);", name=name)
+            self.st.out("uint32_t valueInt = (uint32_t) *value;")
+            self.st.out("return uint32_t_@name@(buffer, offset, &valueInt);", name=name)
         else:
             self.st.out("uint32_t valueInt;")
             self.st.out("uint32_t size = uint32_t_@name@(buffer, offset, &valueInt);", name=name)
@@ -973,7 +967,7 @@ class CxxTreeVisitor (idlvisitor.AstVisitor):
         if p.is_in() and (setter == eSetter):
             return
         if p.is_out():
-            st.out("offset += @pt@_marshal(@bn@, offset, @pn@);", pt=ptvisitor.getResultType(), pn=p.identifier(), bn=bn)
+            st.out("offset += @pt@_marshal(@bn@, offset, &@pn@);", pt=ptvisitor.getResultType(), pn=p.identifier(), bn=bn)
 
     def outputStubBody(self, st, node, setter, returnType):
         st.out("{")

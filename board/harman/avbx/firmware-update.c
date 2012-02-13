@@ -26,11 +26,19 @@
 /* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
 #define GENERAL5_MAGIC (0x0ABCD)
 
-AvbDefs__ErrorCode executeFirmwareUpdate(void);
+/* Constant definitions for event types supported by the AVB platform.
+* These are hash values computed from the stream class names.
+*/
+const uint32_t NULL_EVENT            = 0x00000000;
+const uint32_t FIRMWARE_UPDATE_EVENT = 0x846C034D;
 
-int bootDelay = 0;
-int firmwareUpdate = 0;
-int executeUpdate = 0;
+FirmwareUpdate__FirmwareUpdateExecutionState *state; 
+
+int bootDelay = FALSE;
+int firmwareUpdate = FALSE;
+int executeUpdate = FALSE;
+int queueEnabled = FALSE;
+int eventValid = FALSE;
 
 /**
  * Simple structure to encapsulate firmware update globals
@@ -82,7 +90,7 @@ AvbDefs__ErrorCode startFirmwareUpdate(string_t cmd,
   fwUpdateCtxt.bytesReceived         = 0;
   fwUpdateCtxt.fwImageBase           = (uint8_t*) XPAR_DDR2_CONTROL_MPMC_BASEADDR;
   fwUpdateCtxt.fwImagePtr            = fwUpdateCtxt.fwImageBase;
-
+  
   return(returnValue);
 }
 
@@ -94,7 +102,7 @@ AvbDefs__ErrorCode startFirmwareUpdate(string_t cmd,
  */
 AvbDefs__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 {
-  AvbDefs__ErrorCode sendSuccess = e_EC_SUCCESS;
+  AvbDefs__ErrorCode returnValue = e_EC_SUCCESS;
 
   if(!fwUpdateCtxt.bUpdateInProgress) return e_EC_UPDATE_NOT_IN_PROGRESS;
   memcpy(fwUpdateCtxt.fwImagePtr,data->m_data,data->m_size);
@@ -112,18 +120,17 @@ AvbDefs__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
     printf("Received all %d bytes of image\n", fwUpdateCtxt.length);
 
     /* Begin executing the update command */
-    executeUpdate = 1;  
+    executeUpdate = TRUE;  
  
     /* The firmware update is now no longer in progress */
     fwUpdateCtxt.bUpdateInProgress = FALSE;
   }
   else fwUpdateCtxt.fwImagePtr += data->m_size;
 
-  return(sendSuccess);
+  return(returnValue);
 }
 
-int doCrcCheck(void)
-{
+int doCrcCheck(void) {
   int returnValue = 0;
 
   if(image_check_type((image_header_t *)fwUpdateCtxt.fwImageBase, IH_TYPE_KERNEL)) {
@@ -141,18 +148,22 @@ end:
   return(returnValue);
 }
 
-AvbDefs__ErrorCode executeFirmwareUpdate(void)
-{
-  if (doCrcCheck() == FALSE)
-    return e_EC_CORRUPT_IMAGE;
+int executeFirmwareUpdate(void) {
+
+  if (doCrcCheck() == FALSE) {
+    *state = UPDATE_CORRUPT_IMAGE;
+    return(1);
+  }
 
   /* Invoke the HUSH parser on the command */
   if(parse_string_outer(fwUpdateCtxt.cmd,
                         (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP)) != 0) {
-    return e_EC_NOT_EXECUTED;
+    *state = UPDATE_NOT_EXECUTED;
+    return(1);
   }
-
-  return e_EC_SUCCESS;
+   
+  *state = UPDATE_SUCCESS;
+  return(0);
 }
 
 AvbDefs__ErrorCode sendCommand(string_t cmd) {
@@ -170,15 +181,45 @@ AvbDefs__ErrorCode sendCommand(string_t cmd) {
 AvbDefs__ErrorCode remainInBootloader(void) {
   int returnValue = e_EC_SUCCESS;
  
-  firmwareUpdate = 1;
+  firmwareUpdate = TRUE;
   return(returnValue);
 }
 
 AvbDefs__ErrorCode requestBootDelay(void) {
   int returnValue = e_EC_SUCCESS;
  
-  bootDelay = 1;
+  bootDelay = TRUE;
   return(returnValue);
+}
+
+AvbDefs__ErrorCode get_eventQueueEnabled(uint32_t eventCode,
+                                         bool *enabled) {
+  eventCode = FIRMWARE_UPDATE_EVENT;
+  *enabled = queueEnabled;
+  return(e_EC_SUCCESS);
+}
+
+AvbDefs__ErrorCode set_eventQueueEnabled(uint32_t eventCode,
+                                         bool enabled) {
+  printf("Setting event queue for %08X %s\n", eventCode, (enabled ? "enabled" : "disabled"));
+  queueEnabled = enabled;
+  return(e_EC_SUCCESS);
+}
+
+AvbDefs__ErrorCode get_nextQueuedEvent(FirmwareUpdate__GenericEvent *event) { 
+  int returnValue = e_EC_SUCCESS;
+
+  if(eventValid) { 
+    event->eventCode = FIRMWARE_UPDATE_EVENT;
+    event->data.m_data[0] = *state;
+    event->data.m_size = 0x01;
+    eventValid = FALSE;
+    printf("Sending firmware update event status for %08X of 0x%02X\n", event->eventCode, *state);
+  } else {
+      event->eventCode = NULL_EVENT;
+  }
+
+  return(returnValue); 
 }
 
 /* Statically-allocated request and response buffers for use with IDL */
@@ -193,10 +234,8 @@ static ResponseMessageBuffer_t response;
  */
 int DoFirmwareUpdate(void)
 {
-  AvbDefs__ErrorCode sendSuccess = e_EC_SUCCESS;
   uint32_t reqSize = sizeof(RequestMessageBuffer_t);
   uint32_t respSize;
-  int i;
 
   /* Continuously read request messages from the host and unmarshal them */
   while (ReadLabXMailbox(request, &reqSize, TRUE)) {
@@ -204,7 +243,9 @@ int DoFirmwareUpdate(void)
     switch(getClassCode_req(request)) {
 	
     case k_CC_FirmwareUpdate:
+    case k_CC_AvbSystem:
 #ifdef _LABXDEBUG
+      int i;
       printf("Length: 0x%02X\n", getLength_req(request));
       printf("CC: 0x%02X\n", getClassCode_req(request));
       printf("SC: 0x%02X\n", getServiceCode_req(request));
@@ -240,28 +281,17 @@ int DoFirmwareUpdate(void)
       printf("]\n");
 #endif
 
-      if(executeUpdate) {
-       sendSuccess = executeFirmwareUpdate();
-       setStatusCode_resp(response, (uint16_t)sendSuccess);
-       respSize = getLength_resp(response);
-       setLength_resp(response, respSize);
-       WriteLabXMailbox(response, respSize);
-       TrigAsyncLabXMailbox(); 
-       executeUpdate = FALSE;
-#ifdef _LABXDEBUG
-      printf("Response Length: 0x%02X\n", respSize);
-      printf("Response Code: 0x%04X\n", getStatusCode_resp(response));
-      printf("Response: [ "); 
-      for(i = 0; i < respSize; i++) {
-        printf("%02X", response[i]); 
-      } 
-      printf(" ]\n");
-#endif
-       break;
-      } 
+    if(executeUpdate) {
+      executeFirmwareUpdate();
+      executeUpdate = FALSE;
+      if(queueEnabled) {
+        eventValid = TRUE;
+        TrigAsyncLabXMailbox();
+      }
+    } 
 
-    /* Re-set the max request size for the next iteration */
-    reqSize = sizeof(RequestMessageBuffer_t);
+  /* Re-set the max request size for the next iteration */
+  reqSize = sizeof(RequestMessageBuffer_t);
   }
 
   return 1;
