@@ -469,7 +469,11 @@
 			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,include-dphase-timer = <0x0>;
+			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
+			xlnx,redundant = <0x1>;
+			xlnx,tdm-lane-count = <0x4>;
+			xlnx,tdm-slot-density = <0x10>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.00.b";
