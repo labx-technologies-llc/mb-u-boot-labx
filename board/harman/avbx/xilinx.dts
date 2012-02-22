@@ -294,7 +294,7 @@
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "DMA_NPI";
 			xlnx,internal-params = <0x1>;
-			xlnx,microcode-words = <0x400>;
+			xlnx,microcode-words = <0x800>;
 			xlnx,mplb-awidth = <0x20>;
 			xlnx,mplb-clk-period-ps = <0x2710>;
 			xlnx,mplb-dwidth = <0x80>;
