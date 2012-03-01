@@ -1,6 +1,6 @@
 #
-# (C) Copyright 2010
-# Chris Pane, Lab X Technologies, chris.pane@labxtechnologies.com
+# (C) Copyright 2000-2006
+# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -23,25 +23,18 @@
 
 include $(TOPDIR)/config.mk
 
-LIB	= libidl.a
-
-CFLAGS += -I..
-COBJS   = AvbDefs_type.o
-COBJS  += FirmwareUpdate_type.o
-COBJS  += FirmwareUpdate_unmarshal.o 
-
-IDLSRC  = AvbDefs.idl
-IDLSRC += FirmwareUpdate.idl
+LIB	= $(obj)lib$(BOARD).a
+CFLAGS	+= -I$(TOPDIR)/lib_idl -I. 
+COBJS	= $(BOARD).o firmware-update.o labx-mailbox.o
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
-$(LIB):	$(OBJS)
-	$(AR) $(ARFLAGS)s $@ $(OBJS)
+$(LIB):	do_idls $(OBJS) 
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(TOPDIR)/lib_idl/*.o
 
-do_idls: $(IDLSRC:.idl=.h) 
-
-%.h: %.idl labx_c.py
-	    omniidl -p ./ -b labx_c $<
+do_idls:
+	$(MAKE) -C $(TOPDIR)/lib_idl do_idls
+	$(MAKE) -C $(TOPDIR)/lib_idl
 
 distclean:	clean
 	rm -f $(LIB) core *.bak $(obj).depend
