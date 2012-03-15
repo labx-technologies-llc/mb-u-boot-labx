@@ -1267,6 +1267,8 @@ int do_unzip ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
+	if (argc < 2) goto usage;
+
 	int rc = 0;
 	int i;
 	const char * const script_list[] = {
@@ -1291,14 +1293,10 @@ int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
 			"echo Flash load complete",
 			"echo -------------------"};
-	const char default_rom_image[] = ROM_IMAGE_NAME;
+
 	char tftpcmd[80];
         strcpy(tftpcmd, "tftp 0x88000000 ");
-	if (argc < 2) {
-		strcat(tftpcmd, default_rom_image);
-	} else {
-		strcat(tftpcmd, argv[1]);
-	}
+	strcat(tftpcmd, argv[1]);
 	for (i = 0; i < sizeof(script_list)/sizeof(script_list[0]); i++) {
 		if (script_list[i] != NULL) {
 			rc = run_command(script_list[i], flag);
@@ -1307,6 +1305,9 @@ int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		}
 	}
 	return(rc);
+
+usage:
+	cmd_usage(cmdtp);
 
 }
 

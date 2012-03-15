@@ -305,7 +305,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	
 	if (ret) {
 		printf("SPI flash %s failed\n", argv[0]);
-		return 1;
+		goto fail;
 	}
 	else {
 		printf("Successfully programmed %s and locked OTP region\n", ethintf);
@@ -315,6 +315,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 usage:
 	cmd_usage(cmdtp);
+        return 1;
 fail:
 	return 1;
 }
@@ -363,6 +364,8 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 usage:
 	cmd_usage(cmdtp);
+        return 1;
+
 fail:
 	return 1;
 }
