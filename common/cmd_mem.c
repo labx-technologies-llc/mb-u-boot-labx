@@ -1265,8 +1265,57 @@ int do_unzip ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 }
 #endif /* CONFIG_CMD_UNZIP */
 
+int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+{
+	int rc = 0;
+	int i;
+	const char * const script_list[] = {
+			"echo Starting Flash ROM image load",
+			"echo --------------------------------",
+			"setenv autoload no",
+			"setenv ethaddr 00:0a:35:00:44:01",
+			"setenv ipaddr 192.168.1.1",
+			"setenv serverip 192.168.1.100",
+			"setenv netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01",
+			"ping 192.168.1.100",
+			NULL,
+#ifdef CONFIG_SYS_FLASH_CFI
+			"protect off 0x87000000 +0x1000000",
+			"erase 0x87000000 +0x1000000",
+			"cp.b 0x88000000 0x87000000 0x1000000",
+#endif
+#ifdef CONFIG_SPI_FLASH                     
+                        "sf probe 0:0 40000000 3",
+                        "sf erase 0x000000 0x1000000",
+                        "sf write 0x88000000 0x000000 0x1000000",
+#endif
+			"echo Flash load complete",
+			"echo -------------------"};
+	const char default_rom_image[] = ROM_IMAGE_NAME;
+	char tftpcmd[80];
+        strcpy(tftpcmd, "tftp 0x88000000 ");
+	if (argc < 2) {
+		strcat(tftpcmd, default_rom_image);
+	} else {
+		strcat(tftpcmd, argv[1]);
+	}
+	for (i = 0; i < sizeof(script_list)/sizeof(script_list[0]); i++) {
+		if (script_list[i] != NULL) {
+			rc = run_command(script_list[i], flag);
+		} else {
+			rc = run_command(tftpcmd, flag);
+		}
+	}
+	return(rc);
+
+}
 
 /**************************************************/
+U_BOOT_CMD(flashrom, 2, 0, do_flash_rom_image,
+		"Load ROM image from a TFTP server at 192.168.1.100 "
+		"and write to flash",
+                "[image name]");
+
 U_BOOT_CMD(
 	md,	3,	1,	do_mem_md,
 	"memory display",
