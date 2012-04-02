@@ -30,7 +30,7 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-#define CONFIG_FIRMWARE_UPDATE
+//#define CONFIG_FIRMWARE_UPDATE
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 

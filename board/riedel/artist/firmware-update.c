@@ -10,7 +10,8 @@
  * Returns - Void - Will never return if FW update happens(Should be reset by host)
  *
  */
-void CheckFirmwareUpdate(void)
+int CheckFirmwareUpdate(void)
 {
 	// TODO: Check for a firmware update here...
+	return 0;
 }
