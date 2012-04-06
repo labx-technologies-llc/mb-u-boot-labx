@@ -161,6 +161,8 @@
 		ranges ;
 		aes3_rx0: labx-aes3-rx@82200000 {
 			compatible = "xlnx,labx-aes3-rx-1.01.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 11 2 >;
 			reg = < 0x82200000 0x10000 >;
 			xlnx,cache-address-width = <0xa>;
 			xlnx,family = "spartan6";
@@ -198,7 +200,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 2 2 1 2 5 2 >;
-			local-mac-address = [ 00 0a 35 69 4b 00 ];
+			local-mac-address = [ 00 0a 35 3f 03 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -343,7 +345,7 @@
 		gpio: gpio@82220000 {
 			compatible = "xlnx,xps-gpio-2.00.a", "xlnx,xps-gpio-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 11 2 >;
+			interrupts = < 12 2 >;
 			reg = < 0x82220000 0x200 >;
 			xlnx,all-inputs = <0x0>;
 			xlnx,all-inputs-2 = <0x0>;
@@ -363,7 +365,7 @@
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0x19>;
-			xlnx,num-intr-inputs = <0xc>;
+			xlnx,num-intr-inputs = <0xd>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
 			compatible = "xlnx,labx-ptp-1.04.a";
@@ -433,11 +435,13 @@
 			xlnx,num-ss-bits = <0x1>;
 			xlnx,num-transfer-bits = <0x20>;
 			xlnx,sck-ratio = <0x10>;
-			led_slave_0@0 {
-				compatible = "spidev";
+
+			led_slave@0 {
+				compatible = "spidev,spidev";
+				reg = <0x0>;
 				spi-max-frequency = <15625000>;
-				reg = <0>;
-			} ;
+				linux,modalias = "spidev";
+			};
 		} ;
 		system_timer: timer@82030000 {
 			compatible = "xlnx,xps-timer-1.02.a", "xlnx,xps-timer-1.00.a";
