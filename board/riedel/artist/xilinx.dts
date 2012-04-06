@@ -200,7 +200,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 2 2 1 2 5 2 >;
-			local-mac-address = [ 00 0a 35 3f 03 01 ];
+			local-mac-address = [ 00 0a 35 3f 03 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
