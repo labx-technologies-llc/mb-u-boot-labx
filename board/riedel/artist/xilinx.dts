@@ -433,7 +433,7 @@
 			xlnx,family = "spartan6";
 			xlnx,fifo-exist = <0x1>;
 			xlnx,num-ss-bits = <0x1>;
-			xlnx,num-transfer-bits = <0x20>;
+			xlnx,num-transfer-bits = <0x8>;
 			xlnx,sck-ratio = <0x10>;
 
 			led_slave@0 {
