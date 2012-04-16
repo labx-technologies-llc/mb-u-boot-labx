@@ -388,6 +388,12 @@ struct labx_eth_private {
   unsigned char dev_addr[6];
 };
 
+/* Private data instance to use for the single instance */
+static struct labx_eth_private priv_data = {
+  .idx      = 0,
+  .dev_addr = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00},  
+};
+
 /* Performs a register write to a PHY */
 static void write_phy_register(unsigned long int phy_addr, unsigned int reg_addr, unsigned int phy_data)
 {
@@ -400,7 +406,10 @@ static void write_phy_register(unsigned long int phy_addr, unsigned int reg_addr
   *((volatile unsigned int *) addr) = 
     (PHY_MDIO_WRITE | ((phy_addr & PHY_ADDR_MASK) << PHY_ADDR_SHIFT) |
      (reg_addr & PHY_REG_ADDR_MASK));
-  while(*((volatile unsigned int *) addr) & PHY_MDIO_BUSY);
+
+  /* Wait for the MDIO unit to go busy, then idle again */
+  while((*((volatile uint32_t *) addr) & PHY_MDIO_BUSY) == 0);
+  while((*((volatile uint32_t *) addr) & PHY_MDIO_BUSY) != 0);
 }
 
 /* Performs a register read from a PHY */
@@ -415,7 +424,11 @@ static unsigned int read_phy_register(unsigned long int phy_addr, unsigned int r
   *((volatile unsigned int *) addr) = 
     (PHY_MDIO_READ | ((phy_addr & PHY_ADDR_MASK) << PHY_ADDR_SHIFT) |
      (reg_addr & PHY_REG_ADDR_MASK));
-  while(*((volatile unsigned int *) addr) & PHY_MDIO_BUSY);
+
+  /* Wait for the MDIO unit to go busy, then idle again */
+  while((*((volatile uint32_t *) addr) & PHY_MDIO_BUSY) == 0);
+  while((*((volatile uint32_t *) addr) & PHY_MDIO_BUSY) != 0);
+
   addr = (LABX_MDIO_ETH_BASEADDR + MDIO_DATA_REG);
   readValue = *((volatile unsigned int *) addr);
   return(readValue);
@@ -1048,12 +1061,12 @@ int labx_eth_initialize(bd_t *bis)
   sprintf(dev->name, "Lab X Ethernet, eth%d", WHICH_ETH_PORT);
   dev->name[NAMESIZE - 1] = '\0';
   
-  dev->iobase = LABX_PRIMARY_ETH_BASEADDR;
-  dev->priv = 0;
-  dev->init = labx_eth_init;
-  dev->halt = labx_eth_halt;
-  dev->send = labx_eth_send;
-  dev->recv = labx_eth_recv;
+  dev->iobase =  LABX_PRIMARY_ETH_BASEADDR;
+  dev->priv   = &priv_data;
+  dev->init   =  labx_eth_init;
+  dev->halt   =  labx_eth_halt;
+  dev->send   =  labx_eth_send;
+  dev->recv   =  labx_eth_recv;
   
   eth_register(dev);
   
