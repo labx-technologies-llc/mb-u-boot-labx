@@ -3590,9 +3590,9 @@ harman_ithd_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze ithd harman
 	
-harman_studer_config: unconfig
+harman_avb_ep_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze studer harman
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_ep harman
 
 labx_sanfrancesco_config: unconfig
 	@mkdir -p $(obj)include
