@@ -6,6 +6,8 @@ echo Leaving ethaddr unconfigured
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
 
+set crcreturn 1
+
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
@@ -89,7 +91,7 @@ echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
-set update 'tftp 0x88000000 artistUpdate.bin; source 0x88000040'
+set update 'tftp 0x88000000 artistUpdate.bin; if test ${crcreturn} -eq 0; then source 0x88000040; fi'
 
 echo Saving Configurations...
 saveenv
