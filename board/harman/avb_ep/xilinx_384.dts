@@ -323,7 +323,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.06.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82100000 0x10000 >;
@@ -366,7 +366,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.06.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 10 2 >;
 			reg = < 0x82110000 0x10000 >;
