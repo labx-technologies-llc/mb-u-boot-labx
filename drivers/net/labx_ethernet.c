@@ -378,7 +378,6 @@ typedef struct ll_fifo_s {
 /* Locate the FIFO structure offset from the Ethernet base address */
 ll_fifo_s *ll_fifo = (ll_fifo_s *) (LABX_PRIMARY_ETH_BASEADDR + LABX_FIFO_REGS_BASE);
 
-
 #if !defined(CONFIG_NET_MULTI)
 static struct eth_device *xps_ll_dev = NULL;
 #endif
@@ -531,7 +530,6 @@ static int labx_eth_phy_ctrl(void)
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
     if (id_high == BCM548x_ID_HIGH) // General BCM54xx identifier
     {
-	    unsigned int phy_mii_ctl_reg;
         if ((id_low & BCM548x_ID_LOW_MASK) == BCM5481_ID_LOW) { // Special stuff for BCM5481
             printf("BCM5481 PHY setup\n");
             result = read_phy_register(phy_addr, MII_AUXCTL);
@@ -596,7 +594,6 @@ static int labx_eth_phy_ctrl(void)
     	printf("RGMII Transmit Clock Delay: %d (0x%04X) => %d\n",
     			((result & BCM5481_XMIT_CLOCK_DELAY) != 0), result,
     			((bcm54xx_shadow_read(phy_addr, MII_SHD_CLKALIGN) & BCM5481_XMIT_CLOCK_DELAY) != 0));
-
     }
   }
 
@@ -691,6 +688,11 @@ static int labx_eth_phy_ctrl(void)
       rc = 0;
       break;
   }
+  
+  /* Reset transmit and receive after the link speed changes */
+  labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_SOFT_RESET);
+  labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_SOFT_RESET);
+
   #endif
   return rc;
 }
