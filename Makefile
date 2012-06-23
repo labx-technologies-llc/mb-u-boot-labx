@@ -3597,6 +3597,10 @@ harman_avb_ep_config: unconfig
 labx_sanfrancesco_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze sanfrancesco labx
+
+shure_inferno_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno shure
 #========================================================================
 # Blackfin
 #========================================================================
