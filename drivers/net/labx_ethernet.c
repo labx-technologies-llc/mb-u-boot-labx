@@ -546,7 +546,6 @@ static int labx_eth_phy_ctrl(void)
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
     if (id_high == BCM548x_ID_HIGH) // General BCM54xx identifier
     {
-      printf("BCM548x_ID_HIGH\n");
         if ((id_low & BCM548x_ID_LOW_MASK) == BCM5481_ID_LOW) { // Special stuff for BCM5481
             printf("BCM5481 PHY setup\n");
             result = read_phy_register(phy_addr, MII_AUXCTL);
