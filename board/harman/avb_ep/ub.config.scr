@@ -1,102 +1,112 @@
-echo Setting up Harman ITHD environment
+echo Setting up Studer AVB-EP environment
 echo -----------------------------------
 echo Network Configuration:
-echo TODO - Use something for MAC address
+echo TODO - Use a real OUI for MAC address
 set autoload no
-echo Leaving ethaddr unconfigured
+set ethaddr 00:0a:35:00:44:01
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
-
-set crcreturn 1
+set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01
 
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
 
 echo Boot FPGA Configuration:
-set bootfpgasize 0x200000
-set bootfpgastart 0x0
-set bootfpganame ITHD_Fpga-failsafe.bin
+set bootfpgasize 0x260000
+set bootfpgastart 0x87000000
 
 echo Bootloader Configuration:
 set bootsize 0x40000
-set bootstart 0x200000
-set bootenvsize 0x40000
-set bootenvstart 0xE40000
-
-set eraseenv 'sf probe 0:0 40000000 3;sf erase ${bootenvstart} ${bootenvsize}'
+set bootstart 0x87260000
+set bootenvsize 0x08000
+set bootenvstart 0x87FE0000
+set boottextbase 0x89F00000
+set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
-set fdtsize 0x40000
-set fdtstart 0x240000
-set fdtname ITHD.dtb
+set fdtsize 0x10000
+set fdtstart 0x872A0000
+set fdtname64 avb_ep_64.dtb
+set fdtname384 avb_ep_384.dtb
 
 echo Kernel Configuration:
 set kernsize 0x3C0000
-set kernstart 0x280000
+set kernstart 0x872B0000
 
 echo Root Filesystem Configuration:
-set rootfssize 0x200000
-set rootfsstart 0x640000
+set rootfssize 0x1E0000
+set rootfsstart 0x87670000
 
 echo ROM Filesystem Configuration:
 set romfssize 0x200000
-set romfsstart 0x840000
+set romfsstart 0x87850000
 
 echo FPGA Configuration:
-set fpgasize 0x200000
-set fpgastart 0xA40000
-set fpganame ITHD.bin
+set fpgasize 0x260000
+set fpgastart 0x87A50000
+set fpganame64 Avb_EP_Fpga-EP64.bin
+set fpganame384 Avb_EP_Fpga-EP384.bin
+set bootfpganame64 Avb_EP_Fpga-EP64-golden.bin
+set bootfpganame384 Avb_EP_Fpga-EP384-golden.bin
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x200000
-set settingsfsstart 0xC40000
+set settingsfsstart 0x87C60000
 
 echo Boot Configuration:
-set bootcmd 'sf probe 0:0 40000000 3;sf read ${tempkernstart} ${kernstart} ${kernsize};sf read ${tempfdtstart} ${fdtstart} ${fdtsize};bootm ${tempkernstart} - ${tempfdtstart}'
+set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
-set load_boot_fpga 'tftp ${clobstart} ${bootfpganame}'
-set install_boot_fpga 'sf probe 0:0 40000000 3;sf erase ${bootfpgastart} ${bootfpgasize};sf write ${clobstart} ${bootfpgastart} ${bootfpgasize}'
-set update_boot_fpga run load_boot_fpga install_boot_fpga
+set try_load_fpga64 'tftp ${clobstart} ${fpganame64}'
+set try_load_fpga384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame384}; else echo; fi'
+set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
+set update_fpga run try_load_fpga64 install_fpga
 
-set load_fpga 'tftp ${clobstart} ${fpganame}'
-set install_fpga 'sf probe 0:0 40000000 3;sf erase ${fpgastart} ${fpgasize};sf write ${clobstart} ${fpgastart} ${fpgasize}'
-set update_fpga run load_fpga install_fpga
+set try_load_boot_fpga64 'tftp ${clobstart} ${bootfpganame64}'
+set try_load_boot_fpga384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${bootfpganame384}; else echo; fi'
+set install_boot_fpga 'protect off ${bootfpgastart} +${bootfpgasize};erase ${bootfpgastart} +${bootfpgasize};cp.b ${fileaddr} ${bootfpgastart} ${bootfpgasize}'
+set update_boot_fpga run try_load_boot_fpga64 install_boot_fpga
 
 set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
-set install_kernel 'if test ${crcreturn} -eq 0; then sf probe 0:0 40000000 3;sf erase ${kernstart} ${kernsize};sf write ${clobstart} ${kernstart} ${filesize}; fi'
+set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
 set update_kernel run load_kernel install_kernel
 
 set load_uboot 'tftp ${clobstart} u-boot.bin'
-set install_uboot 'sf probe 0:0 40000000 3;sf erase ${bootstart} ${bootsize};sf write ${clobstart} ${bootstart} ${filesize}'
+set install_uboot 'protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};cp.b ${fileaddr} ${bootstart} ${filesize}'
 set update_uboot run load_uboot install_uboot
 
 set load_rootfs 'tftp ${clobstart} rootfs.romfs'
-set install_rootfs 'sf probe 0:0 40000000 3;sf erase ${rootfsstart} ${rootfssize};sf write ${clobstart} ${rootfsstart} ${filesize}'
+set install_rootfs 'protect off ${rootfsstart} +${rootfssize};erase ${rootfsstart} +${rootfssize};cp.b ${fileaddr} ${rootfsstart} ${filesize}'
 set update_rootfs run load_rootfs install_rootfs
 
 set load_romfs 'tftp ${clobstart} usr.romfs'
-set install_romfs 'sf probe 0:0 40000000 3;sf erase ${romfsstart} ${romfssize};sf write ${clobstart} ${romfsstart} ${filesize}'
+set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
 set update_romfs run load_romfs install_romfs
 
-set load_fdt 'tftp ${clobstart} ${fdtname}'
-set install_fdt 'sf probe 0:0 40000000 3;sf erase ${fdtstart} ${fdtsize};sf write ${clobstart} ${fdtstart} ${filesize}'
-set update_fdt run load_fdt install_fdt
+set try_load_fdt64 'tftp ${clobstart} ${fdtname64}'
+set try_load_fdt384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname384}; else echo; fi'
+set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
+set update_fdt run try_load_fdt64 install_fdt
 
 set load_settingsfs 'tftp ${clobstart} settings.jffs2'
-set install_settingsfs 'sf probe 0:0 40000000 3;sf erase ${settingsfsstart} ${settingsfssize};sf write ${clobstart} ${settingsfsstart} ${filesize}'
+set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
 set update_settingsfs run load_settingsfs install_settingsfs
+
+set update_all 'ping ${serverip} ; run update_fpga update_uboot update_fdt update_kernel update_rootfs update_romfs update_settingsfs'
 
 echo Shortcuts for Development:
 set tempkernstart 0x88800000
 set tempfdtstart 0x88700000
 set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 
-echo Harman ITHD Firmware Update
-set blobname HarmanITHD.bin
-set blobrunstart 0x88000040
-set update_blob 'tftp ${clobstart} ${blobname};if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
+echo Firmware Update Configuration
+setenv blobname avbEpUpdate.bin
+setenv blobrunstart 0x88000040
+set ipset 'setenv ipaddr 192.168.1.1; setenv serverip 192.168.1.100; ping ${serverip}'
+setenv load_blob 'tftp ${clobstart} ${blobname}'
+setenv install_blob 'if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
+setenv update_blob run load_blob install_blob
 
 echo Saving Configurations...
 saveenv

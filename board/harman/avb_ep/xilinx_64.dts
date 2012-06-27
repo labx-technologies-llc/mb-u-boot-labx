@@ -285,7 +285,7 @@
 		audio_dma: labx-dma@82070000 {
 			compatible = "xlnx,labx-dma-1.03.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 0 2 >;
+			interrupts = < 1 2 >;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,cache-address-width = <0xb>;
 			xlnx,cache-data-width = <0x20>;
@@ -313,7 +313,7 @@
 			interrupt-parent = <&irq_control>;
 			interrupts = < 13 2 >;
 			reg = < 0x820c0000 0x10000 >;
-			xlnx,device = "6slx75";
+			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,package = "fgg484";
@@ -332,7 +332,7 @@
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82090000 0x10000 >;
-			xlnx,device = "6slx75";
+			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,package = "fgg484";
@@ -342,7 +342,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 4 2 3 2 15 2 >;
-			local-mac-address = [ 00 0a 35 3a 25 00 ];
+			local-mac-address = [ 00 0a 35 cd 8a 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -361,7 +361,7 @@
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x400>;
 			xlnx,cache-read-latency = <0x2>;
-			xlnx,device = "6slx75";
+			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,has-suppress-inputs = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
@@ -385,7 +385,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 6 2 5 2 >;
-			local-mac-address = [ 00 0a 35 3a 4a 01 ];
+			local-mac-address = [ 00 0a 35 cd 71 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82060000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
@@ -404,7 +404,7 @@
 			xlnx,cache-data-width = <0x20>;
 			xlnx,cache-data-words = <0x400>;
 			xlnx,cache-read-latency = <0x2>;
-			xlnx,device = "6slx75";
+			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,has-suppress-inputs = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
@@ -516,7 +516,7 @@
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
-			xlnx,kind-of-intr = <0x182>;
+			xlnx,kind-of-intr = <0x181>;
 			xlnx,num-intr-inputs = <0x11>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
@@ -581,7 +581,7 @@
 		system_timer: timer@82030000 {
 			compatible = "xlnx,xps-timer-1.02.a", "xlnx,xps-timer-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 1 0 >;
+			interrupts = < 0 0 >;
 			reg = < 0x82030000 0x10000 >;
 			xlnx,count-width = <0x20>;
 			xlnx,family = "spartan6";

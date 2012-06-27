@@ -31,6 +31,7 @@
 #include <net.h>
 #include <malloc.h>
 #include <asm/processor.h>
+#include "labx_ethernet.h"
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -218,6 +219,18 @@ DECLARE_GLOBAL_DATA_PTR;
 #define PHY_PARTNER_RECD_LINK      0x4000  /* Link partner received link code word */
 #define PHY_PARTNER_CAP_NPAGE      0x8000  /* Link partner has Next Page cap  */
 
+/* Auxilary Status Summary register */
+#define MII_AUXSTAT_ANEG_COMPLETE  0x8000
+#define MII_AUXSTAT_ANEG_COMPL_ACK 0x4000
+#define MII_AUXSTAT_ANEG_ACK_DET   0x2000
+#define MII_AUXSTAT_ABILITY_DET    0x1000
+#define MII_AUXSTAT_NEXT_PAGE_WAIT 0x0800
+#define MII_AUXSTAT_PAR_DET_FAULT  0x0080
+#define MII_AUXSTAT_REMOTE_FAULT   0x0040
+#define MII_AUXSTAT_ANEG_PG_RECD   0x0020
+#define MII_AUXSTAT_ANEG_PARTNER_CAP 0x0010
+#define MII_AUXSTAT_NXT_PAGE_PARTNER_CAP 0x0008
+
 /* 1000BASE-T Control register */
 #define PHY_1000BT_TEST_MODE_MASK  0xE000  /* Test mode mask                  */
 #define PHY_1000BT_MASTER_ENA      0x1000  /* Enable master / slave manual config */
@@ -253,27 +266,6 @@ DECLARE_GLOBAL_DATA_PTR;
 #define MII_AUX_SELECT_MISCTEST 4
 #define MII_AUX_SELECT_MISCCTL  7
 
-/* Auxilary Status Summary register */
-#define MII_AUXSTAT_ANEG_COMPLETE  0x8000
-#define MII_AUXSTAT_ANEG_COMPL_ACK 0x4000
-#define MII_AUXSTAT_ANEG_ACK_DET   0x2000
-#define MII_AUXSTAT_ABILITY_DET    0x1000
-#define MII_AUXSTAT_NEXT_PAGE_WAIT 0x0800
-#define MII_AUXSTAT_ANEG_LINK_MASK 0x0700
-#define MII_AUXSTAT_ANEG_1000BTF   0x0700
-#define MII_AUXSTAT_ANEG_1000BTH   0x0600
-#define MII_AUXSTAT_ANEG_100BTF    0x0500
-#define MII_AUXSTAT_ANEG_100BT4    0x0400
-#define MII_AUXSTAT_ANEG_100BTH    0x0300
-#define MII_AUXSTAT_ANEG_10BTF     0x0200
-#define MII_AUXSTAT_ANEG_10BTH     0x0100
-#define MII_AUXSTAT_ANEG_NO_LINK   0x0000
-#define MII_AUXSTAT_PAR_DET_FAULT  0x0080
-#define MII_AUXSTAT_REMOTE_FAULT   0x0040
-#define MII_AUXSTAT_ANEG_PG_RECD   0x0020
-#define MII_AUXSTAT_ANEG_PARTNER_CAP 0x0010
-#define MII_AUXSTAT_NXT_PAGE_PARTNER_CAP 0x0008
-
 /* Extended Shadow Register */
 #define MII_BCM54XX_SHD_WRITE   0x8000
 #define MII_BCM54XX_SHD_VAL(x)  ((x & 0x1f) << 10)
@@ -301,6 +293,18 @@ DECLARE_GLOBAL_DATA_PTR;
 /* Upper ID for BCM548x parts */
 #define BCM548x_ID_HIGH 0x0143
 #define BCM548x_ID_LOW_MASK 0xFFF0
+
+/* Special stuff for MV88E1116R parts */
+#define MV881116R_ID_HIGH               0x0141
+#define MV881116R_ID_LOW                0x0E40
+#define MV881116R_ID_LOW_MASK           0xFFF0
+#define MV88E1116_LED_FCTRL_REG		0x000A
+#define MV88E1116_COPPER_SPF_REG1       0x0011
+#define MV88E1116_MAC_CTRL_REG		0x0015
+#define MV88E1116_PGADR_REG		0x0016
+#define MV88E1116_RGMII_TXTM_CTRL	0x0010
+#define MV88E1116_RGMII_RXTM_CTRL	0x0020
+#define MV88E1116_LED_LINK_ACT  	0x021E
 
 /* Special stuff for setting up a BCM5481.  Note that LS nibble of low ID
  * is revision number, and will vary.
@@ -449,6 +453,18 @@ inline void bcm54xx_shadow_write(unsigned long int phy_addr, unsigned int shadow
       MII_BCM54XX_SHD_VAL(shadow) | MII_BCM54XX_SHD_DATA(phy_data));
 }
 
+inline unsigned int mv88e11x_page_read(unsigned long int phy_addr, unsigned int page, unsigned int reg_addr) 
+{
+  write_phy_register(phy_addr, MV88E1116_PGADR_REG, page);
+  return(read_phy_register(phy_addr, reg_addr));
+}
+
+inline void mv88e11x_page_write(unsigned long int phy_addr, unsigned int page, unsigned int reg_addr, unsigned int phy_data) 
+{
+  write_phy_register(phy_addr, MV88E1116_PGADR_REG, page);
+  write_phy_register(phy_addr, reg_addr, phy_data);
+}
+
 /* Indirect register access functions for the 0x17 Expansion Registers */
 inline unsigned int bxm54xx_exp_read(unsigned long int phy_addr, unsigned int shadow)
 {
@@ -518,18 +534,19 @@ static int labx_eth_phy_ctrl(void)
 {
   unsigned int result;
   unsigned int readback;
+  unsigned int id_high;
+  unsigned id_low;
   int rc;
 
-  if(first) {
-    unsigned int id_high;
-    unsigned id_low;
+  /* Read and report the PHY */
+  id_high = read_phy_register(phy_addr, MII_PHY_ID_HIGH);
+  id_low = read_phy_register(phy_addr, MII_PHY_ID_LOW);
 
-    /* Read and report the PHY */
-    id_high = read_phy_register(phy_addr, MII_PHY_ID_HIGH);
-    id_low = read_phy_register(phy_addr, MII_PHY_ID_LOW);
+  if(first) {
     printf("PHY ID at address 0x%02X: 0x%04X%04X\n", phy_addr, id_high, id_low);
     if (id_high == BCM548x_ID_HIGH) // General BCM54xx identifier
     {
+      printf("BCM548x_ID_HIGH\n");
         if ((id_low & BCM548x_ID_LOW_MASK) == BCM5481_ID_LOW) { // Special stuff for BCM5481
             printf("BCM5481 PHY setup\n");
             result = read_phy_register(phy_addr, MII_AUXCTL);
@@ -568,10 +585,6 @@ static int labx_eth_phy_ctrl(void)
 
         } else if ((id_low & BCM548x_ID_LOW_MASK) == BCM5482_ID_LOW) { // Special stuff for BCM5482
             printf("BCM5482 PHY setup\n");
-            write_phy_register(phy_addr, MII_CTL, PHY_CTL_RESET);
-            while ((read_phy_register(phy_addr, MII_CTL) & PHY_CTL_RESET) != 0) {
-	            mdelay(10);
-            }
             bcm54xx_shadow_write(phy_addr, MII_SHD_MODECTL,
             	BCM5481_MII_SHD_MODECTL_RESERVED); /* Copper only, not fiber */
             write_phy_register(phy_addr, MII_ADVERTISE, PHY_ADVERT_PAUSE_ASYM |
@@ -595,6 +608,34 @@ static int labx_eth_phy_ctrl(void)
     			((result & BCM5481_XMIT_CLOCK_DELAY) != 0), result,
     			((bcm54xx_shadow_read(phy_addr, MII_SHD_CLKALIGN) & BCM5481_XMIT_CLOCK_DELAY) != 0));
     }
+    else if (id_high == MV881116R_ID_HIGH && (id_low & MV881116R_ID_LOW_MASK) == MV881116R_ID_LOW) 
+    {
+        printf("88E1116 PHY setup\n");
+
+        write_phy_register(phy_addr, MII_CTL, PHY_CTL_RESET);
+        while ((read_phy_register(phy_addr, MII_CTL) & PHY_CTL_RESET) != 0) {
+	        mdelay(10);
+        }
+
+        write_phy_register(phy_addr, MII_CTL, PHY_CTL_SPEED1000 | PHY_CTL_ANENABLE | PHY_CTL_ANRESTART | PHY_CTL_FULLDPLX);
+        write_phy_register(phy_addr, MII_ADVERTISE, PHY_ADVERT_PAUSE_ASYM |
+                PHY_ADVERT_PAUSE_CAP | PHY_ADVERT_100BTF | PHY_ADVERT_CSMA);
+        write_phy_register(phy_addr, MII_1GBCTL, PHY_1000BT_ADVERT_FULL);
+
+
+        result = mv88e11x_page_read(phy_addr, 0x02, MV88E1116_MAC_CTRL_REG);
+	mv88e11x_page_write(phy_addr, 0x02, MV88E1116_MAC_CTRL_REG, result | MV88E1116_RGMII_RXTM_CTRL | MV88E1116_RGMII_TXTM_CTRL);                         
+
+	/* Adjust LED Control */
+	mv88e11x_page_write(phy_addr, 0x03, MV88E1116_LED_FCTRL_REG, MV88E1116_LED_LINK_ACT);                              
+
+        result = read_phy_register(phy_addr, MII_CTL);
+        write_phy_register(phy_addr, MII_CTL, PHY_CTL_RESET | result);
+        while ((read_phy_register(phy_addr, MII_CTL) & PHY_CTL_RESET) != 0) {
+	        mdelay(10);
+        }
+        //printf("88E1116 PHY setup complete\n");
+    }
   }
 
   if(!link) {
@@ -610,7 +651,7 @@ static int labx_eth_phy_ctrl(void)
       mdelay(100);
     }
   }
-  
+
   result = read_phy_register(phy_addr, MII_STAT);
   if((result & PHY_STAT_LINK_UP) == 0) {
     printf("No link!\n");
@@ -620,12 +661,13 @@ static int labx_eth_phy_ctrl(void)
     }
     return 0;
   }
+
   if(link == 0) {
     link = 1;
   } else {
     return 1;
   }
-  
+
   #if 0
   if((read_phy_register(phy_addr, MII_1GBSTAT) & 0x0800) != 0 &&
       (read_phy_register(phy_addr, MII_1GBCTL) & 0x0200) != 0) {
@@ -647,51 +689,63 @@ static int labx_eth_phy_ctrl(void)
     rc = 0;
   }
   #else
-  result = read_phy_register(phy_addr, MII_AUXSTAT);
-  switch(result & MII_AUXSTAT_ANEG_LINK_MASK)
-  {
-    case MII_AUXSTAT_ANEG_1000BTF:
-      labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_1_GBPS);
-      printf("1000BASE-T/Full Duplex link detected\n");
-      rc = 1;
-      break;
-    case MII_AUXSTAT_ANEG_1000BTH:
-      printf("1000BASE-T/Half Duplex link not supported\n");
-      rc = 0;
-      break;
-    case MII_AUXSTAT_ANEG_100BTF:
-      labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
-      printf("100BASE-T/Full Duplex link detected\n");
-      rc = 1;
-      break;
-    case MII_AUXSTAT_ANEG_100BT4:
-      labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
-      printf("100BASE-T4 link detected\n");
-      rc = 0;
-      break;
-    case MII_AUXSTAT_ANEG_100BTH:
-      printf("100BASE-T/Half Duplex link not supported\n");
-      rc = 0;
-      break;
-    case MII_AUXSTAT_ANEG_10BTF:
-      labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_10_MBPS);
-      printf("10BASE-T/Full Duplex link detected\n");
-      rc = 1;
-      break;
-    case MII_AUXSTAT_ANEG_10BTH:
-      printf("10BASE-T/Half Duplex link not supported\n");
-      rc = 0;
-      break;
-    case MII_AUXSTAT_ANEG_NO_LINK:
-    default:
-      printf("No link detected!\n");
-      rc = 0;
-      break;
-  }
   
-  /* Reset transmit and receive after the link speed changes */
-  labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_SOFT_RESET);
-  labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_SOFT_RESET);
+  if (id_high == MV881116R_ID_HIGH && (id_low & MV881116R_ID_LOW_MASK) == MV881116R_ID_LOW) 
+  { 
+    result = mv88e11x_page_read(phy_addr, 0x00, MV88E1116_COPPER_SPF_REG1);
+    //printf("Result: 0x%04X\n", result);
+  }
+  else 
+  {
+    result = read_phy_register(phy_addr, MII_AUXSTAT);
+  }
+
+    switch(result & MII_ANEG_LINK_MASK)
+    {
+      case MII_ANEG_1000BTF:
+        labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_1_GBPS);
+        printf("1000BASE-T/Full Duplex link detected\n");
+        rc = 1;
+        break;
+      case MII_ANEG_1000BTH:
+        printf("1000BASE-T/Half Duplex link not supported\n");
+        rc = 0;
+        break;
+      case MII_ANEG_100BTF:
+        labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
+        printf("100BASE-T/Full Duplex link detected\n");
+        rc = 1;
+        break;
+      case MII_ANEG_100BT4:
+        labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_100_MBPS);
+        printf("100BASE-T4 link detected\n");
+        rc = 0;
+        break;
+      case MII_ANEG_100BTH:
+        printf("100BASE-T/Half Duplex link not supported\n");
+        rc = 0;
+        break;
+      case MII_ANEG_10BTF:
+        labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_10_MBPS);
+        printf("10BASE-T/Full Duplex link detected\n");
+        rc = 1;
+        break;
+      case MII_ANEG_10BTH:
+        printf("10BASE-T/Half Duplex link not supported\n");
+        rc = 0;
+        break;
+      case MII_ANEG_NO_LINK:
+      default:
+        printf("No link detected!\n");
+        rc = 0;
+        break;
+    }
+
+  if(first) {
+  /* Reset transmit and receive MAC logic after the link speed changes */
+    labx_eth_write_mac_reg(MAC_RX_CONFIG_REG, RX_SOFT_RESET);
+    labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_SOFT_RESET);
+  }
 
   #endif
   return rc;
@@ -1091,7 +1145,7 @@ int do_dump_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
       "==============================================\n", WHICH_ETH_PORT, val);
   val = read_phy_register(phy_addr, 0x00);
   printf("0x00 - MII Control register:                           0x%04lx\n", val);
-  val = read_phy_register(phy_addr, 0x01);
+  val = read_phy_register(phy_addr, MII_STAT);
   printf("0x01 - MII Status  register:                           0x%04lx\n", val);
   val = read_phy_register(phy_addr, MII_ADVERTISE);
   printf("0x04 - Auto-negotiation Advertisement register:        0x%04lx\n", val);
@@ -1109,6 +1163,44 @@ int do_dump_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
   printf("0x0A - 1000Base-T Status register:                     0x%04lx\n", val);
   val = read_phy_register(phy_addr, 0x0F);
   printf("0x0F - IEEE Extended Status register:                  0x%04lx\n", val);
+#ifdef CONFIG_MV88E1116R 
+  val = mv88e11x_page_read(phy_addr, 0x00, MV88E1116_COPPER_SPF_REG1);
+  printf("0:0x10 - Copper Specific Control register 1:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x11);
+  printf("0:0x11 - Copper Specific Status register 1:            0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x12);
+  printf("0:0x12 - Interrupt Enable register - Copper:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x13);
+  printf("0:0x13 - Copper Specific Status register 2:            0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x14);
+  printf("0:0x14 - Copper Specific Control register 3:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x15);
+  printf("0:0x15 - Receive Error Counter register:               0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x00, 0x1A);
+  printf("0:0x1A - Copper Specific Control register 2:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x10);
+  printf("2:0x10 - MAC Specific Control register 1:              0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x12);
+  printf("2:0x12 - Interupt Enable register - MAC:               0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x13);
+  printf("2:0x13 - MAC Specific Status register 2:               0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x15);
+  printf("2:0x15 - Control register - MAC:                       0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x18);
+  printf("2:0x18 - RGMII Output Imp Calib Override register:     0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x02, 0x19);
+  printf("2:0x19 - RGMII Output Imp Target register:             0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x03, 0x10);
+  printf("3:0x10 - LED[2:0] Function Control register:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x03, 0x11);
+  printf("3:0x11 - LED[2:0] Polarity Control register:           0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x05, 0x14);
+  printf("5:0x14 - 1000 BASE-T Pair Skew register:               0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x05, 0x15);
+  printf("5:0x15 - 1000 BASE-T Pair Swap and Polarity register:  0x%04lx\n", val);
+  val = mv88e11x_page_read(phy_addr, 0x05, 0x14);
+  printf("5:0x14 - 1000 BASE-T Pair Skew register:               0x%04lx\n", val);
+#else
   val = read_phy_register(phy_addr, 0x10);
   printf("0x10 - IEEE Extended Control register:                 0x%04lx\n", val);
   val = read_phy_register(phy_addr, 0x11);
@@ -1187,6 +1279,7 @@ int do_dump_phy_reg(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
   printf("0x1D - PHY Extended Status register:                   0x%04lx\n", val);
   val = read_phy_register(phy_addr, 0x1E);
   printf("0x1E - HCD Sumary register:                            0x%04lx\n", val);
+#endif
   return(0);
 }
 

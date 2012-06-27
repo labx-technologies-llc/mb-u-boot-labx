@@ -275,7 +275,7 @@
 	} ;
 	ddr2_control: memory@88000000 {
 		device_type = "memory";
-		reg = < 0x88000000 0x8000000 >;
+		reg = < 0x88000000 0x4000000 >;
 	} ;
 	peripheral_bus: plb@0 {
 		#address-cells = <1>;
@@ -316,7 +316,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 3 2 2 2 14 2 >;
-			local-mac-address = [ 00 0a 35 a4 32 00 ];
+			local-mac-address = [ 00 0a 35 49 89 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
@@ -359,7 +359,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 5 2 4 2 >;
-			local-mac-address = [ 00 0a 35 a4 61 01 ];
+			local-mac-address = [ 00 0a 35 49 64 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;

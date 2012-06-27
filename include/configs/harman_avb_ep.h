@@ -70,15 +70,17 @@
    * FIFO used for data are specified, as well as the corresponding PHY address.
    */
 #  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x01)
+#  define LABX_ETHERNET_PHY_ADDR  (0x08)
 
 #else
 
   /* Use port one instead */
 #  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH1_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x02)
+#  define LABX_ETHERNET_PHY_ADDR  (0x09)
 
 #endif /* if(U_BOOT_PORT = 0) */
+
+#define CONFIG_MV88E1116R 1
 
 /* gpio */
 #ifdef XPAR_XPS_GPIO_0_BASEADDR
@@ -140,9 +142,11 @@
 #define	CONFIG_SYS_MAX_FLASH_SECT	512	                  /* max number of sectors on one chip */
 #define	CONFIG_SYS_FLASH_PROTECTION		                  /* hardware flash protection */
 #define CONFIG_SYS_FLASH_USE_BUFFER_WRITE 1 /* Accelerate Flash writes with on-chip buffers */
+//#define CONFIG_FLASH_CFI_LEGACY 1
+//#define CONFIG_SYS_FLASH_CFI_AMD_RESET 1
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/meyer_sound/CAL_ICS/ub.config.scr!
+ *        variables in ../../board/harman/avb_ep/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
@@ -150,8 +154,6 @@
 #define	CONFIG_ENV_SECT_SIZE	0x20000	 /* 128K */
 #define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      
 #define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
-
-
 
 /* Perform the normal bootdelay checking */
 #define CONFIG_BOOTDELAY 1
