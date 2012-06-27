@@ -308,8 +308,8 @@
 			xlnx,param-words = <0x200>;
 			xlnx,parameter-interlock-fifo = <0x1>;
 		} ;
-		avb_ep_mailbox_0: avb-ep-mailbox@820c0000 {
-			compatible = "xlnx,avb-ep-mailbox-1.00.a";
+		labx_spi_mailbox_0: labx-spi-mailbox@820c0000 {
+			compatible = "xlnx,labx-spi-mailbox-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 13 2 >;
 			reg = < 0x820c0000 0x10000 >;
