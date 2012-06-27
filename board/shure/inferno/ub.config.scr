@@ -99,7 +99,9 @@ setenv spiprobe 'sf probe 0:0 40000000 3'
 echo Shure Inferno Firmware Update
 setenv blobname infernoUpdate.bin
 setenv blobrunstart 0x88000040
-setenv update_blob 'if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
+setenv load_blob 'tftp ${clobstart} ${blobname}'
+setenv install_blob 'if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
+setenv update_blob run load_blob install_blob
 
 echo Saving Configurations...
 saveenv
