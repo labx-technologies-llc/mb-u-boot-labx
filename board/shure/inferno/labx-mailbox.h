@@ -4,7 +4,7 @@
 #include <linux/types.h>
 
 /* LabXMailbox Register Map */
-#define LABX_MBOX_BASE              (XPAR_UHI_MAILBOX0_BASEADDR)
+#define LABX_MBOX_BASE              (XPAR_LABX_SPI_MAILBOX_0_BASEADDR)
 
 /* Maximum number of mailboxes and instance count */
 #define MAX_MAILBOX_DEVICES 1 

@@ -31,11 +31,11 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-#define CONFIG_FIRMWARE_UPDATE
+//#define CONFIG_FIRMWARE_UPDATE
 
 // Configuration for SPI OTP
 #define CFG_SPI_OTP
-#define NUM_ETH_PORTS 2
+#define NUM_ETH_PORTS 1 
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
@@ -54,6 +54,7 @@
 
 /* Use the Lab X Ethernet driver */
 #define CONFIG_LABX_ETHERNET  1
+#define CONFIG_MVSWITCH_6350R 1
 
 /* Top-level configuration setting to determine whether AVB port 0 or 1
  * is used by U-Boot.  AVB 0 is on top at the card edge, with AVB 1

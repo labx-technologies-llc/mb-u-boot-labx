@@ -75,5 +75,8 @@ int board_eth_init(bd_t *bis)
   /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
    * one of them for use with U-Boot.
    */
+#ifdef CONFIG_MVSWITCH_6350R
+  mvEthE6350RSwitchInit();
+#endif
   return(labx_eth_initialize(bis));
 }
