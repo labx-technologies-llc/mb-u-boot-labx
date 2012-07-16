@@ -70,20 +70,11 @@
  */
 #define LABX_MDIO_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
 
-#if (WHICH_ETH_PORT == 0)
-  /* Use port zero; the base address of the primary register file and the
-   * FIFO used for data are specified, as well as the corresponding PHY address.
-   */
+/* Use port zero; the base address of the primary register file and the
+ * FIFO used for data are specified, as well as the corresponding PHY address.
+ */
 #  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x01)
-
-#else
-
-  /* Use port one instead */
-#  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH1_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x02)
-
-#endif /* if(U_BOOT_PORT = 0) */
+#  define LABX_ETHERNET_PHY_ADDR  (0x00)
 
 /* gpio */
 #ifdef XPAR_XPS_GPIO_0_BASEADDR

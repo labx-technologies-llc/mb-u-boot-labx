@@ -288,11 +288,11 @@
 			interrupt-parent = <&irq_control>;
 			interrupts = < 3 2 2 2 14 2 >;
 			local-mac-address = [ 00 0a 35 94 6e 00 ];
-			phy-mdio-controller = <&eth0>;
+			phy-mdio-bus-name = "mv88e6350r";
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
-			xlnx,phy-addr = <0x1>;
-			xlnx,phy-mask = <0xffff>;
+			xlnx,phy-addr = <0x0>;
+			xlnx,phy-mask = <0x10000>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
