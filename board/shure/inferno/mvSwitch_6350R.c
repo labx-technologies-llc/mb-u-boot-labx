@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "mvSwitch_6350R.h"                                
                              
 
-/* CAL_ICS constants; ultimately these and the corresponding code
+/* Inferno constants; ultimately these and the corresponding code
  * should migrate into board-specific init code.
  */
 #define REG_PORT(p)		(0x10 + (p))
@@ -76,8 +76,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define REG_GLOBAL2		0x1c
 
 /* 88E6350R ports assigned to the two CPU ports */
-#define CAL_ICS_CPU_PORT_0 (5)
-#define CAL_ICS_CPU_PORT_1 (6)
+#define INFERNO_CPU_PORT (5)
+#define INFERNO_HMI_PORT (6)
 
 /* Register constant definitions for the 88E6350R LinkStreet switch */
 #define PHYS_CTRL_REG  (1)
@@ -100,11 +100,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Using RGMII delay on switch OUTD output data
  */
  
-#define CAL_ICS_CPU_PORT_0_PHYS_CTRL (RGMII_MODE_RXCLK_DELAY  | \
-                                         RGMII_MODE_GTXCLK_DELAY | \
-                                         FORCE_LINK_UP           | \
-                                         FORCE_DUPLEX_FULL       | \
-                                         FORCE_SPEED_1000)
+#define INFERNO_CPU_PORT_PHYS_CTRL (RGMII_MODE_RXCLK_DELAY  | \
+                                    RGMII_MODE_GTXCLK_DELAY | \
+                                    FORCE_LINK_UP           | \
+                                    FORCE_DUPLEX_FULL       | \
+                                    FORCE_SPEED_1000)
 
 
 
@@ -114,18 +114,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * Using RGMII delay on switch OUTD output data
  */
  
-#define CAL_ICS_CPU_PORT_1_PHYS_CTRL (RGMII_MODE_RXCLK_DELAY  | \
-                                         RGMII_MODE_GTXCLK_DELAY | \
-                                         FORCE_LINK_UP           | \
-                                         FORCE_DUPLEX_FULL       | \
-                                         FORCE_SPEED_1000)
+#define INFERNO_HMI_PORT_PHYS_CTRL (RGMII_MODE_RXCLK_DELAY  | \
+                                    RGMII_MODE_GTXCLK_DELAY | \
+                                    FORCE_LINK_UP           | \
+                                    FORCE_DUPLEX_FULL       | \
+                                    FORCE_SPEED_1000)
 
 
 /* Bit-mask of enabled ports  */
-#define CAL_ICS_ENABLED_PORTS ((1 << 6) | (1 << 5) | (1 << 1) | (1 << 0))
+#define INFERNO_ENABLED_PORTS ((1 << 6) | (1 << 5) | (1 << 1) | (1 << 0))
 
-/* Number of copper 1000Base-TX ports for CAL_ICS */
-#define CAL_ICS_COPPER_PORTS (2)
+/* Number of copper 1000Base-TX ports for Inferno */
+#define INFERNO_COPPER_PORTS (2)
 
 /* E6350R-related */
 #define MV_E6350R_MAX_PORTS_NUM					7
@@ -182,82 +182,76 @@ unsigned int REG_READ(int phy_addr, int reg_addr)
 
 
 
-static void switchVlanInit(
-						               MV_U32 switchCpuPort0,
-						               MV_U32 switchCpuPort1,
+static void switchVlanInit(MV_U32 switchCpuPort,
+                           MV_U32 switchHmiPort,
                            MV_U32 switchMaxPortsNum,
                            MV_U32 switchEnabledPortsMask)
 {
   MV_U32 prt;
-	MV_U16 reg;
+  MV_U16 reg;
 
-	MV_U16 cpu_vid = 0x1;
+  MV_U16 cpu_vid = 0x1;
 
-
-	/* Setting  Port default priority for all ports to zero, set default VID=0x1 */
-    for(prt=0; prt < switchMaxPortsNum; prt++) {
-      if (((1 << prt)& switchEnabledPortsMask)) {
-		    reg = REG_READ (REG_PORT(prt),MV_SWITCH_PORT_VID_REG);
-		    reg &= ~0xefff;
-		    reg |= cpu_vid;
-		    REG_WRITE (REG_PORT(prt),
-                                 MV_SWITCH_PORT_VID_REG,reg);
-        //printf("Yi Cao: set default priority of port %d\n", prt);
-        mdelay(2); 
-      }
-	}
-
+  /* Setting  Port default priority for all ports to zero, set default VID=0x1 */
+  for(prt=0; prt < switchMaxPortsNum; prt++) {
+    if (((1 << prt)& switchEnabledPortsMask)) {
+      reg = REG_READ (REG_PORT(prt),MV_SWITCH_PORT_VID_REG);
+      reg &= ~0xefff;
+      reg |= cpu_vid;
+      REG_WRITE (REG_PORT(prt), MV_SWITCH_PORT_VID_REG,reg);
+      //printf("Yi Cao: set default priority of port %d\n", prt);
+      mdelay(2); 
+    }
+  }
 	
   /* 
-   *  set Ports VLAN Mapping.
-   *	
+   * Set Ports VLAN Mapping.
    */
   
   /* port 0 is mapped to port 5 (CPU Port) */  
   reg = REG_READ ( REG_PORT(0),MV_SWITCH_PORT_VMAP_REG);  
   reg &= ~0x00ff;
   reg |= 0x20;
-  REG_WRITE ( REG_PORT(0),
-                       MV_SWITCH_PORT_VMAP_REG,reg); 
+  REG_WRITE ( REG_PORT(0), MV_SWITCH_PORT_VMAP_REG,reg); 
   //printf("VLAN map for port 0 = 0x%08X\n", reg);
   mdelay(2);   
+
   /* port 1 is mapped to port 6 (CPU Port) */
   reg = REG_READ ( REG_PORT(1),MV_SWITCH_PORT_VMAP_REG);  
   reg &= ~0x00ff;
   reg |= 0x40;
-  REG_WRITE ( REG_PORT(1),
-                       MV_SWITCH_PORT_VMAP_REG,reg);                 
+  REG_WRITE(REG_PORT(1), MV_SWITCH_PORT_VMAP_REG,reg);                 
   //printf("VLAN map for port 1 = 0x%08X\n", reg);      
   mdelay(2);                       
-	/* port 5 (CPU Port) is mapped to port 0*/
-	reg = REG_READ ( REG_PORT(switchCpuPort0),MV_SWITCH_PORT_VMAP_REG);
-	reg &= ~0x00ff;
-	reg |= 0x01;
-	REG_WRITE ( REG_PORT(switchCpuPort0),
-                         MV_SWITCH_PORT_VMAP_REG,reg);
-  //printf("VLAN map for CPU port %d = 0x%08X\n", switchCpuPort0, reg);
-  mdelay(2); 
-  /* port 6 (CPU Port) is mapped to port 1*/
-	reg = REG_READ ( REG_PORT(switchCpuPort1),MV_SWITCH_PORT_VMAP_REG);
-	reg &= ~0x00ff;
-	reg |= 0x02;
-	REG_WRITE ( REG_PORT(switchCpuPort1),
-                         MV_SWITCH_PORT_VMAP_REG,reg);
-  //printf("VLAN map for CPU port %d = 0x%08X\n", switchCpuPort1, reg);
-  mdelay(2); 
-    /*enable only appropriate ports to forwarding mode*/
-    for(prt=0; prt < switchMaxPortsNum; prt++) {
 
-      if ((1 << prt)& switchEnabledPortsMask) {
-        reg = REG_READ ( REG_PORT(prt),MV_SWITCH_PORT_CONTROL_REG);
-        reg |= 0x3;
-        REG_WRITE ( REG_PORT(prt),MV_SWITCH_PORT_CONTROL_REG,reg);
-        //printf("Yi Cao: set forwarding mode of port %d\n", prt);
-        mdelay(2); 
-      }
+  /* port 5 (CPU Port) is mapped to port 0*/
+  reg = REG_READ(REG_PORT(switchCpuPort),MV_SWITCH_PORT_VMAP_REG);
+  reg &= ~0x00ff;
+  reg |= 0x01;
+  REG_WRITE(REG_PORT(switchCpuPort), MV_SWITCH_PORT_VMAP_REG,reg);
+  //printf("VLAN map for CPU port %d = 0x%08X\n", switchCpuPort, reg);
+  mdelay(2); 
+
+  /* port 6 (HMI Port) is mapped to port 1*/
+  reg = REG_READ(REG_PORT(switchHmiPort),MV_SWITCH_PORT_VMAP_REG);
+  reg &= ~0x00ff;
+  reg |= 0x02;
+  REG_WRITE(REG_PORT(switchHmiPort), MV_SWITCH_PORT_VMAP_REG,reg);
+  //printf("VLAN map for HMI port %d = 0x%08X\n", switchHmiPort, reg);
+  mdelay(2); 
+
+  /*enable only appropriate ports to forwarding mode*/
+  for(prt=0; prt < switchMaxPortsNum; prt++) {
+    if ((1 << prt)& switchEnabledPortsMask) {
+      reg = REG_READ ( REG_PORT(prt),MV_SWITCH_PORT_CONTROL_REG);
+      reg |= 0x3;
+      REG_WRITE ( REG_PORT(prt),MV_SWITCH_PORT_CONTROL_REG,reg);
+      //printf("Yi Cao: set forwarding mode of port %d\n", prt);
+      mdelay(2); 
     }
+  }
 
-	return;
+  return;
 }
 
 static void mv88e6350R_hard_reset(void)
@@ -291,91 +285,66 @@ static void mv88e6350R_hard_reset(void)
 
 MV_VOID mvEthE6350RSwitchInit()
 {
-	MV_U32 portIndex;
-	MV_U16 saved_g1reg4;
-	
-	mdelay(1000);
-	mv88e6350R_hard_reset();
-	mdelay(1000);
- 
+  MV_U32 portIndex;
+  MV_U16 saved_g1reg4;
+  
+  mdelay(1000);
+  mv88e6350R_hard_reset();
+  mdelay(1000);
+
   REG_WRITE( 
-             REG_PORT(CAL_ICS_CPU_PORT_0), 
-             PHYS_CTRL_REG,
-             CAL_ICS_CPU_PORT_0_PHYS_CTRL);
+       REG_PORT(INFERNO_CPU_PORT), 
+       PHYS_CTRL_REG,
+       INFERNO_CPU_PORT_PHYS_CTRL);
 
   mdelay(2); 
-                        
-	REG_WRITE( 
-             REG_PORT(CAL_ICS_CPU_PORT_1), 
-             PHYS_CTRL_REG,
-             CAL_ICS_CPU_PORT_1_PHYS_CTRL);
+                  
+  REG_WRITE( 
+       REG_PORT(INFERNO_HMI_PORT), 
+       PHYS_CTRL_REG,
+       INFERNO_HMI_PORT_PHYS_CTRL);
 
-	/* Init vlan LAN0-3 <-> CPU port egiga0 */
-  //printf("CPU port is on 88E6350R port %d and %d\n", CAL_ICS_CPU_PORT_0, CAL_ICS_CPU_PORT_1);
-	mdelay(2); 
-  switchVlanInit(
-                   CAL_ICS_CPU_PORT_0,
-                   CAL_ICS_CPU_PORT_1,
-                   MV_E6350R_MAX_PORTS_NUM,
-                   CAL_ICS_ENABLED_PORTS);
+  /* Init vlan LAN0-3 <-> CPU port egiga0 */
+  //printf("CPU port is on 88E6350R port %d and %d\n", INFERNO_CPU_PORT, INFERNO_HMI_PORT);
+  mdelay(2); 
+  
+  switchVlanInit(INFERNO_CPU_PORT,
+                 INFERNO_HMI_PORT,
+                 MV_E6350R_MAX_PORTS_NUM,
+                 INFERNO_ENABLED_PORTS);
 
-	/* Disable PPU */
-	saved_g1reg4 = REG_READ(REG_GLOBAL,0x4);
-	REG_WRITE(REG_GLOBAL,0x4,0x0);
+  /* Disable PPU */
+  saved_g1reg4 = REG_READ(REG_GLOBAL,0x4);
+  REG_WRITE(REG_GLOBAL,0x4,0x0);
 
 
-	for(portIndex = 0; portIndex < MV_E6350R_MAX_PORTS_NUM; portIndex++) {
-      /* Reset PHYs for all but the port to the CPU */
-      if((portIndex != CAL_ICS_CPU_PORT_0) && (portIndex != CAL_ICS_CPU_PORT_1)) {
-        //printf("Yi Cao: reset phy of port %d\n", portIndex);
-        mdelay(2);
-        REG_WRITE(portIndex, 0, 0x9140);
-      }
+  for(portIndex = 0; portIndex < MV_E6350R_MAX_PORTS_NUM; portIndex++) {
+    /* Reset PHYs for all but the port to the CPU */
+    if((portIndex != INFERNO_CPU_PORT) && (portIndex != INFERNO_HMI_PORT)) {
+      //printf("Yi Cao: reset phy of port %d\n", portIndex);
+      mdelay(2);
+      REG_WRITE(portIndex, 0, 0x9140);
     }
+  }
 
-    /* Initialize LED control registers
-     *
-     * Specifically, Titanium-411 is designed to display per-port status on the
-     * front panel using LED columns COL_0 and COL_1:
-     *
-     * Green -   1 Gbit Link Up
-     * Amber - 100 Mbit Link Up
-     * Red   -  10 Mbit Link Up
-     *
-     * Regardless of color, activity is indicated by blinking.
-     *
-     * On the back panel, LED columns COL_2 and COL_3 reflect status via light
-     * pipes co-located above each port, with the exception of switch port 4,
-     * which is denoted as "Port 5 - SFP Port" on the enclosure.  The SFP port
-     * has a vertical two-LED stack reflecting the same:
-     *
-     * Green - 1 Gbit Link Up
-     * Red   - Any Link Up / Activity (blink)
-     *
-     * This functionality is enabled through the use of the LED control 
-     * registers within the 88E6350R switch chip.
-     */
-    for(portIndex = 0; portIndex < CAL_ICS_COPPER_PORTS; portIndex++) {
-      //printf("Yi Cao: set up the LED of port %d\n",portIndex);
-      mdelay(2); 
-      REG_WRITE( 
-                          REG_PORT(portIndex),
-                          MV_SWITCH_PORT_LED_CTRL_REG,
-                          MV_SWITCH_LED_WRITE(MV_SWITCH_LED_01_CTRL_REG, 
-                                              (MV_SWITCH_LED1_100M_10M_ACT | MV_SWITCH_LED0_1G_100M_ACT)));
-      REG_WRITE( 
-                          REG_PORT(portIndex),
-                          MV_SWITCH_PORT_LED_CTRL_REG,
-                          MV_SWITCH_LED_WRITE(MV_SWITCH_LED_23_CTRL_REG, 
-                                              (MV_SWITCH_LED3_LINK_ACT | MV_SWITCH_LED2_1G_LINK)));
-      REG_WRITE( 
-                          REG_PORT(portIndex),
-                          MV_SWITCH_PORT_LED_CTRL_REG,
-                          MV_SWITCH_LED_WRITE(MV_SWITCH_LED_SPECIAL_CTRL_REG, 
-                                              MV_SWITCH_LED_SPECIAL_NONE));
-    }
+  /*
+   * Initialize LED control registers.
+   *
+   * Default (on power up):
+   *   LED 0 = green -- link, activity; LED 1 = yellow -- GBIT.
+   *
+   * We also want LEDs 2 and 3 turned off so that
+   * the strobing isn't visible in the adjacent
+   * LEDs 0 and 1.
+   */
+  for(portIndex = 0; portIndex < INFERNO_COPPER_PORTS; portIndex++) {
+    REG_WRITE(REG_PORT(portIndex),
+              MV_SWITCH_PORT_LED_CTRL_REG,
+              MV_SWITCH_LED_WRITE(MV_SWITCH_LED_23_CTRL_REG, MV_SWITCH_LED23_OFF));
+  }
 
-	/* Enable PHY Polling Unit (PPU) */
-	saved_g1reg4 |= 0x4000;
-	REG_WRITE(REG_GLOBAL,0x4,saved_g1reg4);
+  /* Enable PHY Polling Unit (PPU) */
+  saved_g1reg4 |= 0x4000;
+  REG_WRITE(REG_GLOBAL,0x4,saved_g1reg4);
 }
+

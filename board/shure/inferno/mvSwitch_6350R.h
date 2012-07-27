@@ -82,33 +82,24 @@ typedef void    MV_VOID;
 #define MV_SWITCH_PORT_VID_REG					0x07
 
 /* Port LED control register and indirect registers */
-#define MV_SWITCH_PORT_LED_CTRL_REG             0x16
+#define MV_SWITCH_PORT_LED_CTRL_REG       0x16
 #  define MV_SWITCH_LED_CTRL_UPDATE     0x8000
 #  define MV_SWITCH_LED_CTRL_PTR_MASK      0x7
 #  define MV_SWITCH_LED_CTRL_PTR_SHIFT      12
-#    define MV_SWITCH_LED_01_CTRL_REG       0x0
-#      define MV_SWITCH_LED0_1G_100M_ACT   0x001
-#      define MV_SWITCH_LED1_100M_10M_ACT  0x010
-#      define MV_SWITCH_LED1_By_BLINK_RATE 0x000 
+#    define MV_SWITCH_LED_23_CTRL_REG      0x1
+#      define MV_SWITCH_LED23_OFF         0xEE
 
-#    define MV_SWITCH_LED_23_CTRL_REG       0x1
-#      define MV_SWITCH_LED2_1G_LINK       0x009
-#      define MV_SWITCH_LED3_LINK_ACT      0x0A0
-
-#    define MV_SWITCH_LED_RATE_CTRL_REG     0x6
-#    define MV_SWITCH_LED_SPECIAL_CTRL_REG  0x7
-#      define MV_SWITCH_LED_SPECIAL_NONE  0x000
-#  define MV_SWITCH_LED_CTRL_DATA_MASK  0x03FF
+#    define MV_SWITCH_LED_RATE_CTRL_REG    0x6
+#    define MV_SWITCH_LED_SPECIAL_CTRL_REG 0x7
+#      define MV_SWITCH_LED_SPECIAL_NONE   0x0
+#  define MV_SWITCH_LED_CTRL_DATA_MASK   0x3FF
 
 #define MV_SWITCH_LED_WRITE(ledReg, regValue)                                   \
     (MV_SWITCH_LED_CTRL_UPDATE |                                                \
      ((ledReg & MV_SWITCH_LED_CTRL_PTR_MASK) << MV_SWITCH_LED_CTRL_PTR_SHIFT) | \
      (regValue & MV_SWITCH_LED_CTRL_DATA_MASK))
 
-
-
-
-/* CAL_ICS board-specific switch init code */
+/* Inferno board-specific switch init code */
 MV_VOID mvEthE6350RSwitchInit();
 
 #endif /* #ifndef __INCETHSWITCHH */
