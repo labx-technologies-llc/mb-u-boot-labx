@@ -66,6 +66,29 @@
 #define ATM_CMD_SOFTLOCK_START		0x80
 #define ATM_CMD_LOCK_SECT		0x40
 
+/* Spansion Mirror-bit Flash commands */
+#define SPN_CMD_PASSWORD_PROTECT        0x60
+#define SPN_CMD_PASSWORD_PROGRAM        0xA0
+
+#define SPN_CMD_PPB                     0xC0
+#define SPN_CMD_PPB_PROGRAM             0xA0
+#define SPN_CMD_PPB_ERASE_START         0x80
+#define SPN_CMD_PPB_ERASE_CONFIRM       0x30
+
+#define SPN_CMD_PPB_LOCK                0x50
+#define SPN_CMD_PPB_LOCK_SET            0xA0
+#define SPN_CMD_PPB_LOCK_SET_CONFIRM    0x00
+
+#define SPN_LOCK_MODE_DYNAMIC           0x00 /* dynamic lock bits only */
+#define SPN_LOCK_MODE_PPB               0x02 /* PPB + dynamic bits */
+#define SPN_LOCK_MODE_PASSWORD          0x04 /* Password protected PPB + dynamic bits */
+
+#define SPN_CMD_DYB                     0xE0
+#define SPN_CMD_DYB_SET                 0xA0
+#define SPN_CMD_DYB_SET_CONFIRM         0x00
+#define SPN_CMD_DYB_CLEAR               0xA0
+#define SPN_CMD_DYB_CLEAR_CONFIRM       0x01
+
 #define FLASH_CONTINUATION_CODE		0x7F
 
 #define FLASH_OFFSET_MANUFACTURER_ID	0x00

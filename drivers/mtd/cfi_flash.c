@@ -1146,6 +1146,10 @@ void flash_print_info (flash_info_t * info)
 		info->manufacturer_id, info->device_id);
 	if (info->device_id == 0x7E) {
 		printf("%04X", info->device_id2);
+	} else if (info->device_id == (ushort)AMD_ID_MIRROR) {
+		printf(", Lock Mode: %s",
+			(info->lock_mode == SPN_LOCK_MODE_DYNAMIC) ? "Dynamic" :
+			((info->lock_mode == SPN_LOCK_MODE_PPB) ? "PPB" : "Password"));
 	}
 	printf ("\n  Erase timeout: %ld ms, write timeout: %ld ms\n",
 		info->erase_blk_tout,
@@ -1336,6 +1340,17 @@ int write_buff (flash_info_t * info, uchar * src, ulong addr, ulong cnt)
 	return flash_write_cfiword (info, wp, cword);
 }
 
+static void spn_enter_cmd(flash_info_t *info, unsigned int cmd) {
+	flash_write_cmd(info, 0, info->addr_unlock1, 0xAA);
+	flash_write_cmd(info, 0, info->addr_unlock2, 0x55);
+	flash_write_cmd(info, 0, info->addr_unlock1, cmd);
+}
+
+static void spn_exit_cmd(flash_info_t *info) {
+	flash_write_cmd(info, 0, 0, 0x90);
+	flash_write_cmd(info, 0, 0, 0x00);
+}
+
 /*-----------------------------------------------------------------------
  */
 #ifdef CONFIG_SYS_FLASH_PROTECTION
@@ -1378,6 +1393,33 @@ int flash_real_protect (flash_info_t * info, long sector, int prot)
 						flash_write_cmd (info, sector,
 							0, ATM_CMD_UNLOCK_SECT);
 				}
+			} else if (info->device_id == (ushort)AMD_ID_MIRROR) {
+				if (info->lock_mode == SPN_LOCK_MODE_PPB) {
+					spn_enter_cmd(info, SPN_CMD_PPB);
+					if (prot) {
+						flash_write_cmd(info, 0, 0, SPN_CMD_PPB_PROGRAM);
+						flash_write_cmd(info, sector, 0, 0);
+					} else {
+						flash_write_cmd(info, 0, 0, SPN_CMD_PPB_ERASE_START);
+						flash_write_cmd(info, 0, 0, SPN_CMD_PPB_ERASE_CONFIRM);
+						/* TODO: This unprotectes everything... Need to re-protect other sectors */
+					}
+					(void)flash_status_check (info, sector, info->buffer_write_tout, "protect");
+					spn_exit_cmd(info);
+				}
+
+				/* Change the dynamic protect bit to match */
+				spn_enter_cmd(info, SPN_CMD_DYB);
+				if (prot) {
+					flash_write_cmd(info, 0, 0, SPN_CMD_DYB_SET);
+					flash_write_cmd(info, sector, 0, SPN_CMD_DYB_SET_CONFIRM);
+				} else {
+					flash_write_cmd(info, 0, 0, SPN_CMD_DYB_CLEAR);
+					flash_write_cmd(info, sector, 0, SPN_CMD_DYB_CLEAR_CONFIRM);
+				}
+				spn_exit_cmd(info);
+			} else {
+				printf("CFI: Unknown protection scheme: %02X %02X\n", info->manufacturer_id, info->device_id);
 			}
 			break;
 #ifdef CONFIG_FLASH_CFI_LEGACY
@@ -1849,6 +1891,19 @@ ulong flash_get_size (phys_addr_t base, int banknum)
 		case CFI_CMDSET_AMD_STANDARD:
 		case CFI_CMDSET_AMD_EXTENDED:
 			cmdset_amd_init(info, &qry);
+
+                        /* Read the lock mode for mirror-bit parts */
+			if (info->device_id == (ushort)AMD_ID_MIRROR) {
+				spn_enter_cmd(info, SPN_CMD_PPB_LOCK);
+				if (flash_isset(info, 0, 0, SPN_LOCK_MODE_PPB)) {
+				  info->lock_mode = SPN_LOCK_MODE_PPB;
+				} else if (flash_isset(info, 0, 0, SPN_LOCK_MODE_PASSWORD)) {
+				  info->lock_mode = SPN_LOCK_MODE_PASSWORD;
+				} else {
+				  info->lock_mode = SPN_LOCK_MODE_DYNAMIC;
+				}
+				spn_exit_cmd(info);
+                        }
 			break;
 		default:
 			printf("CFI: Unknown command set 0x%x\n",
@@ -1933,6 +1988,25 @@ ulong flash_get_size (phys_addr_t base, int banknum)
 							     FLASH_OFFSET_PROTECT,
 							     FLASH_STATUS_PROTECT);
 					break;
+
+				case CFI_CMDSET_AMD_EXTENDED:
+				case CFI_CMDSET_AMD_STANDARD:
+					if (info->device_id == (ushort)AMD_ID_MIRROR) {
+						if (info->lock_mode == SPN_LOCK_MODE_PPB) {
+							spn_enter_cmd(info, SPN_CMD_PPB);
+							info->protect[sect_cnt] = 
+								!flash_isset(info, sect_cnt, 0, 1);
+							spn_exit_cmd(info);
+						}
+						/* Also check the dynamic protection bit */
+						spn_enter_cmd(info, SPN_CMD_DYB);
+						info->protect[sect_cnt] |= 
+							!flash_isset(info, sect_cnt, 0, 1);
+						spn_exit_cmd(info);
+						break;
+					}
+					/* Fall through to the default case */
+
 				default:
 					/* default: not protected */
 					info->protect[sect_cnt] = 0;
