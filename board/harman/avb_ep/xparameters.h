@@ -233,14 +233,14 @@
 /******************************************************************/
 
 /* Definitions for peripheral FLASH_CONTROL */
-#define XPAR_FLASH_CONTROL_MEM0_BASEADDR 0x87000000
+#define XPAR_FLASH_CONTROL_MEM0_BASEADDR 0x86000000
 #define XPAR_FLASH_CONTROL_MEM0_HIGHADDR 0x87FFFFFF
 
 /******************************************************************/
 
 /* Canonical definitions for peripheral FLASH_CONTROL */
 #define XPAR_EMC_0_NUM_BANKS_MEM 1
-#define XPAR_EMC_0_MEM0_BASEADDR 0x87000000
+#define XPAR_EMC_0_MEM0_BASEADDR 0x86000000
 #define XPAR_EMC_0_MEM0_HIGHADDR 0x87FFFFFF
 
 #define XPAR_XPS_MCH_EMC
