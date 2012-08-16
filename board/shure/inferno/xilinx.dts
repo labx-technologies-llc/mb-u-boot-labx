@@ -435,8 +435,8 @@
 			xlnx,nominal-increment-fraction = <0x0>;
 			xlnx,nominal-increment-mantissa = <0x8>;
 			xlnx,num-ports = <0x1>;
-			xlnx,phy-mac-rx-delay = <0xfa>;
-			xlnx,phy-mac-tx-delay = <0xfa>;
+			xlnx,phy-mac-rx-delay = <0x500>;
+			xlnx,phy-mac-tx-delay = <0x500>;
 			xlnx,port-interface-0 = "eth0";
 			xlnx,port-interface-1 = "Invalid";
 			xlnx,port-interface-2 = "Invalid";
