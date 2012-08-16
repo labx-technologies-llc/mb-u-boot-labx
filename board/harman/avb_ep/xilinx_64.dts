@@ -38,7 +38,7 @@
 		serial0 = &serial_console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=87000000.flash:2048K(bootfpga),256K(boot),128K(fdt),3840K(image),1920K(rootfs),3968K(romfs),2048K(fpga),2048K(settingsfs),32K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2432K(bootfpga),2432K(fpga),256K(boot),4096K(image),2048K(rootfs),4096K(romfs),17152K(settingsfs),128K(fdt),128K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -423,10 +423,10 @@
 			xlnx,package = "fgg484";
 			xlnx,param-address-width = <0x9>;
 		} ;
-		flash_control: flash@87000000 {
+		flash_control: flash@86000000 {
 			bank-width = <2>;
 			compatible = "xlnx,xps-mch-emc-3.01.a", "cfi-flash";
-			reg = < 0x87000000 0x1000000 >;
+			reg = < 0x86000000 0x2000000 >;
 			xlnx,family = "spartan6";
 			xlnx,include-datawidth-matching-0 = <0x1>;
 			xlnx,include-datawidth-matching-1 = <0x0>;

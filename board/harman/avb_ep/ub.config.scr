@@ -13,45 +13,45 @@ set clobstart 0x88000000
 
 echo Boot FPGA Configuration:
 set bootfpgasize 0x260000
-set bootfpgastart 0x87000000
+set bootfpgastart 0x86000000
+set bootfpganame64 Avb_EP_Fpga-EP64-golden.bin
+set bootfpganame384 Avb_EP_Fpga-EP384-golden.bin
+
+echo Runtime FPGA Configuration:
+set fpgasize 0x260000
+set fpgastart 0x86260000
+set fpganame64 Avb_EP_Fpga-EP64.bin
+set fpganame384 Avb_EP_Fpga-EP384.bin
 
 echo Bootloader Configuration:
 set bootsize 0x40000
-set bootstart 0x87260000
+set bootstart 0x864C0000
 set bootenvsize 0x08000
 set bootenvstart 0x87FE0000
 set boottextbase 0x89F00000
 set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
 
 echo Flattened Device Tree Configuration:
-set fdtsize 0x10000
-set fdtstart 0x872A0000
+set fdtsize 0x20000
+set fdtstart 0x87FC0000
 set fdtname64 avb_ep_64.dtb
 set fdtname384 avb_ep_384.dtb
 
 echo Kernel Configuration:
-set kernsize 0x3C0000
-set kernstart 0x872B0000
+set kernsize 0x400000
+set kernstart 0x86500000
 
 echo Root Filesystem Configuration:
-set rootfssize 0x1E0000
-set rootfsstart 0x87670000
+set rootfssize 0x200000
+set rootfsstart 0x86900000
 
 echo ROM Filesystem Configuration:
-set romfssize 0x200000
-set romfsstart 0x87850000
-
-echo FPGA Configuration:
-set fpgasize 0x260000
-set fpgastart 0x87A50000
-set fpganame64 Avb_EP_Fpga-EP64.bin
-set fpganame384 Avb_EP_Fpga-EP384.bin
-set bootfpganame64 Avb_EP_Fpga-EP64-golden.bin
-set bootfpganame384 Avb_EP_Fpga-EP384-golden.bin
+set romfssize 0x400000
+set romfsstart 0x86B00000
 
 echo Settings Filesystem Configuration:
-set settingsfssize 0x200000
-set settingsfsstart 0x87C60000
+set settingsfssize 0x10C0000
+set settingsfsstart 0x86F00000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
