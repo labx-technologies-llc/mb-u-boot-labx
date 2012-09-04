@@ -529,12 +529,14 @@ restart:
 				sprintf(buf, "%lX", NetBootFileXferSize);
 				setenv("filesize", buf);
 
-				if(image_check_type((image_header_t *)load_addr, IH_TYPE_KERNEL)) {
+                                // If the first byte of the loaded file is the U-Boot image
+                                // header magic number, then this image is prepended with
+                                // a mkimage header, and we can check its checksum.
+				setenv("crcreturn", "1");
+				if(ntohl(*(uint32_t*)load_addr) == IH_MAGIC) {
 					printf("   Verifying Checksum ... ");
-					setenv("crcreturn", "0");
-					if (!image_check_dcrc ((image_header_t *)load_addr)) {
-						printf("Bad Data CRC - please reboot and retry\n");
-						setenv("crcreturn", "1");
+					if(!image_check_hcrc((image_header_t*)load_addr) || !image_check_dcrc((image_header_t *)load_addr)) {
+						printf("Bad CRC - please reboot and retry\n");
 
 #ifdef CONFIG_SYS_GPIO
 						//Set the LEDs and then hang
@@ -544,6 +546,7 @@ restart:
 #endif
 					} else {
 						printf("OK\n");
+					        setenv("crcreturn", "0");
 					}
 				}
 
