@@ -8,6 +8,7 @@ setenv ipaddr   192.168.1.1
 setenv serverip 192.168.1.100
 
 setenv crcreturn 1
+setenv crcdram 0
 setenv secsize 0x40000
 
 echo Clobber DRAM Configuration
@@ -22,52 +23,52 @@ setenv bootcmd 'run spiprobe; sf read ${tempkernstart} ${kernstart} ${kernsize};
 setenv bootdelay 3
 
 echo Flash Map
-setenv bootfpgasize     0x180000; setenv bootfpgastart     0x000000
-setenv goldenfdtsize    0x008000; setenv goldenfdtstart    0x178000
+setenv bootfpgasize     0x180000; setenv bootfpgastart     0x000000; setenv bootfpgacrc     0x88000000
+setenv goldenfdtsize    0x008000; setenv goldenfdtstart    0x178000; setenv goldenfdtcrc    0x88000004
 setenv goldenfdtsector  0x140000; setenv goldenfdtdram   0x88038000
 setenv crcsize          0x040000; setenv crcstart          0x180000
 setenv bootenvsize      0x040000; setenv bootenvstart      0x1C0000
-setenv bootsize         0x040000; setenv bootstart         0x200000
-setenv kernsize         0x140000; setenv kernstart         0x240000
-setenv goldenkernsize   0x140000; setenv goldenkernstart   0x380000
-setenv romfssize        0x340000; setenv romfsstart        0x4C0000
-setenv goldenromfssize  0x240000; setenv goldenromfsstart  0x800000
-setenv fpgasize         0x180000; setenv fpgastart         0xA40000
-setenv fdtsize          0x008000; setenv fdtstart          0xBB8000
+setenv bootsize         0x040000; setenv bootstart         0x200000; setenv bootcrc         0x88000008
+setenv kernsize         0x140000; setenv kernstart         0x240000; setenv kerncrc         0x8800000C
+setenv goldenkernsize   0x140000; setenv goldenkernstart   0x380000; setenv goldenkerncrc   0x88000010
+setenv romfssize        0x340000; setenv romfsstart        0x4C0000; setenv romfscrc        0x88000014
+setenv goldenromfssize  0x240000; setenv goldenromfsstart  0x800000; setenv goldenromfscrc  0x88000018
+setenv fpgasize         0x180000; setenv fpgastart         0xA40000; setenv fpgacrc         0x8800001C
+setenv fdtsize          0x008000; setenv fdtstart          0xBB8000; setenv fdtcrc          0x88000020
 setenv fdtsector        0xB80000; setenv fdtdram         0x88038000
-setenv rootfssize       0x100000; setenv rootfsstart       0xBC0000
-setenv goldenrootfssize 0x100000; setenv goldenrootfsstart 0xCC0000
-setenv settingsfssize   0x240000; setenv settingsfsstart   0xDC0000
+setenv rootfssize       0x100000; setenv rootfsstart       0xBC0000; setenv rootfscrc       0x88000024
+setenv goldenrootfssize 0x100000; setenv goldenrootfsstart 0xCC0000; setenv goldenrootfscrc 0x88000028
+setenv settingsfssize   0x240000; setenv settingsfsstart   0xDC0000; setenv settingsfscrc   0x8800002C
 
 echo Update Commands
 # FDTs and FPGAs share sectors. These procedures properly handle
 # this, so that the FDTs and FPGAs can be updated separately.
 setenv bak_golden_fdt       'setenv bakstart ${goldenfdtstart};          setenv baksize ${goldenfdtsize};     run bak'
-setenv update_boot_fpga     'setenv imgname Inferno_Fpga-failsafe.bin.ub;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    run load spiprobe bak_golden_fdt install unbak'
-setenv update_golden_fdt    'setenv imgname inferno-golden.dtb.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv secoffdram ${goldenfdtdram}; run load spiprobe install_in_sector'
-setenv update_boot_env      'setenv imgname ub.config.img;               setenv imgstart ${bootenvstart};     setenv imgsize ${bootenvsize};     run load; source ${clobstart}'
-setenv update_uboot         'setenv imgname u-boot.bin.ub;               setenv imgstart ${bootstart};        setenv imgsize ${bootsize};        run load spiprobe install'
-setenv update_kernel        'setenv imgname linux.ub;                    setenv imgstart ${kernstart};        setenv imgsize ${kernsize};        run load spiprobe install_crc'
-setenv update_golden_kernel 'setenv imgname linux-golden.ub;             setenv imgstart ${goldenkernstart};  setenv imgsize ${goldenkernsize};  run load spiprobe install_crc'
-setenv update_romfs         'setenv imgname usr.romfs.ub;                setenv imgstart ${romfsstart};       setenv imgsize ${romfssize};       run load spiprobe install'
-setenv update_golden_romfs  'setenv imgname usr-golden.romfs.ub;         setenv imgstart ${goldenromfsstart}; setenv imgsize ${goldenromfssize}; run load spiprobe install'
 setenv bak_fdt              'setenv bakstart ${fdtstart};                setenv baksize ${fdtsize};           run bak'
-setenv update_fpga          'setenv imgname Inferno_Fpga.bin.ub;         setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        run load spiprobe bak_fdt install unbak'
-setenv update_fdt           'setenv imgname inferno.dtb.ub;              setenv flashsec ${fdtsector};        setenv imgsize ${fdtsize};         setenv secoffdram ${fdtdram}; run load spiprobe install_in_sector'
-setenv update_rootfs        'setenv imgname rootfs.sqfs.ub;              setenv imgstart ${rootfsstart};      setenv imgsize ${rootfssize};      run load spiprobe install'
-setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;       setenv imgstart ${goldenrootfsstart};setenv imgsize ${goldenrootfssize};run load spiprobe install'
-setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;         setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};  run load spiprobe install'
+
+setenv update_boot_fpga     'setenv imgname Inferno_Fpga-failsafe.bin.ub;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv crcdram ${bootfpgacrc};    run load spiprobe bak_golden_fdt install unbak'
+setenv update_golden_fdt    'setenv imgname inferno-golden.dtb.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv crcdram ${goldenfdtcrc};   setenv secoffdram ${goldenfdtdram};run load spiprobe install_in_sector'
+setenv update_boot_env      'setenv imgname ub.config.img;               setenv imgstart ${bootenvstart};     setenv imgsize ${bootenvsize};                                       run load; source ${clobstart}'
+setenv update_uboot         'setenv imgname u-boot.bin.ub;               setenv imgstart ${bootstart};        setenv imgsize ${bootsize};        setenv crcdram ${bootcrc};        run load spiprobe install'
+setenv update_kernel        'setenv imgname linux.ub;                    setenv imgstart ${kernstart};        setenv imgsize ${kernsize};        setenv crcdram ${kerncrc};        run load spiprobe install_with_crc'
+setenv update_golden_kernel 'setenv imgname linux-golden.ub;             setenv imgstart ${goldenkernstart};  setenv imgsize ${goldenkernsize};  setenv crcdram ${goldenkerncrc};  run load spiprobe install_with_crc'
+setenv update_romfs         'setenv imgname usr.romfs.ub;                setenv imgstart ${romfsstart};       setenv imgsize ${romfssize};       setenv crcdram ${romfscrc};       run load spiprobe install'
+setenv update_golden_romfs  'setenv imgname usr-golden.romfs.ub;         setenv imgstart ${goldenromfsstart}; setenv imgsize ${goldenromfssize}; setenv crcdram ${goldenromfscrc}; run load spiprobe install'
+setenv update_fpga          'setenv imgname Inferno_Fpga.bin.ub;         setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        setenv crcdram ${fpgacrc};        run load spiprobe bak_fdt install unbak'
+setenv update_fdt           'setenv imgname inferno.dtb.ub;              setenv flashsec ${fdtsector};        setenv imgsize ${fdtsize};         setenv crcdram ${fdtcrc};         setenv secoffdram ${fdtdram}; run load spiprobe install_in_sector'
+setenv update_rootfs        'setenv imgname rootfs.sqfs.ub;              setenv imgstart ${rootfsstart};      setenv imgsize ${rootfssize};      setenv crcdram ${rootfscrc};      run load spiprobe install'
+setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;       setenv imgstart ${goldenrootfsstart};setenv imgsize ${goldenrootfssize};setenv crcdram ${goldenrootfscrc};run load spiprobe install'
+setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;         setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};  setenv crcdram ${settingsfscrc};  run load spiprobe install'
 setenv update_all           'ping ${serverip}; run update_boot_env update_boot_fpga update_golden_fdt update_uboot update_kernel update_golden_kernel update_romfs update_golden_romfs update_fpga update_fdt update_rootfs update_golden_rootfs update_settingsfs'
 
 echo Load/Install Commands
 # Files are transferred over with a 64-byte U-Boot header (created by U-Boot's
-# mkimage utility), which gives us automatic CRC checking whenever we transfer any
-# file whose extension is .ub (functionality we implemented). The install commands
-# copy the image into flash either with that header or without it. They also copy
-# the CRCs into the CRC storage area.
-setenv load        'tftp ${clobstart} ${imgname}'
-setenv install     'if test ${crcreturn} -eq 0; then sf erase ${imgstart} ${imgsize}; sf write ${clobstart_nocrc} ${imgstart} ${imgsize}; fi'
-setenv install_crc 'if test ${crcreturn} -eq 0; then sf erase ${imgstart} ${imgsize}; sf write ${clobstart}       ${imgstart} ${imgsize}; fi'
+# mkimage utility), which gives us automatic CRC checking. The install commands
+# copy the image into flash either with that header or without it. They also run
+# the script to copy the CRCs into the CRC storage area.
+setenv load             'tftp ${clobstart} ${imgname}'
+setenv install          'if test ${crcreturn} -eq 0; then sf erase ${imgstart} ${imgsize}; sf write ${clobstart_nocrc} ${imgstart} ${imgsize}; run install_crc; fi'
+setenv install_with_crc 'if test ${crcreturn} -eq 0; then sf erase ${imgstart} ${imgsize}; sf write ${clobstart}       ${imgstart} ${imgsize}; run install_crc; fi'
 
 # Special install command for when an image sits somewhere within a single
 # flash sector. Strips the preceding 64-byte U-Boot header, like 'install'.
@@ -76,7 +77,15 @@ setenv install_crc 'if test ${crcreturn} -eq 0; then sf erase ${imgstart} ${imgs
 #  - Load the sector from flash that will contain the image.
 #  - Copy the image into that loaded flash sector.
 #  - Write the sector back to flash.
-setenv install_in_sector 'cp.b ${clobstart_nocrc} ${temp} ${imgsize}; sf read ${clobstart} ${flashsec} ${secsize}; cp.b ${temp} ${secoffdram} ${imgsize}; sf erase ${flashsec} ${secsize}; sf write ${clobstart} ${flashsec} ${secsize}'
+setenv install_in_sector 'run install_crc; cp.b ${clobstart_nocrc} ${temp} ${imgsize}; sf read ${clobstart} ${flashsec} ${secsize}; cp.b ${temp} ${secoffdram} ${imgsize}; sf erase ${flashsec} ${secsize}; sf write ${clobstart} ${flashsec} ${secsize}'
+
+# Install command to take the CRC in the mkimage header currently residing
+# at ${clobstart} and store it to flash, based on the ${crcdram} variable.
+# Clears the variable after completion, so that duplicate runs are avoided
+# (partly because this script changes what sits at ${clobstart}). Runs 'true'
+# if the test condition fails so that this install script will not stop any
+# script that runs it. Modeled after 'install_in_sector'.
+setenv install_crc 'if test ${crcdram} -ne 0; then echo Saving CRC...; cp.b 0x88000018 ${temp} 0x4; sf read ${clobstart} ${crcstart} ${crcsize}; cp.b ${temp} ${crcdram} 0x4; sf erase ${crcstart} ${crcsize}; sf write ${clobstart} ${crcstart} ${crcsize}; setenv crcdram 0; else true; fi'
 
 # Backup and unbackup an image that sits somewhere within
 # a flash sector that is going to be erased (used when
