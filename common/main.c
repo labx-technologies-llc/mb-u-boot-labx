@@ -48,6 +48,10 @@ DECLARE_GLOBAL_DATA_PTR;
 extern int CheckFirmwareUpdate(void);
 #endif
 
+#if defined(CONFIG_LABX_PREBOOT)
+extern int labx_preboot(void);
+#endif
+
 #if defined(CONFIG_GPIO_INIT)
 extern void gpio_init(int is_update);
 #endif
@@ -389,6 +393,12 @@ void main_loop (void)
 	do_update = CheckFirmwareUpdate();
 	if (do_update == 0) {
 		bootdelay = 0;
+	} else if (bootdelay == 0) {
+		// This will set up a boot delay based on the
+		// "bootdelay" environment variable even if
+		// CONFIG_BOOTDELAY is not defined.
+		s = getenv ("bootdelay");
+		if (s) bootdelay = (int)simple_strtol(s, NULL, 10);
 	}
 #endif
 
@@ -414,10 +424,8 @@ void main_loop (void)
 	}
 	else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
-#if defined(CONFIG_FIRMWARE_UPDATE)
-		if (do_update != 0) {
-			s = getenv("blob_update");
-		} else
+#if defined(CONFIG_LABX_PREBOOT)
+		if(labx_preboot() == -1) bootdelay = -1;
 #endif
 		s = getenv ("bootcmd");
 

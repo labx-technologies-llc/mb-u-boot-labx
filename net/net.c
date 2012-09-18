@@ -528,6 +528,8 @@ restart:
 					NetBootFileXferSize);
 				sprintf(buf, "%lX", NetBootFileXferSize);
 				setenv("filesize", buf);
+				sprintf(buf, "%lX", NetBootFileXferSize - sizeof(image_header_t));
+				setenv("filesize_nohdr", buf);
 
                                 // If the first byte of the loaded file is the U-Boot image
                                 // header magic number, then this image is prepended with
