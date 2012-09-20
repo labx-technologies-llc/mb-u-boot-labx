@@ -7,6 +7,9 @@
 #include <config.h>
 #include <command.h>
 
+// Assuming this will get brought in.
+extern void mdelay(unsigned int msec);
+
 #define RUNTIME_FPGA_BASE (0x00A40000)
 #define BOOT_FPGA_BASE (0x00000000)
 
@@ -26,8 +29,6 @@ void icap_reset(int resetProduction)
 {
 	unsigned long int fpga_base;
 	u32 val;
-
-	printf("Reconfiguring to %s FPGA.\n", (resetProduction ? "production" : "golden"));
 
 	// ICAP behavior is described (poorly) in Xilinx specification UG380.  Brave
 	// souls may look there for detailed guidance on what is being done here.
@@ -81,7 +82,7 @@ void icap_reset(int resetProduction)
 		putfsl(0x032A1, 0); // Write GENERAL3
 		putfsl(((BOOT_FPGA_BASE >> 0) & 0x0FFFF), 0);
 		putfsl(0x032C1, 0); // Write GENERAL4
-		putfsl((((BOOT_FPGA_BASE >> 16)) & 0x0FF | 0x0300), 0);
+		putfsl((((BOOT_FPGA_BASE >> 16) & 0x0FF) | 0x0300), 0);
 #else
 		putfsl(0x03261, 0); // Write GENERAL1
 		putfsl(((fpga_base >> 1) & 0x0FFFF), 0); // Multiboot start address[15:0]
@@ -96,8 +97,6 @@ void icap_reset(int resetProduction)
 #endif
 
 		putfsl(0x032E1, 0); // Write GENERAL5
-		printf("0x%hX > general5\n", resetProduction);
-		mdelay(100);
 		putfsl((resetProduction ? 1 : 0), 0); // Value 0 allows u-boot to use production image
 
 		// Write IPROG command
@@ -124,6 +123,9 @@ int do_reconfigure(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
 
 	if(argc == 2) production = simple_strtoul(argv[1], NULL, 10);
 
+	printf("Reconfiguring to %s FPGA.\n", (production ? "production" : "golden"));
+	mdelay(100); // Let it print.
+
 	icap_reset(production);
 	return 0;
 }
@@ -136,7 +138,10 @@ U_BOOT_CMD(
 );
 
 int do_reset(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]) {
-	puts("Note: use 'reconf' command to reconfigure to the production FPGA.\n");
+	puts("Reconfiguring to golden FPGA.\n"
+	"Note: use 'reconf 1' to reconfigure to the production FPGA.\n");
+	mdelay(100); // Let it print.
+
 	icap_reset(0);
 	return 0;
 }

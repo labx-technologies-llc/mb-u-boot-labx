@@ -1,7 +1,7 @@
-// File        : preboot.c
-// Author      : Yuriy Dragunov (yuriy.dragunov@labxtechnologies.com)
-// Description : Pre-boot procedures for U-Boot.
-// Copyright (c) 2012, Lab X Technologies, LLC.  All rights reserved.
+/* File        : preboot.c
+ * Author      : Yuriy Dragunov (yuriy.dragunov@labxtechnologies.com)
+ * Description : Pre-boot procedures for U-Boot.
+ * Copyright (c) 2012, Lab X Technologies, LLC.  All rights reserved. */
 
 #include <common.h>
 #include <config.h>
@@ -56,45 +56,48 @@ static const char *crc_vars[][5] = {
 };
 static const unsigned int num_crcs = sizeof(crc_vars) / sizeof(crc_vars[0]);
 
-/* Pre-boot function. If we are in a golden image, sets
- * environment variable "golden" to 1, and sets environment
- * variable "bootcmd" to reconfigure to the runtime FPGA
- * if production CRCs pass. Returns -1 if auto-boot is to
- * be disabled completely, and we want to stay in U-Boot.
- * Returns 0 otherwise. */
+/* Pre-boot function. */
 int labx_preboot(void) {
-  if(labx_is_golden_fpga()) {
-    // This will make the default boot command boot
-    // golden Linux instead of production Linux.
-    //setenv("golden", "1");
+  // Print if we are in development mode.
+#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 1)
+  puts("Development build.\n");
+#endif
 
+  if(labx_is_golden_fpga()) {
     // Only check CRCs and perform related logic if
     // we are not in development mode (i.e. no boot
     // delay is configured, and we try to boot right
     // away).
 #if !defined(CONFIG_BOOTDELAY) || (CONFIG_BOOTDELAY == 0)
-    if(check_runtime_crcs()) {
-      setenv("bootcmd", "reconf 1");
-    } else {
-      if(check_golden_crcs()) {
-        puts("Runtime CRC checks failed. Booting golden Linux.\n");
-      } else {
-        puts("Runtime and golden CRC checks failed. Staying in U-Boot. Please perform a firmware update. Type 'boot' to try to boot anyways.\n");
+    puts("Checking runtime CRCs...\n");
+    if(!check_runtime_crcs()) {
+      puts("Runtime CRC checks failed. Checking golden CRCs...\n");
+      if(!check_golden_crcs()) {
+        puts("Golden CRC checks failed. Staying in U-Boot. Please perform a firmware update. Type 'boot' to try to boot to golden Linux anyways.\n");
+        labx_print_cmdhelp();
+        setenv("bootcmd", "run bootglnx");
         return -1;
       }
-    }
+    } else
 #endif
+    // The auto-boot will reconfigure
+    // to the production FPGA.
+    setenv("bootcmd", "reconf 1");
   }
 
-  // If we are in development mode (a boot delay is
-  // configured), then we want to disable auto-boot.
-#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 1)
-  puts("Development build. Staying in U-Boot.\nType 'reconf 1' to reconfigure to the runtime FPGA, or type 'reconf' or 'reset' to reconfigure to the boot FPGA.\nType 'boot' to boot to golden Linux.\n'checkc', 'checkp', and 'checkg' will check all, production, and golden CRCs, respectively.\n");
-  return -1;
-#else
-  puts("Production build.\n");
-  return 0;
-#endif
+  // In the production FPGA, we try to boot right away.
+  if(labx_is_golden_fpga()) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+void labx_print_cmdhelp(void) {
+	puts("Available commands:\n");
+	puts("  'checkc', 'checkg', 'checkp', to check all, golden, and production CRCs.\n");
+	puts("  'reconf 1' to reconfigure to the production FPGA (no arg for golden).\n");
+	puts("  'run bootglnx' to boot golden linux.\n");
 }
 
 static int check_crcs(const char *crc_vars[][5], int num) {
@@ -266,8 +269,6 @@ static int read_general_5(void) {
   putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
   udelay(1000);
   getfslx(readValue, 0, FSL_ATOMIC); // Read the ICAP result
-
-  printf("general5 = 0x%hX\n", readValue);
 
   return readValue;
 }

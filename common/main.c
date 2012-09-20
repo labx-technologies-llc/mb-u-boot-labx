@@ -50,6 +50,12 @@ extern int CheckFirmwareUpdate(void);
 
 #if defined(CONFIG_LABX_PREBOOT)
 extern int labx_preboot(void);
+extern void labx_print_cmdhelp(void);
+#if defined(USE_ICAP_FSL)
+extern int labx_is_golden_fpga(void);
+#else
+#error "ICAP support required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)."
+#endif
 #endif
 
 #if defined(CONFIG_GPIO_INIT)
@@ -301,6 +307,9 @@ void main_loop (void)
 #ifdef CONFIG_PREBOOT
 	char *p;
 #endif
+#ifdef CONFIG_LABX_PREBOOT
+  int labx_preboot_res;
+#endif
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	unsigned long bootcount = 0;
 	unsigned long bootlimit = 0;
@@ -394,9 +403,9 @@ void main_loop (void)
 	if (do_update == 0) {
 		bootdelay = 0;
 	} else if (bootdelay == 0) {
-		// This will set up a boot delay based on the
-		// "bootdelay" environment variable even if
-		// CONFIG_BOOTDELAY is not defined.
+		/* This will set up a boot delay based on the
+		 * "bootdelay" environment variable even if
+		 * CONFIG_BOOTDELAY is not defined. */
 		s = getenv ("bootdelay");
 		if (s) bootdelay = (int)simple_strtol(s, NULL, 10);
 	}
@@ -416,6 +425,13 @@ void main_loop (void)
 	}
 	else
 #endif /* CONFIG_POST */
+
+#if defined(CONFIG_LABX_PREBOOT)
+  labx_preboot_res = labx_preboot();
+	if(labx_preboot_res == -1) bootdelay = -1;
+  else if(labx_preboot_res == 0) bootdelay = 0;
+#endif
+
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {
 		printf ("Warning: Bootlimit (%u) exceeded. Using altbootcmd.\n",
@@ -424,10 +440,7 @@ void main_loop (void)
 	}
 	else
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
-#if defined(CONFIG_LABX_PREBOOT)
-		if(labx_preboot() == -1) bootdelay = -1;
-#endif
-		s = getenv ("bootcmd");
+	s = getenv ("bootcmd");
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 
@@ -450,23 +463,33 @@ void main_loop (void)
 
 # ifdef CONFIG_MENUKEY
 	if (menukey == CONFIG_MENUKEY) {
-	    s = getenv("menucmd");
-	    if (s) {
+		s = getenv("menucmd");
+		if (s) {
 # ifndef CONFIG_SYS_HUSH_PARSER
 		run_command (s, 0);
 # else
 		parse_string_outer(s, FLAG_PARSE_SEMICOLON |
 				    FLAG_EXIT_FROM_LOOP);
 # endif
-	    }
+		}
 	}
 #endif /* CONFIG_MENUKEY */
+
+#ifdef CONFIG_LABX_PREBOOT
+	/* If we're here, an auto-boot has been cancelled. */
+  if (labx_is_golden_fpga()) {
+	  puts("Auto-boot cancelled. ");
+		labx_print_cmdhelp();
+    puts("'boot' will reconfigure to the production FPGA.\n");
+	}
+#endif
+
 #endif	/* CONFIG_BOOTDELAY */
 
 #ifdef CONFIG_AMIGAONEG3SE
 	{
-	    extern void video_banner(void);
-	    video_banner();
+		extern void video_banner(void);
+		video_banner();
 	}
 #endif
 
