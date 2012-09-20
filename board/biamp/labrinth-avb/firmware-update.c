@@ -540,8 +540,8 @@ int CheckFirmwareUpdate(void)
   
     //only bother loading up the device tree and booting from it if there is a valid address
     if(fdt0 || fdt1) {
-      run_command("cp.b 0x87240000 0x88F40000 0x00020000", 0);
-      run_command("fdt addr 0x88F40000 0x00020000", 0);
+      run_command("cp.b 0x87240000 0x88F80000 0x00020000", 0);
+      run_command("fdt addr 0x88F80000 0x00020000", 0);
     
       if(fdt0) {
         //special case for fdt0: also modify MAC address in u-boot
@@ -562,7 +562,7 @@ int CheckFirmwareUpdate(void)
         run_command(fdtmac1, 0);
       }
       //change the boot FDT location
-      run_command("set bootfdt 0x88F40000", 0);
+      run_command("set bootfdt 0x88F80000", 0);
     }
   } else {
     // Couldn't even determine where to look for Flash-based MACs;
