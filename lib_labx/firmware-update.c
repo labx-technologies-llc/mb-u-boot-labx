@@ -1,7 +1,8 @@
 #include "hush.h"
 #include "labx-mailbox.h"
-#include "FirmwareUpdate_unmarshal.h"
-#include "FirmwareUpdate.h"
+#include "preboot.h"
+#include "idl/FirmwareUpdate_unmarshal.h"
+#include "idl/FirmwareUpdate.h"
 #include "xparameters.h"
 #include <linux/types.h>
 #include <common.h>
@@ -18,13 +19,11 @@
 
 //#define _LABXDEBUG
 
+#ifndef CONFIG_LABX_PREBOOT
+#error "Lab X pre-boot procedures required for firmware update support (CONFIG_LABX_PREBOOT not defined)."
+#endif
+
 #define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
-
-/* Bit definition which kicks off a dump of the FIFO to the ICAP */
-#define FINISH_FSL_BIT (0x80000000)
-
-/* "Magic" value written to the ICAP GENERAL5 register to detect fallback */
-#define GENERAL5_MAGIC (0x0ABCD)
 
 /* Constant definitions for event types supported by the AVB platform.
 * These are hash values computed from the stream class names.
@@ -302,14 +301,13 @@ int DoFirmwareUpdate(void)
  * carry out firmware update and return.
  *
  * Returns - Zero if no firmware update was performed and no
- *           boot delay desired, nonzero otherwise
+ *           boot delay requested from host, nonzero otherwise
  *
  */
 int CheckFirmwareUpdate(void)
 {
   int doUpdate = 0;
   int i;
-  u16 readValue;
 
   uint32_t reqSize = sizeof(RequestMessageBuffer_t);
   uint32_t respSize;
@@ -317,39 +315,6 @@ int CheckFirmwareUpdate(void)
 
   // Enable the mailbox.
   SetupLabXMailbox();
-
-  /* Read the GENERAL5 register from the ICAP peripheral to determine
-   * whether the golden FPGA is still resident as the result of a re-
-   * configuration fallback
-   */
-  putfslx(0x0FFFF, 0, FSL_CONTROL_ATOMIC);
-  udelay(1000);
-
-  /* First determine whether a reconfiguration has already been attempted
-   * and failed (e.g. due to a corrupted run-time bitstream).  This is done
-   * by checking for the fallback bit in the ICAP status register.
-   *
-   * Next, examine the GPIO signal from the backplane to see if the host is
-   * initiating a firware update or not.  If not, see if a boot delay
-   * is being requested by an installed jumper.
-   */
-  putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
-  putfslx(0x0FFFF, 0, FSL_ATOMIC);
-  putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
-  putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
-
-  // Read GENERAL5
-  putfslx(0x02AE1, 0, FSL_ATOMIC);
-
-  // Add some safety noops and wait briefly
-  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-  putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-
-  // Trigger the FSL peripheral to drain the FIFO into the ICAP.
-  // Wait briefly for the read to occur.
-  putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
-  udelay(1000);
-  getfslx(readValue, 0, FSL_ATOMIC); // Read the ICAP result
 
   /* Check the mailbox every quarter of a second for a
   total of 1 second to enter into firmware update */
@@ -402,8 +367,12 @@ int CheckFirmwareUpdate(void)
   	}
   }
 
-  if (readValue == GENERAL5_MAGIC) {
+  if (is_fallback_fpga()) {
     printf("Run-time FPGA reconfiguration failed\n");
+    // TODO: there is currently no notification provided
+    // to the host when a failure to reconfigure to the
+    // runtime FPGA occurred and that the host needs to
+    // provide a firmware update image.
     doUpdate = 1;
   } else if(firmwareUpdate) {
     printf("Firmware Update Requested from HOST\n");

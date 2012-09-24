@@ -183,6 +183,9 @@ int image_check_dcrc (const image_header_t *hdr)
 	ulong len = image_get_data_size (hdr);
 	ulong dcrc = crc32_wd (0, (unsigned char *)data, len, CHUNKSZ_CRC32);
 
+	// Lab X: This is fairly non-obtrusive, but helps with debugging.
+	printf("(checksum = 0x%08X) ", (unsigned int)dcrc);
+
 	return (dcrc == image_get_dcrc (hdr));
 }
 
