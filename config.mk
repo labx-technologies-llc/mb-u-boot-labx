@@ -71,10 +71,9 @@ else
 HOSTCC		= gcc
 endif
 
-ifeq ($(HOSTOS),cygwin)
-HOSTCFLAGS	+= -ansi
-endif
-
+#ifeq ($(HOSTOS),cygwin)
+#HOSTCFLAGS	+= -ansi
+#endif
 # We build some files with extra pedantic flags to try to minimize things
 # that won't build on some weird host compiler -- though there are lots of
 # exceptions for files that aren't complaint.

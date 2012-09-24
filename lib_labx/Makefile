@@ -1,6 +1,7 @@
 #
-# (C) Copyright 2000-2006
-# Wolfgang Denk, DENX Software Engineering, wd@denx.de.
+# (C) Copyright 2012
+# Chris Pane, Lab X Technologies, chris.pane@labxtechnologies.com
+# Yuriy Dragunov, Lab X Technologies, yuriy.dragunov@labxtechnologies.com
 #
 # See file CREDITS for list of people who contributed to this
 # project.
@@ -23,28 +24,21 @@
 
 include $(TOPDIR)/config.mk
 
-LIB      = $(obj)lib$(BOARD).a
-COBJS    = $(BOARD).o
-COBJS   += mvSwitch_6350R.o
-OBJS    := $(addprefix $(obj),$(COBJS))
+LIB     = lib_labx.a
 
-# This is how to include our libraries. The .o files
-# in these folders get linked in (the library files
-# themselves are not used).
-LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
+CFLAGS += -I$(TOPDIR)/board/$(BOARDDIR) -I$(TOPDIR)
+COBJS   = preboot.o
+COBJS  += cmd_reset.o
+COBJS  += firmware-update.o
+COBJS  += labx-mailbox.o
 
-$(LIB): $(OBJS) libs
-	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
+OBJS   := $(addprefix $(obj),$(COBJS))
 
-libs:
-	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls # Don't know why this needs to be executed separately.
-	$(MAKE) -C $(TOPDIR)/lib_labx/idl
-	$(MAKE) -C $(TOPDIR)/lib_labx
+$(LIB):	$(OBJS)
+	$(AR) $(ARFLAGS)s $@ $(OBJS)
 
-.PHONY: libs
-
-distclean:	clean
-	rm -f $(LIB) core *.bak $(obj).depend
+distclean: clean
+	rm -f $(LIB) core *.bak $(obj).depend $(OBJS)
 
 #########################################################################
 
