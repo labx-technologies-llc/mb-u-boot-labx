@@ -465,9 +465,9 @@
 		labx_tdm_audio_0: labx-tdm-audio@820b0000 {
 			compatible = "xlnx,labx-tdm-audio-1.02.a";
 			reg = < 0x820b0000 0x10000 >;
-			xlnx,cache-write-addr-width = <0x8>;
                         xlnx,device = "6slx45";
                         xlnx,dma-burst-length = <0x4>;
+                        xlnx,ext-cache-addr-width = <0x8>;
                         xlnx,family = "spartan6";
                         xlnx,has-tdm-loopback = <0x0>;
                         xlnx,has-tdm-slave-manager = <0x1>;
@@ -478,8 +478,9 @@
                         xlnx,package = "csg324";
                         xlnx,param-address-width = <0x9>;
                         xlnx,redundant = <0x0>;
-                        xlnx,tdm-lane-count = <0x4>;
-                        xlnx,tdm-max-slot-density = <0x10>;
+                        xlnx,tdm-lane-count = <0x8>;
+                        xlnx,tdm-max-slot-density = <0x8>;
+                        xlnx,write-cache-addr-width = <0xd>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.00.b";
