@@ -298,7 +298,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.07.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82100000 0x10000 >;
@@ -326,7 +326,7 @@
 			xlnx,param-address-width = <0x9>;
 		} ;
 		eth0_audio_packetizer: labx-audio-packetizer@82090000 {
-			compatible = "xlnx,labx-audio-packetizer-1.04.a";
+			compatible = "xlnx,labx-audio-packetizer-1.05.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 7 2 >;
 			reg = < 0x82090000 0x10000 >;
@@ -468,14 +468,17 @@
 			xlnx,device = "6slx45";
 			xlnx,dma-burst-length = <0x4>;
 			xlnx,family = "spartan6";
-			xlnx,include-dphase-timer = <0x0>;
-			xlnx,max-num-channels = <0x40>;
-			xlnx,num-streams = <0x40>;
-			xlnx,package = "csg324";
-			xlnx,param-address-width = <0x9>;
-			xlnx,redundant = <0x0>;
-			xlnx,tdm-lane-count = <0x4>;
-			xlnx,tdm-slot-density = <0x10>;
+                        xlnx,has-tdm-loopback = <0x0>;
+                        xlnx,has-tdm-slave-manager = <0x1>;
+                        xlnx,include-dphase-timer = <0x0>;
+                        xlnx,local-osc-ratio = <0x400>;
+                        xlnx,max-num-streams = <0x40>;
+                        xlnx,mclk-ratio = <0x400>;
+                        xlnx,package = "csg324";
+                        xlnx,param-address-width = <0x9>;
+                        xlnx,redundant = <0x0>;
+                        xlnx,tdm-lane-count = <0x4>;
+                        xlnx,tdm-max-slot-density = <0x10>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.00.b";

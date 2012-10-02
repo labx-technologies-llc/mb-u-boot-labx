@@ -295,7 +295,7 @@
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "DMA_NPI";
 			xlnx,internal-params = <0x1>;
-			xlnx,microcode-words = <0x400>;
+			xlnx,microcode-words = <0x800>;
 			xlnx,mplb-awidth = <0x20>;
 			xlnx,mplb-clk-period-ps = <0x2710>;
 			xlnx,mplb-dwidth = <0x80>;
@@ -304,8 +304,8 @@
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,num-cache-interfaces = <0x2>;
 			xlnx,num-param-interfaces = <0x2>;
-			xlnx,param-address-width = <0x9>;
-			xlnx,param-words = <0x200>;
+			xlnx,param-address-width = <0xa>;
+			xlnx,param-words = <0x400>;
 			xlnx,parameter-interlock-fifo = <0x1>;
 		} ;
 		labx_spi_mailbox_0: labx-spi-mailbox@820c0000 {
@@ -346,7 +346,7 @@
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
-			xlnx,phy-addr = <0x1>;
+			xlnx,phy-addr = <0x8>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
@@ -378,7 +378,7 @@
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
-			xlnx,param-address-width = <0x9>;
+			xlnx,param-address-width = <0xa>;
 		} ;
 		eth1: ethernet@82060000 {
 			compatible = "xlnx,labx-ethernet-1.03.a";
@@ -389,7 +389,7 @@
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82060000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
-			xlnx,phy-addr = <0x2>;
+			xlnx,phy-addr = <0x9>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
@@ -421,7 +421,7 @@
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,num-streams = <0x40>;
 			xlnx,package = "fgg484";
-			xlnx,param-address-width = <0x9>;
+			xlnx,param-address-width = <0xa>;
 		} ;
 		flash_control: flash@86000000 {
 			bank-width = <2>;
@@ -600,7 +600,7 @@
 			xlnx,ext-dma-data-width = <0x20>;
 			xlnx,family = "spartan6";
 			xlnx,include-dphase-timer = <0x0>;
-			xlnx,param-address-width = <0x9>;
+			xlnx,param-address-width = <0xa>;
 		} ;
 		xps_gpio_0: gpio@820f0000 {
 			compatible = "xlnx,xps-gpio-2.00.a", "xlnx,xps-gpio-1.00.a";
