@@ -1,3 +1,7 @@
+#include "config.h"
+
+#ifdef CONFIG_FIRMWARE_UPDATE
+
 #include "hush.h"
 #include "labx-mailbox.h"
 #include "preboot.h"
@@ -302,7 +306,6 @@ int DoFirmwareUpdate(void)
  *
  * Returns - Zero if no firmware update was performed and no
  *           boot delay requested from host, nonzero otherwise
- *
  */
 int CheckFirmwareUpdate(void)
 {
@@ -313,82 +316,105 @@ int CheckFirmwareUpdate(void)
   uint32_t respSize;
   int returnValue = 0;
 
-  // Enable the mailbox.
+  /* Enable the mailbox. */
   SetupLabXMailbox();
 
+  /* Check GPIOs, if any are defined for the platform,
+     for boot delay and for firmware update mode. */
+#ifdef XPAR_XPS_GPIO_0_BASEADDR
+#ifdef GPIO_BOOT_DELAY_BIT
+  if(*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & GPIO_BOOT_DELAY_BIT) {
+    puts("Boot delay requested via GPIO.\n");
+    bootDelay = 1;
+  }
+#endif
+#ifdef GPIO_FIRMWARE_UPDATE_BIT
+  if(*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & GPIO_FIRMWARE_UPDATE_BIT) {
+    puts("Firmware update requested via GPIO.\n");
+    doUpdate = 1;
+  }
+#endif
+#endif
+
   /* Check the mailbox every quarter of a second for a
-  total of 1 second to enter into firmware update */
-  for (i=0; i<4; ++i) {
-	if(ReadLabXMailbox(request, &reqSize, FALSE)) {
+     total of 1 second to enter into firmware update */
+  if(!doUpdate) {
+    puts("Checking for firmware update request from host... ");
+    for(i = 0; i < 4; ++i) {
+      if(ReadLabXMailbox(request, &reqSize, FALSE)) {
+        puts("requested\n");
 #ifdef _LABXDEBUG
-          printf("Length: 0x%02X\n", getLength_req(request));
-          printf("CC: 0x%02X\n", getClassCode_req(request));
-          printf("SC: 0x%02X\n", getServiceCode_req(request));
-          printf("AC: 0x%02X\n", getAttributeCode_req(request));
-          printf("Request: [ ");
-          for(i = 0; i < reqSize; i++) {
-            printf("%02X ", request[i]);
-          }
-          printf("]\n");
+        printf("Length: 0x%02X\n", getLength_req(request));
+        printf("CC: 0x%02X\n", getClassCode_req(request));
+        printf("SC: 0x%02X\n", getServiceCode_req(request));
+        printf("AC: 0x%02X\n", getAttributeCode_req(request));
+        printf("Request: [ ");
+        for(i = 0; i < reqSize; i++) {
+          printf("%02X ", request[i]);
+        }
+        printf("]\n");
 #endif
-		/* Unmarshal the received request */
-		switch(getClassCode_req(request)) {
+        /* Unmarshal the received request */
+        switch(getClassCode_req(request)) {
 
-		case k_CC_FirmwareUpdate:
-	  	  FirmwareUpdate__unmarshal(request, response);
-		  break;
+          case k_CC_FirmwareUpdate:
+            FirmwareUpdate__unmarshal(request, response);
+            break;
 
-		default:
-	  	// Report a malformed request
-		  setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
-		  setLength_resp(response, getPayloadOffset_resp(response));
-		}
+          default:
+            // Report a malformed request
+            setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
+            setLength_resp(response, getPayloadOffset_resp(response));
+        }
 
-		respSize = getLength_resp(response);
-		setLength_resp(response, respSize);
-		WriteLabXMailbox(response, respSize);
+        respSize = getLength_resp(response);
+        setLength_resp(response, respSize);
+        WriteLabXMailbox(response, respSize);
 #ifdef _LABXDEBUG
-                printf("Response Length: 0x%02X\n", respSize);
-                printf("Response Code: 0x%04X\n", getStatusCode_resp(response));
-                printf("Response: [ "); 
-                for(i = 0; i < respSize; i++) {
-                  printf("%02X ", response[i]); 
-                } 
-                 printf("]\n");
+        printf("Response Length: 0x%02X\n", respSize);
+        printf("Response Code: 0x%04X\n", getStatusCode_resp(response));
+        printf("Response: [ "); 
+        for(i = 0; i < respSize; i++) {
+          printf("%02X ", response[i]); 
+        } 
+        printf("]\n");
 #endif
-    		/* Re-set the max request size for the next iteration */
-		reqSize = sizeof(RequestMessageBuffer_t);
+        /* Re-set the max request size for the next iteration */
+        reqSize = sizeof(RequestMessageBuffer_t);
 
-		/* Break out of loop, we received a valid request */
-                if(getStatusCode_resp(response) == e_EC_SUCCESS) break;
-	}
-	else {
-		udelay(250000);
-  	}
+        /* Break out of loop, we received a valid request */
+        if(getStatusCode_resp(response) == e_EC_SUCCESS) break;
+      } else {
+        udelay(250000);
+      }
+    }
+    if(i == 4) {
+      puts("none requested\n");
+    }
   }
 
-  if (is_fallback_fpga()) {
-    printf("Run-time FPGA reconfiguration failed\n");
+  if(labx_is_fallback_fpga()) {
+    puts("Run-time FPGA reconfiguration failed\n");
     // TODO: there is currently no notification provided
     // to the host when a failure to reconfigure to the
     // runtime FPGA occurred and that the host needs to
     // provide a firmware update image.
     doUpdate = 1;
   } else if(firmwareUpdate) {
-    printf("Firmware Update Requested from HOST\n");
+    puts("Firmware Update Requested from HOST\n");
     doUpdate = 1;
   } else if(bootDelay) {
-    printf("Boot Delay Requested from HOST\n");
+    puts("Boot Delay Requested from HOST\n");
     returnValue = 1;
   } else {
-    printf("No Firmware update requested\n");
+    puts("No Firmware update requested\n");
   }
 
   // Perform an update if required for any reason
   if(doUpdate) {
-    printf("Entering firmware update\n");
+    puts("Waiting to receive firmware update image...\n");
     DoFirmwareUpdate();
-    printf("Firmware update completed, waiting for reset from host\n");
+    puts("Firmware update completed, waiting for reset from host\n");
     while(1);
   }
 
@@ -396,3 +422,5 @@ int CheckFirmwareUpdate(void)
   // if a firmware update was requested, we will never get here.
   return(returnValue);
 }
+
+#endif /* CONFIG_FIRMWARE_UPDATE */

@@ -31,7 +31,14 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-//#define CONFIG_FIRMWARE_UPDATE
+// This is the entire firmware update module,
+// and includes GPIO-checking.
+#define CONFIG_FIRMWARE_UPDATE
+
+// GPIO pins to request a boot
+// delay or a firmware update.
+#define GPIO_BOOT_DELAY_BIT      0x1
+#define GPIO_FIRMWARE_UPDATE_BIT 0x2
 
 // Configuration for SPI OTP
 #define CFG_SPI_OTP

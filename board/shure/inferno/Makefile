@@ -37,7 +37,8 @@ $(LIB): $(OBJS) libs
 	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
 
 libs:
-	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls # Don't know why this needs to be executed separately.
+# Don't know why do_idls needs to be executed separately.
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls
 	$(MAKE) -C $(TOPDIR)/lib_labx/idl
 	$(MAKE) -C $(TOPDIR)/lib_labx
 

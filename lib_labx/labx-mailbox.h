@@ -45,7 +45,7 @@
 #define LABX_MBOX_WRITE_REG(reg,val) ( *((volatile unsigned long *)reg) = val )
 
 /* Public functions */
-extern void SetupLabXMbox(void);
+extern void SetupLabXMailbox(void);
 extern int ReadLabXMailbox(uint8_t *buffer, uint32_t *size, uint8_t pollForMsg);
 extern void WriteLabXMailbox(uint8_t *buffer, uint32_t size);
 extern void TrigAsyncLabXMailbox(void);
