@@ -49,7 +49,7 @@ extern int CheckFirmwareUpdate(void);
 #endif
 
 #if defined(CONFIG_LABX_PREBOOT)
-extern int labx_preboot(void);
+extern int labx_preboot(int bootdelay);
 extern void labx_print_cmdhelp(void);
 #if defined(USE_ICAP_FSL)
 extern int labx_is_golden_fpga(void);
@@ -299,9 +299,9 @@ void main_loop (void)
 	int flag;
 #endif
 
-#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
+#ifdef CONFIG_BOOTDELAY
 	char *s;
-	int bootdelay;
+	int bootdelay = 0;
 	int do_update = 0;
 #endif
 #ifdef CONFIG_PREBOOT
@@ -393,22 +393,24 @@ void main_loop (void)
 #endif /* CONFIG_UPDATE_TFTP */
 
 #if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
+#if CONFIG_BOOTDELAY > 0
 	s = getenv ("bootdelay");
 	bootdelay = s ? (int)simple_strtol(s, NULL, 10) : CONFIG_BOOTDELAY;
+#endif
 
 	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
-#if defined(CONFIG_FIRMWARE_UPDATE) 
-	do_update = CheckFirmwareUpdate();
-	if (do_update == 0) {
-		bootdelay = 0;
-	} else if (bootdelay == 0) {
-		/* This will set up a boot delay based on the
-		 * "bootdelay" environment variable even if
-		 * CONFIG_BOOTDELAY is not defined. */
-		s = getenv ("bootdelay");
-		if (s) bootdelay = (int)simple_strtol(s, NULL, 10);
-	}
+#if defined(CONFIG_FIRMWARE_UPDATE) && defined(CONFIG_LABX_PREBOOT)
+  /* CheckFirmwareUpdate() returns a 1 if a boot delay was
+   * manually requested by the host or by the user. Otherwise,
+   * it returns zero. If it performs a firmware update, it
+   * never returns. */
+  if(labx_is_golden_fpga() && CheckFirmwareUpdate() && bootdelay == 0) {
+    /* This will set up a boot delay based on the
+     * "bootdelay" environment variable or a default
+     * value even if CONFIG_BOOTDELAY is 0. */
+    bootdelay = 3;
+  }
 #endif
 
 #if defined(CONFIG_GPIO_INIT)
@@ -427,7 +429,7 @@ void main_loop (void)
 #endif /* CONFIG_POST */
 
 #if defined(CONFIG_LABX_PREBOOT)
-  labx_preboot_res = labx_preboot();
+  labx_preboot_res = labx_preboot(bootdelay);
 	if(labx_preboot_res == -1) bootdelay = -1;
   else if(labx_preboot_res == 0) bootdelay = 0;
 #endif
@@ -444,7 +446,7 @@ void main_loop (void)
 
 	debug ("### main_loop: bootcmd=\"%s\"\n", s ? s : "<UNDEFINED>");
 
-	if (bootdelay >= 0 && s && !abortboot (bootdelay)) {
+	if (bootdelay >= 0 && s && (bootdelay == 0 || !abortboot (bootdelay))) {
 # ifdef CONFIG_AUTOBOOT_KEYED
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
 # endif
@@ -476,8 +478,8 @@ void main_loop (void)
 #endif /* CONFIG_MENUKEY */
 
 #ifdef CONFIG_LABX_PREBOOT
-	/* If we're here, an auto-boot has been cancelled. */
-  if (labx_is_golden_fpga()) {
+	/* If an auto-boot has been cancelled. */
+  if (bootdelay > 0 && labx_is_golden_fpga()) {
 	  puts("Auto-boot cancelled. ");
 		labx_print_cmdhelp();
     puts("'boot' will reconfigure to the production FPGA.\n");

@@ -37,8 +37,8 @@
 
 // GPIO pins to request a boot
 // delay or a firmware update.
-#define GPIO_BOOT_DELAY_BIT      0x1
-#define GPIO_FIRMWARE_UPDATE_BIT 0x2
+#define GPIO_BOOT_DELAY_BIT      0x2
+#define GPIO_FIRMWARE_UPDATE_BIT 0x3
 
 // Configuration for SPI OTP
 #define CFG_SPI_OTP
@@ -213,8 +213,12 @@
 #define XPAR_EMC_0_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
 #define XPAR_XPS_MCH_EMC
 
-/* Perform the normal bootdelay checking */
-#define CONFIG_BOOTDELAY 1
+/* If this is defined and zero, the system will auto-boot
+ * ("production" mode). If it is defined and > 0, there
+ * will be a delay to allow the user to stop auto-boot,
+ * if desired. If it is not defined, auto-boot will be
+ * compiled out completely. */
+#define CONFIG_BOOTDELAY 3
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
 #define CONFIG_LABX_PREBOOT

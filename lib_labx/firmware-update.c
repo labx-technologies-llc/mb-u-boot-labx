@@ -184,6 +184,7 @@ AvbDefs__ErrorCode sendCommand(string_t cmd) {
 AvbDefs__ErrorCode remainInBootloader(void) {
   int returnValue = e_EC_SUCCESS;
  
+  puts("Firmware Update Requested from HOST\n");
   firmwareUpdate = TRUE;
   return(returnValue);
 }
@@ -191,6 +192,7 @@ AvbDefs__ErrorCode remainInBootloader(void) {
 AvbDefs__ErrorCode requestBootDelay(void) {
   int returnValue = e_EC_SUCCESS;
  
+  puts("Boot Delay Requested from HOST\n");
   bootDelay = TRUE;
   return(returnValue);
 }
@@ -316,29 +318,42 @@ int CheckFirmwareUpdate(void)
   uint32_t respSize;
   int returnValue = 0;
 
-  /* Enable the mailbox. */
-  SetupLabXMailbox();
-
-  /* Check GPIOs, if any are defined for the platform,
-     for boot delay and for firmware update mode. */
-#ifdef XPAR_XPS_GPIO_0_BASEADDR
-#ifdef GPIO_BOOT_DELAY_BIT
-  if(*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & GPIO_BOOT_DELAY_BIT) {
-    puts("Boot delay requested via GPIO.\n");
-    bootDelay = 1;
-  }
-#endif
-#ifdef GPIO_FIRMWARE_UPDATE_BIT
-  if(*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & GPIO_FIRMWARE_UPDATE_BIT) {
-    puts("Firmware update requested via GPIO.\n");
+  /* If this is a fallback FPGA, we wait for
+   * a firmware update image unconditionally. */
+  if(labx_is_fallback_fpga()) {
+    puts("Run-time FPGA reconfiguration failed.\n");
+    /* TODO: there is currently no notification provided
+     * to the host when a failure to reconfigure to the
+     * runtime FPGA occurred and that the host needs to
+     * provide a firmware update image. */
     doUpdate = 1;
   }
+
+  if(!doUpdate) {
+    /* Check GPIOs, if any are defined for the platform,
+       for boot delay and for firmware update mode. */
+#ifdef XPAR_XPS_GPIO_0_BASEADDR
+#ifdef GPIO_BOOT_DELAY_BIT
+    if(~*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & (0x1 << GPIO_BOOT_DELAY_BIT)) {
+      puts("Boot delay requested via GPIO\n");
+      bootDelay = 1;
+    }
+#endif
+#ifdef GPIO_FIRMWARE_UPDATE_BIT
+    if(~*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & (0x1 << GPIO_FIRMWARE_UPDATE_BIT)) {
+      puts("Firmware update requested via GPIO\n");
+      doUpdate = 1;
+    }
 #endif
 #endif
+  }
 
   /* Check the mailbox every quarter of a second for a
      total of 1 second to enter into firmware update */
-  if(!doUpdate) {
+  if(!doUpdate && !bootDelay) {
+    /* Enable the mailbox. */
+    SetupLabXMailbox();
+
     puts("Checking for firmware update request from host... ");
     for(i = 0; i < 4; ++i) {
       if(ReadLabXMailbox(request, &reqSize, FALSE)) {
@@ -356,15 +371,14 @@ int CheckFirmwareUpdate(void)
 #endif
         /* Unmarshal the received request */
         switch(getClassCode_req(request)) {
+        case k_CC_FirmwareUpdate:
+          FirmwareUpdate__unmarshal(request, response);
+          break;
 
-          case k_CC_FirmwareUpdate:
-            FirmwareUpdate__unmarshal(request, response);
-            break;
-
-          default:
-            // Report a malformed request
-            setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
-            setLength_resp(response, getPayloadOffset_resp(response));
+        default:
+          /* Report a malformed request */
+          setStatusCode_resp(response, e_EC_INVALID_SERVICE_CODE);
+          setLength_resp(response, getPayloadOffset_resp(response));
         }
 
         respSize = getLength_resp(response);
@@ -393,24 +407,15 @@ int CheckFirmwareUpdate(void)
     }
   }
 
-  if(labx_is_fallback_fpga()) {
-    puts("Run-time FPGA reconfiguration failed\n");
-    // TODO: there is currently no notification provided
-    // to the host when a failure to reconfigure to the
-    // runtime FPGA occurred and that the host needs to
-    // provide a firmware update image.
-    doUpdate = 1;
-  } else if(firmwareUpdate) {
-    puts("Firmware Update Requested from HOST\n");
+  /* These variables are checked like this because
+   * they can be set asynchronously (such as over IDL). */
+  if(firmwareUpdate) {
     doUpdate = 1;
   } else if(bootDelay) {
-    puts("Boot Delay Requested from HOST\n");
     returnValue = 1;
-  } else {
-    puts("No Firmware update requested\n");
   }
 
-  // Perform an update if required for any reason
+  /* Perform an update if required for any reason */
   if(doUpdate) {
     puts("Waiting to receive firmware update image...\n");
     DoFirmwareUpdate();
@@ -418,8 +423,8 @@ int CheckFirmwareUpdate(void)
     while(1);
   }
 
-  // Return, supplying a nonzero value if a boot delay was requested;
-  // if a firmware update was requested, we will never get here.
+  /* Return, supplying a nonzero value if a boot delay was requested.
+   * If a firmware update was requested, we will never get here. */
   return(returnValue);
 }
 

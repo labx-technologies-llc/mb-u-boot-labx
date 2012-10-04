@@ -57,38 +57,50 @@ static const char *crc_vars[][5] = {
 static const unsigned int num_crcs = sizeof(crc_vars) / sizeof(crc_vars[0]);
 
 /* Pre-boot function. */
-int labx_preboot(void) {
-  // Print if we are in development mode.
-#if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 1)
-  puts("Development build.\n");
-#endif
-
+int labx_preboot(int bootdelay) {
   if(labx_is_golden_fpga()) {
-    // Only check CRCs and perform related logic if
-    // we are not in development mode (i.e. no boot
-    // delay is configured, and we try to boot right
-    // away).
-#if !defined(CONFIG_BOOTDELAY) || (CONFIG_BOOTDELAY == 0)
-    puts("Checking runtime CRCs...\n");
-    if(!check_runtime_crcs()) {
-      puts("Runtime CRC checks failed. Checking golden CRCs...\n");
-      if(!check_golden_crcs()) {
-        puts("Golden CRC checks failed. Staying in U-Boot. Please perform a firmware update. Type 'boot' to try to boot to golden Linux anyways.\n");
-        labx_print_cmdhelp();
-        setenv("bootcmd", "run bootglnx");
-        return -1;
-      }
-    } else
-#endif
-    // The auto-boot will reconfigure
-    // to the production FPGA.
+#ifdef CONFIG_BOOTDELAY /* If auto-boot is compiled in. */
+    /* The auto-boot will reconfigure
+     * to the production FPGA. */
     setenv("bootcmd", "reconf 1");
-  }
 
-  // In the production FPGA, we try to boot right away.
-  if(labx_is_golden_fpga()) {
+#if CONFIG_BOOTDELAY > 0
+    /* Print if we are in development mode. */
+    puts("Development build\n");
+#else
+    /* Only check CRCs and perform related logic if
+     * we are not in development mode (i.e. no boot
+     * delay is configured, and we try to boot right
+     * away), and if we are to boot right away. */
+    if(bootdelay == 0) {
+      puts("Checking runtime CRCs...\n");
+      if(!check_runtime_crcs()) {
+        /* Runtime CRCs failed. The boot command
+         * will now boot golden Linux. */
+        setenv("bootcmd", "run bootglnx");
+
+        puts("Runtime CRC checks failed. Checking golden CRCs...\n");
+        if(!check_golden_crcs()) {
+          puts("Golden CRC checks failed. Staying in U-Boot. Please perform a firmware update.\n");
+          labx_print_cmdhelp();
+          puts("Type 'boot' to try to boot to golden Linux anyways.\n");
+          return -1; /* Abort auto-boot (i.e. stay in U-Boot). */
+        } else {
+          puts("Golden CRC checks passed. Golden Linux will be booted.\n");
+          return 0; /* Continue to boot right away. */
+        }
+      } else {
+        puts("Runtime CRC checks passed. Booting Linux.\n");
+      }
+    } else {
+      puts("Production build: boot delay requested, not checking CRCs.\n");
+    }
+#endif
+#endif
+    /* Do not affect boot-up mode (delay or not). */
     return 1;
   } else {
+    /* In the production FPGA, we always try to boot right away. */
     return 0;
   }
 }
@@ -178,11 +190,17 @@ static int check_crcs(const char *crc_vars[][5], int num) {
     // Sanity checks.
     if(!(part_size_var = getenv(crc_vars[i][2]))) {
       printf("required environment variable \"%s\" not defined.\n", crc_vars[i][2]);
-      continue;
+      success = 0;
+      break;
     } else { part_size = simple_strtoul(part_size_var, NULL, 16); }
     if(part_size > 0x800000 || hdr_ddr->ih_size > part_size) {
       puts("failed sanity checks: exuberant sizes reported.\n");
-      continue;
+      success = 0;
+      break;
+    } else if(hdr_ddr->ih_size == 0) {
+      puts("failed sanity checks: zero size reported.\n");
+      success = 0;
+      break;
     }
 
     // Data image.
