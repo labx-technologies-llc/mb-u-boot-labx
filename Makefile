@@ -3598,6 +3598,10 @@ labx_sanfrancesco_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze sanfrancesco labx
 
+labx_avbx_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx labx
+
 shure_inferno_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno shure
