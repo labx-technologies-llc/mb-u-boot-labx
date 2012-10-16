@@ -20,10 +20,12 @@
 #ifdef CFG_SPI_OTP
 #define MAC_ADDR_BYTES 6
 #define MAX_MAC_STRING_CHAR 17
-#define OTP_BASE_ADDR 0x114
-#define OTP_LOCK_REGION1_BASE 0x112
 #define OTP_REGION_OFFSET 0x010
 #define OTP_REGION_INSET 0x02
+
+#if !defined(OTP_BASE_ADDR) || !defined(OTP_LOCK_REGION_BASE)
+#error OTP_BASE_ADDR or OTP_LOCK_REGION_BASE not defined. They need to be defined in the board-specific header file so that we know where in OTP to flash and read back MAC addresses. Used to be common to all SPI OTP projects, now it's board-specific.
+#endif
 #endif
 
 #ifndef FALSE
@@ -275,7 +277,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	run_command(getenv("spiprobe"), flag);
 	
 	ulong otp_addr = (ulong)(OTP_BASE_ADDR + (ethnum * OTP_REGION_OFFSET));
-	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION1_BASE;
+	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION_BASE;
 	uint8_t lockmask = 0x01 << ethnum;
 	
 	ret = spi_flash_read_otp(flash, otp_lock_addr, 1, (void*)&lockbits);
