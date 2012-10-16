@@ -471,7 +471,7 @@
                         xlnx,family = "spartan6";
                         xlnx,has-tdm-loopback = <0x0>;
                         xlnx,has-tdm-slave-manager = <0x1>;
-                        xlnx,has-tdm-analyzer = <0x0>;
+                        xlnx,has-tdm-analyzer = <0x1>;
                         xlnx,has-dynamic-sample-rates = <0x1>;
                         xlnx,include-dphase-timer = <0x0>;
                         xlnx,local-osc-ratio = <0x400>;
