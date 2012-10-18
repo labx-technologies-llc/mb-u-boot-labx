@@ -28,7 +28,7 @@
 #define OTP_REGION_OFFSET 0x010
 #define OTP_REGION_INSET 0x02
 #define OTP_MAX_MAC_ADDR_OFFSET 32
-#define OTP_OFFSET_PARAM "labx_ethernet.base_otp_reg"
+#define OTP_OFFSET_PARAM "base_otp_reg"
 #endif
 
 #ifndef FALSE
