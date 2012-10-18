@@ -7,6 +7,9 @@
 
 #include <common.h>
 #include <spi_flash.h>
+#include <malloc.h>
+#include <fdt.h>
+#include <libfdt.h>
 
 #include <asm/io.h>
 
@@ -20,12 +23,12 @@
 #ifdef CFG_SPI_OTP
 #define MAC_ADDR_BYTES 6
 #define MAX_MAC_STRING_CHAR 17
+#define OTP_BASE_ADDR 0x114
+#define OTP_LOCK_REGION_BASE 0x112
 #define OTP_REGION_OFFSET 0x010
 #define OTP_REGION_INSET 0x02
-
-#if !defined(OTP_BASE_ADDR) || !defined(OTP_LOCK_REGION_BASE)
-#error OTP_BASE_ADDR or OTP_LOCK_REGION_BASE not defined. They need to be defined in the board-specific header file so that we know where in OTP to flash and read back MAC addresses. Used to be common to all SPI OTP projects, now it's board-specific.
-#endif
+#define OTP_MAX_MAC_ADDR_OFFSET 32
+#define OTP_OFFSET_PARAM "labx_ethernet.base_otp_reg"
 #endif
 
 #ifndef FALSE
@@ -214,6 +217,78 @@ int char_to_hex(char ch)
   	return(ret_Value);
 }
 
+int getFdtBootCmdProperty(const char *propertyName, char *buf, size_t bufLen)
+{
+	int   i;
+	int   err;
+	ulong fdt_flash_offset;
+	ulong fdt_flash_size;
+	void *pfdt = NULL;
+	const char *str;		/* used to get string properties */
+	const char *path;
+	uint8_t hdrbuf[256];
+
+	fdt_flash_offset = simple_strtoul(getenv("fdtstart"), NULL, 0);
+	if (fdt_flash_offset == 0) {
+		puts("fdtstart not specified in environment\n");
+		return -1;
+	}		
+	err = spi_flash_read(flash, fdt_flash_offset, sizeof(hdrbuf), hdrbuf);
+	if (err != 0) {
+		printf("FDT header read failed: %s\n", fdt_strerror(err));
+		return err;
+	}
+	err = fdt_check_header(hdrbuf);
+	if (err != 0 || (fdt_flash_size = fdt_totalsize(hdrbuf)) == 0) {
+		printf("FDT header invalid: %s\n", fdt_strerror(err));
+		return err;
+	}
+	pfdt = malloc(fdt_flash_size);
+	if (pfdt == NULL) {
+		printf("FDT allocation of %lu bytes failed\n", fdt_flash_size);
+		return -1;
+	}
+	err = spi_flash_read(flash, fdt_flash_offset, fdt_flash_size, pfdt);
+	if (err != 0) {
+		printf("FDT read failed: %s\n", fdt_strerror(err));
+		goto getFdtBootCmdProperty_err;
+	}
+	err = fdt_check_header(pfdt);
+	if (err != 0) {
+		printf("FDT invalid: %s\n", fdt_strerror(err));
+		goto getFdtBootCmdProperty_err;
+	}
+	i = fdt_path_offset (pfdt, "/chosen");
+	if (i < 0) {
+		puts("FDT node \"/chosen\" not found\n");
+		err = -1;
+		goto getFdtBootCmdProperty_err;
+	}
+	path = fdt_getprop(pfdt, i, "bootargs", NULL);
+	if (path == NULL) {
+		puts("FDT property \"bootargs\" not found\n");
+		err = -1;
+		goto getFdtBootCmdProperty_err;
+	}
+	if ((str = strstr (path, propertyName)) == NULL ||
+			(str = strchr(str, '=')) == NULL) {
+		printf("FDT bootargs property \"%s\" not found\n", propertyName);
+		err = -1;
+		goto getFdtBootCmdProperty_err;
+	}
+	while (*str == '=' || *str == ' ') {
+		++str;
+	}
+	for (i = 0; (str[i] > ' ') && (i < (int)bufLen - 1); ++i)
+		;
+	memcpy(buf, str, i);
+	buf[i] = '\0';
+
+getFdtBootCmdProperty_err:
+	free(pfdt);
+	return (err == 0) ? i : err;
+}
+
 int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	int i = 0;
@@ -222,6 +297,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	const char *ethintf = argv[1];
 	const char *mac = argv[2];
 	uint8_t macbyte[8];
+    char otpMacOffsetStr[16];
 	uint8_t stored_macbyte[8];
 	uint8_t lockbits;
 	int skip_colon = TRUE; 
@@ -276,8 +352,21 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	// Probe SPI flash device
 	run_command(getenv("spiprobe"), flag);
 	
-	ulong otp_addr = (ulong)(OTP_BASE_ADDR + (ethnum * OTP_REGION_OFFSET));
-	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION_BASE;
+	if (getFdtBootCmdProperty(OTP_OFFSET_PARAM, otpMacOffsetStr, sizeof(otpMacOffsetStr)) > 0) {
+		i = (int)simple_strtoul(otpMacOffsetStr, NULL, 0);
+		if (i < 0 || i > OTP_MAX_MAC_ADDR_OFFSET) {
+			printf(OTP_OFFSET_PARAM " (%d) exceeds max value %d\n", i, OTP_MAX_MAC_ADDR_OFFSET);
+			i = 0;
+		} else {
+			printf("Boot command string " OTP_OFFSET_PARAM "=%d\n", i);
+		}
+	} else {
+		i = 0;
+		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset 0\n");
+	}
+
+	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * OTP_REGION_OFFSET));
+	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION_BASE + ((i + ethnum) >> 3);
 	uint8_t lockmask = 0x01 << ethnum;
 	
 	ret = spi_flash_read_otp(flash, otp_lock_addr, 1, (void*)&lockbits);
@@ -329,6 +418,8 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	int ethnum = 0;
 	const char *ethintf;
         uint8_t macbyte[6];
+    char otpMacOffsetStr[16];
+    ulong otp_addr;
 
 	if (argc < 2)
 		goto usage;
@@ -342,12 +433,25 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		goto fail;
 	}
 	
-	puts ("Reading MAC from OTP flash...\n");
-	
 	// Probe SPI flash device
 	run_command(getenv("spiprobe"), flag);
 	
-	ulong otp_addr = (ulong)(OTP_BASE_ADDR + (ethnum * OTP_REGION_OFFSET) + OTP_REGION_INSET);
+	// Read FDT to find MAC address offset in kernel boot args
+	
+	if (getFdtBootCmdProperty(OTP_OFFSET_PARAM, otpMacOffsetStr, sizeof(otpMacOffsetStr)) > 0) {
+		i = (int)simple_strtoul(otpMacOffsetStr, NULL, 0);
+		if (i < 0 || i > OTP_MAX_MAC_ADDR_OFFSET) {
+			printf(OTP_OFFSET_PARAM " (%d) exceeds max value %d\n", i, OTP_MAX_MAC_ADDR_OFFSET);
+			i = 0;
+		} else {
+			printf("Boot command string " OTP_OFFSET_PARAM "=%d\n", i);
+		}
+	} else {
+		i = 0;
+		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset 0\n");
+	}
+
+	otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * OTP_REGION_OFFSET) + OTP_REGION_INSET);
 	printf("eth%d MAC: ", ethnum);
 	ret = spi_flash_read_otp(flash, otp_addr, MAC_ADDR_BYTES, (void*)macbyte); 
 	for(i = 0; i < MAC_ADDR_BYTES; i++) { 

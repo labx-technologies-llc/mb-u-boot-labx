@@ -37,10 +37,6 @@
 #define CFG_SPI_OTP
 #define NUM_ETH_PORTS 2
 
-/* MAC address OTP configuration for SPI OTP flash */
-#define OTP_BASE_ADDR 0x194
-#define OTP_LOCK_REGION_BASE 0x113
-
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
 #define	CONFIG_XILINX_UARTLITE
