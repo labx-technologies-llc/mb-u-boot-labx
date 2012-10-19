@@ -31,7 +31,10 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-#define CONFIG_FIRMWARE_UPDATE
+// Leave commented out, disables the firmware update check for updates
+// over the host interface and configures a boot delay to break into
+// the bootloader
+//#define CONFIG_FIRMWARE_UPDATE
 
 /* Configuration for SPI OTP */
 #define CFG_SPI_OTP
