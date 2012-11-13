@@ -56,7 +56,7 @@ set romfsstart 0x87B20000
 
 echo Settings Filesystem Configuration:
 set settingsfssize 0x140000
-set settingsfsstart 0x87E60000
+set settingsfsstart 0x87EA0000
 
 echo Boot Configuration:
 set bootcmd 'bootm ${kernstart} - ${fdtstart}'
