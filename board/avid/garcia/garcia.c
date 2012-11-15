@@ -73,7 +73,7 @@ int board_eth_init(bd_t *bis)
   return(labx_eth_initialize(bis));
 }
 
-int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
+int do_garcia_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	int rc = 0;
 	int i;
@@ -111,7 +111,7 @@ int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 }
 
-U_BOOT_CMD(flash_rom_image, 2, 0, do_flash_rom_image,
+U_BOOT_CMD(flash_garcia_image, 2, 0, do_garcia_flash_rom_image,
 		"Load a Garcia Flash ROM image into Flash memory",
 		"Read a flash ROM image, by default named \"garcia.rom\", from a TFTP server at"
 		" IP address 192.168.1.100 and write it to the Flash ROM.");
