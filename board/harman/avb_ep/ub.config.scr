@@ -3,10 +3,10 @@ echo -----------------------------------
 echo Network Configuration:
 echo TODO - Use a real OUI for MAC address
 set autoload no
-set ethaddr 00:0a:35:00:44:01
+#set ethaddr 00:0a:35:00:44:01
 set ipaddr 192.168.1.1
 set serverip 192.168.1.100
-set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01
+#set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01
 
 echo Clobber DRAM Configuration:
 set clobstart 0x88000000
@@ -58,14 +58,16 @@ set bootcmd 'bootm ${kernstart} - ${fdtstart}'
 set bootdelay 3
 
 set try_load_fpga64 'tftp ${clobstart} ${fpganame64}'
-set try_load_fpga384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame384}; else echo; fi'
+set try_load_fpga384 'tftp ${clobstart} ${fpganame384}'
 set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
 set update_fpga run try_load_fpga64 install_fpga
+set update_fpga_384 run try_load_fpga384 install_fpga
 
 set try_load_boot_fpga64 'tftp ${clobstart} ${bootfpganame64}'
-set try_load_boot_fpga384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${bootfpganame384}; else echo; fi'
+set try_load_boot_fpga384 'tftp ${clobstart} ${bootfpganame384}'
 set install_boot_fpga 'protect off ${bootfpgastart} +${bootfpgasize};erase ${bootfpgastart} +${bootfpgasize};cp.b ${fileaddr} ${bootfpgastart} ${bootfpgasize}'
 set update_boot_fpga run try_load_boot_fpga64 install_boot_fpga
+set update_boot_fpga_384 run try_load_boot_fpga384 install_boot_fpga
 
 set kernname linux.ub
 set load_kernel 'tftp ${clobstart} ${kernname}'
@@ -85,9 +87,10 @@ set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +
 set update_romfs run load_romfs install_romfs
 
 set try_load_fdt64 'tftp ${clobstart} ${fdtname64}'
-set try_load_fdt384 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname384}; else echo; fi'
+set try_load_fdt384 'tftp ${clobstart} ${fdtname384}'
 set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
 set update_fdt run try_load_fdt64 install_fdt
+set update_fdt_384 run try_load_fdt384 install_fdt
 
 set load_settingsfs 'tftp ${clobstart} settings.jffs2'
 set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
