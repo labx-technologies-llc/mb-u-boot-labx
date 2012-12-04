@@ -36,6 +36,8 @@ IDLSRC += FirmwareUpdate.idl
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
+all: do_idls $(LIB)
+
 $(LIB):	$(OBJS)
 	$(AR) $(ARFLAGS)s $@ $(OBJS)
 
@@ -45,7 +47,7 @@ do_idls: $(IDLSRC:.idl=.h)
 	    omniidl -p ./ -b labx_c $<
 
 distclean:	clean
-	rm -f $(LIB) core *.bak $(obj).depend
+	rm -f $(LIB) core *.bak $(obj).depend $(OBJS)
 
 #########################################################################
 
