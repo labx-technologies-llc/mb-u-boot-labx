@@ -38,7 +38,7 @@
 		serial0 = &serial_console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2560K(bootfpga),2560K(fpga),256K(boot),128K(bootenv),128K(goldenfdt),1536K(goldenkernel),1024K(goldenrootfs),2560K(goldenromfs),5632K(empty1),128K(fdt),384K(empty2),1536K(kernel),1024K(rootfs),3584K(romfs),2560K(settingsfs) root=/dev/mtdblock12 rootfstype=squashfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2560K(bootfpga),2560K(fpga),256K(boot),128K(bootenv),128K(goldenfdt),1536K(goldenkernel),1024K(goldenrootfs),2560K(goldenromfs),5632K(empty1),128K(fdt),384K(empty2),1536K(kernel),1024K(rootfs),3584K(romfs),2560K(settingsfs) root=/dev/mtdblock6 rootfstype=squashfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
