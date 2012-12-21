@@ -394,6 +394,9 @@ void main_loop (void)
 	update_tftp ();
 #endif /* CONFIG_UPDATE_TFTP */
 
+  /* CONFIG_BOOTDELAY has to be defined for the
+     auto-boot mechanism to be compiled into the
+     code. */
 #if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
 #if CONFIG_BOOTDELAY > 0
 	s = getenv ("bootdelay");
@@ -409,8 +412,10 @@ void main_loop (void)
    * never returns. */
   if(labx_is_golden_fpga() && CheckFirmwareUpdate() && bootdelay == 0) {
     /* This will set up a boot delay based on the
-     * "bootdelay" environment variable or a default
-     * value even if CONFIG_BOOTDELAY is 0. */
+     * "bootdelay" environment variable (which just
+     * happened, above) or a default value even if
+     * CONFIG_BOOTDELAY is 0 (which is what this 'if'
+     * is for -- bootdelay == 0 iff CONFIG_BOOTDELAY == 0). */
     bootdelay = 3;
   }
 #endif

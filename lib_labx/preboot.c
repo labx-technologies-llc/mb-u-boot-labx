@@ -69,7 +69,7 @@ int labx_preboot(int bootdelay) {
 
 #if CONFIG_BOOTDELAY > 0
     /* Print if we are in development mode. */
-    puts("Development build\n");
+    puts("Development build. Not checking CRCs.\n");
 #else
     /* Only check CRCs and perform related logic if
      * we are not in development mode (i.e. no boot
