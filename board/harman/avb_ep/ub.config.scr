@@ -45,16 +45,16 @@ setenv settingsfssize   0x280000; setenv settingsfsstart   0x87680000 # Settings
 echo Update Commands
 setenv check_settingsfs_crc 'sf read 0x88000040 ${settingsfsstart} ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
 
-setenv update_boot_fpga     'set_boot_fpga_name;                  setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load install'
-setenv update_golden_fdt    'set_golden_fdt_name;                 setenv imgstart ${goldenfdtstart};   setenv imgsize ${goldenfdtsize};   setenv hdrloc ${goldenfdthdr};   run load install'
+setenv update_boot_fpga     'run set_boot_fpga_name;              setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load install'
+setenv update_golden_fdt    'run set_golden_fdt_name;             setenv imgstart ${goldenfdtstart};   setenv imgsize ${goldenfdtsize};   setenv hdrloc ${goldenfdthdr};   run load install'
 setenv update_boot_env      'setenv imgname ub.config.img;        setenv imgstart ${bootenvstart};     setenv imgsize ${bootenvsize};                                      run load run_script'
 setenv update_uboot         'setenv imgname u-boot.bin.ub;        setenv imgstart ${bootstart};        setenv imgsize ${bootsize};        setenv hdrloc ${boothdr};        run load install'
 setenv update_kernel        'setenv imgname linux.ub;             setenv imgstart ${kernstart};        setenv imgsize ${kernsize};                                         run load install_with_hdr'
 setenv update_golden_kernel 'setenv imgname linux-golden.ub;      setenv imgstart ${goldenkernstart};  setenv imgsize ${goldenkernsize};                                   run load install_with_hdr'
 setenv update_romfs         'setenv imgname usr.romfs.ub;         setenv imgstart ${romfsstart};       setenv imgsize ${romfssize};       setenv hdrloc ${romfshdr};       run load install'
 setenv update_golden_romfs  'setenv imgname usr-golden.romfs.ub;  setenv imgstart ${goldenromfsstart}; setenv imgsize ${goldenromfssize}; setenv hdrloc ${goldenromfshdr}; run load install'
-setenv update_fpga          'set_fpga_name;                       setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        setenv hdrloc ${fpgahdr};        run load install'
-setenv update_fdt           'set_fdt_name;                        setenv imgstart ${fdtstart};         setenv imgsize ${fdtsize};         setenv hdrloc ${fdthdr};         run load install'
+setenv update_fpga          'run set_fpga_name;                   setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        setenv hdrloc ${fpgahdr};        run load install'
+setenv update_fdt           'run set_fdt_name;                    setenv imgstart ${fdtstart};         setenv imgsize ${fdtsize};         setenv hdrloc ${fdthdr};         run load install'
 setenv update_rootfs        'setenv imgname rootfs.sqfs.ub;       setenv imgstart ${rootfsstart};      setenv imgsize ${rootfssize};      setenv hdrloc ${rootfshdr};      run load install'
 setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;setenv imgstart ${goldenrootfsstart};setenv imgsize ${goldenrootfssize};setenv hdrloc ${goldenrootfshdr};run load install'
 setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;  setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};                                   run load install_no_hdr check_settingsfs_crc'
@@ -81,7 +81,7 @@ setenv install_with_hdr 'if test ${crcreturn} -eq 0; then protect off ${imgstart
 echo Shortcuts for Development:
 setenv tempkernstart 0x88800000
 setenv tempfdtstart 0x88700000
-setenv temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
+setenv temp_kernel 'tftp ${tempkernstart} ${kernname};setenv imgname avb_ep_64.dtb; tftp ${tempfdtstart} ${imgname};bootm ${tempkernstart} - ${tempfdtstart}'
 
 echo Firmware Update Configuration
 setenv blobname avbEpUpdate.bin.ub
