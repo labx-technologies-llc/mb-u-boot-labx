@@ -54,7 +54,7 @@ extern void labx_print_cmdhelp(void);
 #if defined(USE_ICAP_FSL)
 extern int labx_is_golden_fpga(void);
 #else
-#error "ICAP support required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)."
+#error ICAP support required for Lab X pre-boot procedures (USE_ICAP_FSL not defined).
 #endif
 #endif
 
@@ -317,6 +317,8 @@ void main_loop (void)
 	char bcs_set[16];
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
 
+  puts("main\n");
+
 #if defined(CONFIG_VFD) && defined(VFD_TEST_LOGO)
 	ulong bmp = 0;		/* default bitmap */
 	extern int trab_vfd (ulong bitmap);
@@ -429,10 +431,12 @@ void main_loop (void)
 #endif /* CONFIG_POST */
 
 #if defined(CONFIG_LABX_PREBOOT)
+  puts("preboot\n");
   labx_preboot_res = labx_preboot(bootdelay);
 	if(labx_preboot_res == -1) bootdelay = -1;
   else if(labx_preboot_res == 0) bootdelay = 0;
 #endif
+  puts("post preboot\n");
 
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {

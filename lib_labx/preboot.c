@@ -26,6 +26,9 @@
 #error "Support for the ICAP module is required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)"
 #endif
 
+/* Implementation of U-Boot memcpy command. */
+//extern int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
+
 /* Arrays for variables that hold the locations
  * of all of the images to check CRCs for. These
  * variables need to be defined as part of the
@@ -115,7 +118,7 @@ void labx_print_cmdhelp(void) {
 static int check_crcs(const char *crc_vars[][5], int num) {
   int success = 1;
   char start_var[11], hdr_var[11], *part_size_var;
-  unsigned long int i, start_off, hdr_off, part_size, crc_in_image;
+  unsigned int i, start_off, hdr_off, part_size, crc_in_image;
   const unsigned int hdr_len = sizeof(image_header_t);
   static unsigned char *ddr = NULL;
   image_header_t *hdr_ddr;
@@ -123,7 +126,6 @@ static int check_crcs(const char *crc_vars[][5], int num) {
   static struct spi_flash *spiflash = NULL;
 #else
   char ddr_str[11], ddr_str_hdr[11], len_str[11]; // These strings need to hold "0xXXXXXXXX"
-  char *cp_cmd[4];
 #endif
 
   // Use the start of DDR memory for temporary storage.
@@ -134,8 +136,8 @@ static int check_crcs(const char *crc_vars[][5], int num) {
     } else {
       hdr_ddr = (image_header_t*)ddr;
 #ifndef CONFIG_SPI_FLASH
-      snprintf(ddr_str,     sizeof(ddr_str),     "0x%08X", (unsigned int)ddr);
-      snprintf(ddr_str_hdr, sizeof(ddr_str_hdr), "0x%08X", (unsigned int)(ddr + hdr_len));
+      sprintf(ddr_str,     "0x%08X", (unsigned int)ddr);
+      sprintf(ddr_str_hdr, "0x%08X", (unsigned int)(ddr + hdr_len));
 #endif
     }
   }
@@ -181,10 +183,10 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 #else
     // Emulate "cp.b" command.
     // TODO: this code hasn't been tested yet.
-    snprintf(len_str, sizeof(len_str), "0x%08X", hdr_len);
-    snprintf(hdr_var, sizeof(hdr_var), "0x%08X", hdr_off + XPAR_FLASH_CNTLR_MEM0_BASEADDR0)
-    cp_cmd = { "cp.b", hdr_var, ddr_str, len_str };
-    do_mem_cpy(NULL, 0, 4, cp_cmd);
+    sprintf(len_str, "0x%08X", hdr_len);
+    sprintf(hdr_var, "0x%08X", hdr_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR);
+    memcpy(ddr, (const void*)(hdr_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR), hdr_len);
+    //do_mem_cp(NULL, 0, 4, (char*[4]){ "cp.b", hdr_var, ddr_str, len_str });
 #endif
 
     // Sanity checks.
@@ -209,10 +211,10 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 #else
     // Emulate "cp.b" command.
     // TODO: this code hasn't been tested yet.
-    snprintf(len_str,   sizeof(len_str),   "0x%08X", hdr_ddr->ih_size);
-    snprintf(start_var, sizeof(start_var), "0x%08X", start_off + XPAR_FLASH_CNTLR_MEM0_BASEADDR0)
-    cp_cmd = { "cp.b", start_var, ddr_str_hdr, len_str };
-    do_mem_cpy(NULL, 0, 4, cp_cmd);
+    sprintf(len_str,   "0x%08X", hdr_ddr->ih_size);
+    sprintf(start_var, "0x%08X", start_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR);
+    memcpy(ddr + hdr_len, (const void*)(start_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR), hdr_ddr->ih_size);
+    //do_mem_cp(NULL, 0, 4, (char*[4]){ "cp.b", start_var, ddr_str_hdr, len_str });
 #endif
 
     // Perform CRC check.
@@ -266,27 +268,39 @@ U_BOOT_CMD(checkc, 1, 1, cmd_check_crcs,
 static int read_general_5(void) {
   u16 readValue;
 
+  puts("Trying to read general5\n");
+
   /* Read the GENERAL5 register from the ICAP peripheral. */
   putfslx(0x0FFFF, 0, FSL_CONTROL_ATOMIC);
+  puts("A");
   udelay(1000);
+  puts("B");
 
   putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
   putfslx(0x0FFFF, 0, FSL_ATOMIC);
   putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
   putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
+  puts("C");
 
   // Read GENERAL5
   putfslx(0x02AE1, 0, FSL_ATOMIC);
 
+  puts("D");
   // Add some safety noops and wait briefly
   putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
   putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
+  puts("E");
 
   // Trigger the FSL peripheral to drain the FIFO into the ICAP.
   // Wait briefly for the read to occur.
   putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
+  puts("F");
   udelay(1000);
+  puts("F.5");
   getfslx(readValue, 0, FSL_ATOMIC); // Read the ICAP result
+  puts("G");
+
+  puts("Read general5\n");
 
   return readValue;
 }

@@ -28,10 +28,12 @@ CFLAGS	+= -I.
 COBJS	= $(BOARD).o
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
+ifneq (CONFIG_LABX_PREBOOT,)
 # This is how to include our libraries. The .o files
 # in these folders get linked in (the library files
 # themselves are not used).
 LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
+endif
 
 $(LIB):	$(OBJS) libs
 	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
