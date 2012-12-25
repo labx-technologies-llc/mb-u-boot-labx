@@ -28,21 +28,8 @@
 #include <common.h>
 #include <config.h>
 #include <asm/microblaze_intc.h>
-#include <asm/asm.h>
 #include <net.h>
 #include <netdev.h>
-
-void do_reset (void)
-{
-#ifdef CONFIG_SYS_GPIO_0
-	*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)) =
-	    ++(*((unsigned long *)(CONFIG_SYS_GPIO_0_ADDR)));
-#endif
-#ifdef CONFIG_SYS_RESET_ADDRESS
-	puts ("Reseting board\n");
-	asm ("bra r0");
-#endif
-}
 
 int gpio_init (void)
 {
@@ -75,5 +62,8 @@ int board_eth_init(bd_t *bis)
   /* This board has two Lab X Ethernet / LocalLink MACs.  Initialize
    * one of them for use with U-Boot.
    */
+#ifdef CONFIG_MVSWITCH_6350R
+  mvEthE6350RSwitchInit();
+#endif
   return(labx_eth_initialize(bis));
 }

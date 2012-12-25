@@ -3799,7 +3799,7 @@ clean:
 	       $(obj)tools/mkimage	   $(obj)tools/mpc86x_clk	  \
 	       $(obj)tools/ncb		   $(obj)tools/ubsha1
 	@rm -f $(obj)board/biamp/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
-	@rm -f $(obj)lib_idl/{FirmwareUpdate.h,AvbDefs.h,*_type.*,*_stub.*,*_unmarshal.*,*.pyc}	  \
+	@rm -f $(obj)lib_labx/idl/{FirmwareUpdate.h,AvbDefs.h,*_type.*,*_stub.*,*_unmarshal.*,*.pyc}	  \
 	@rm -f $(obj)board/cray/L1/{bootscript.c,bootscript.image}	  \
 	       $(obj)board/netstar/{eeprom,crcek,crcit,*.srec,*.bin}	  \
 	       $(obj)board/trab/trab_fkt   $(obj)board/voiceblue/eeprom   \

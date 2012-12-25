@@ -4,7 +4,16 @@
 #include <linux/types.h>
 
 /* LabXMailbox Register Map */
+#ifdef XPAR_LABX_SPI_MAILBOX_0_BASEADDR
+#define LABX_MBOX_BASE              (XPAR_LABX_SPI_MAILBOX_0_BASEADDR)
+#endif
+#ifdef XPAR_UHI_MAILBOX0_BASEADDR
 #define LABX_MBOX_BASE              (XPAR_UHI_MAILBOX0_BASEADDR)
+#endif
+
+#ifndef LABX_MBOX_BASE
+#error No Lab X Mailbox base address defined! (No suitable definition found for LABX_MBOX_BASE)
+#endif
 
 /* Maximum number of mailboxes and instance count */
 #define MAX_MAILBOX_DEVICES 1 
@@ -45,7 +54,7 @@
 #define LABX_MBOX_WRITE_REG(reg,val) ( *((volatile unsigned long *)reg) = val )
 
 /* Public functions */
-extern void SetupLabXMbox(void);
+extern void SetupLabXMailbox(void);
 extern int ReadLabXMailbox(uint8_t *buffer, uint32_t *size, uint8_t pollForMsg);
 extern void WriteLabXMailbox(uint8_t *buffer, uint32_t size);
 extern void TrigAsyncLabXMailbox(void);
