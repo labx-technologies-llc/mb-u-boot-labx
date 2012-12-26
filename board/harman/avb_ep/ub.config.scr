@@ -43,7 +43,7 @@ setenv romfssize        0x380000; setenv romfsstart        0x87300000; setenv ro
 setenv settingsfssize   0x280000; setenv settingsfsstart   0x87680000 # SettingsFS is read-write. It doesn't store a CRC. We only check once, after flashing.
 
 echo Update Commands
-setenv check_settingsfs_crc 'sf read 0x88000040 ${settingsfsstart} ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
+setenv check_settingsfs_crc 'cp.b ${settingsfsstart} 0x88000040 ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
 
 setenv update_boot_fpga     'run set_boot_fpga_name;              setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load install'
 setenv update_golden_fdt    'run set_golden_fdt_name;             setenv imgstart ${goldenfdtstart};   setenv imgsize ${goldenfdtsize};   setenv hdrloc ${goldenfdthdr};   run load install'
@@ -60,10 +60,10 @@ setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;setenv imgstar
 setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;  setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};                                   run load install_no_hdr check_settingsfs_crc'
 setenv update_all           'ping ${serverip}; run update_boot_env update_boot_fpga update_golden_fdt update_uboot update_kernel update_golden_kernel update_romfs update_golden_romfs update_fpga update_fdt update_rootfs update_golden_rootfs update_settingsfs'
 
-setenv set_boot_fpga_name  'if itest.b 0x40 -eq "*0x80002002 & 0xC0"; then setenv imgname Avb_EP_Fpga-EP384-golden.bin.ub; else setenv imgname Avb_EP_Fpga-EP64-golden.bin.ub; fi'
-setenv set_fpga_name       'if itest.b 0x40 -eq "*0x80002002 & 0xC0"; then setenv imgname Avb_EP_Fpga-EP384.bin.ub;        else setenv imgname Avb_EP_Fpga-EP64.bin.ub;        fi'
-setenv set_golden_fdt_name 'if itest.b 0x40 -eq "*0x80002002 & 0xC0"; then setenv imgname avb_ep_384-golden.dtb.ub;        else setenv imgname avb_ep_64-golden.dtb.ub;        fi'
-setenv set_fdt_name        'if itest.b 0x40 -eq "*0x80002002 & 0xC0"; then setenv imgname avb_ep_384.dtb.ub;               else setenv imgname avb_ep_64.dtb.ub;               fi'
+setenv set_boot_fpga_name  'if itest.b 0x40 -eq "*0x820f0000 & 0x10000"; then setenv imgname Avb_EP_Fpga-EP384-golden.bin.ub; else setenv imgname Avb_EP_Fpga-EP64-golden.bin.ub; fi'
+setenv set_fpga_name       'if itest.b 0x40 -eq "*0x820f0000 & 0x10000"; then setenv imgname Avb_EP_Fpga-EP384.bin.ub;        else setenv imgname Avb_EP_Fpga-EP64.bin.ub;        fi'
+setenv set_golden_fdt_name 'if itest.b 0x40 -eq "*0x820f0000 & 0x10000"; then setenv imgname avb_ep_384-golden.dtb.ub;        else setenv imgname avb_ep_64-golden.dtb.ub;        fi'
+setenv set_fdt_name        'if itest.b 0x40 -eq "*0x820f0000 & 0x10000"; then setenv imgname avb_ep_384.dtb.ub;               else setenv imgname avb_ep_64.dtb.ub;               fi'
 
 echo Load/Install Commands
 # Files are transferred over with a 64-byte U-Boot header (created by U-Boot's
@@ -85,11 +85,14 @@ setenv temp_kernel 'tftp ${tempkernstart} ${kernname};setenv imgname avb_ep_64.d
 
 echo Firmware Update Configuration
 setenv blobname avbEpUpdate.bin.ub
+setenv goldenblobname avbEpGoldenUpdate.bin.ub
 setenv blobrunstart 0x88000040
 setenv ipset 'setenv ipaddr 192.168.1.1; setenv serverip 192.168.1.100; ping ${serverip}'
 setenv load_blob 'tftp ${clobstart} ${blobname}'
+setenv load_golden_blob 'tftp ${clobstart} ${goldenblobname}'
 setenv install_blob 'if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
 setenv update_blob run load_blob install_blob
+setenv update_golden_blob run load_golden_blob install_blob
 
 echo Saving Configurations...
 saveenv
