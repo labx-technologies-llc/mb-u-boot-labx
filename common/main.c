@@ -317,8 +317,6 @@ void main_loop (void)
 	char bcs_set[16];
 #endif /* CONFIG_BOOTCOUNT_LIMIT */
 
-  puts("main\n");
-
 #if defined(CONFIG_VFD) && defined(VFD_TEST_LOGO)
 	ulong bmp = 0;		/* default bitmap */
 	extern int trab_vfd (ulong bitmap);
@@ -394,6 +392,9 @@ void main_loop (void)
 	update_tftp ();
 #endif /* CONFIG_UPDATE_TFTP */
 
+  /* CONFIG_BOOTDELAY has to be defined for the
+     auto-boot mechanism to be compiled into the
+     code. */
 #if defined(CONFIG_BOOTDELAY) && (CONFIG_BOOTDELAY >= 0)
 #if CONFIG_BOOTDELAY > 0
 	s = getenv ("bootdelay");
@@ -409,8 +410,10 @@ void main_loop (void)
    * never returns. */
   if(labx_is_golden_fpga() && CheckFirmwareUpdate() && bootdelay == 0) {
     /* This will set up a boot delay based on the
-     * "bootdelay" environment variable or a default
-     * value even if CONFIG_BOOTDELAY is 0. */
+     * "bootdelay" environment variable (which just
+     * happened, above) or a default value even if
+     * CONFIG_BOOTDELAY is 0 (which is what this 'if'
+     * is for -- bootdelay == 0 iff CONFIG_BOOTDELAY == 0). */
     bootdelay = 3;
   }
 #endif
@@ -431,12 +434,10 @@ void main_loop (void)
 #endif /* CONFIG_POST */
 
 #if defined(CONFIG_LABX_PREBOOT)
-  puts("preboot\n");
   labx_preboot_res = labx_preboot(bootdelay);
 	if(labx_preboot_res == -1) bootdelay = -1;
   else if(labx_preboot_res == 0) bootdelay = 0;
 #endif
-  puts("post preboot\n");
 
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	if (bootlimit && (bootcount > bootlimit)) {

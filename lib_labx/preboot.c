@@ -69,7 +69,7 @@ int labx_preboot(int bootdelay) {
 
 #if CONFIG_BOOTDELAY > 0
     /* Print if we are in development mode. */
-    puts("Development build\n");
+    puts("Development build. Not checking CRCs.\n");
 #else
     /* Only check CRCs and perform related logic if
      * we are not in development mode (i.e. no boot
@@ -124,8 +124,6 @@ static int check_crcs(const char *crc_vars[][5], int num) {
   image_header_t *hdr_ddr;
 #ifdef CONFIG_SPI_FLASH
   static struct spi_flash *spiflash = NULL;
-#else
-  char ddr_str[11], ddr_str_hdr[11], len_str[11]; // These strings need to hold "0xXXXXXXXX"
 #endif
 
   // Use the start of DDR memory for temporary storage.
@@ -135,10 +133,6 @@ static int check_crcs(const char *crc_vars[][5], int num) {
       return 0;
     } else {
       hdr_ddr = (image_header_t*)ddr;
-#ifndef CONFIG_SPI_FLASH
-      sprintf(ddr_str,     "0x%08X", (unsigned int)ddr);
-      sprintf(ddr_str_hdr, "0x%08X", (unsigned int)(ddr + hdr_len));
-#endif
     }
   }
 
@@ -181,12 +175,7 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 #ifdef CONFIG_SPI_FLASH
     spi_flash_read(spiflash, hdr_off, hdr_len, ddr);
 #else
-    // Emulate "cp.b" command.
-    // TODO: this code hasn't been tested yet.
-    sprintf(len_str, "0x%08X", hdr_len);
-    sprintf(hdr_var, "0x%08X", hdr_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR);
-    memcpy(ddr, (const void*)(hdr_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR), hdr_len);
-    //do_mem_cp(NULL, 0, 4, (char*[4]){ "cp.b", hdr_var, ddr_str, len_str });
+    memcpy(ddr, hdr_off, hdr_len);
 #endif
 
     // Sanity checks.
@@ -209,12 +198,7 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 #ifdef CONFIG_SPI_FLASH
     spi_flash_read(spiflash, start_off, hdr_ddr->ih_size, ddr + hdr_len);
 #else
-    // Emulate "cp.b" command.
-    // TODO: this code hasn't been tested yet.
-    sprintf(len_str,   "0x%08X", hdr_ddr->ih_size);
-    sprintf(start_var, "0x%08X", start_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR);
-    memcpy(ddr + hdr_len, (const void*)(start_off + XPAR_FLASH_CONTROL_MEM0_BASEADDR), hdr_ddr->ih_size);
-    //do_mem_cp(NULL, 0, 4, (char*[4]){ "cp.b", start_var, ddr_str_hdr, len_str });
+    memcpy(ddr + hdr_len, (const void*)(start_off), hdr_ddr->ih_size);
 #endif
 
     // Perform CRC check.
@@ -268,39 +252,27 @@ U_BOOT_CMD(checkc, 1, 1, cmd_check_crcs,
 static int read_general_5(void) {
   u16 readValue;
 
-  puts("Trying to read general5\n");
-
   /* Read the GENERAL5 register from the ICAP peripheral. */
   putfslx(0x0FFFF, 0, FSL_CONTROL_ATOMIC);
-  puts("A");
   udelay(1000);
-  puts("B");
 
   putfslx(0x0FFFF, 0, FSL_ATOMIC); // Pad words
   putfslx(0x0FFFF, 0, FSL_ATOMIC);
   putfslx(0x0AA99, 0, FSL_ATOMIC); // SYNC
   putfslx(0x05566, 0, FSL_ATOMIC); // SYNC
-  puts("C");
 
   // Read GENERAL5
   putfslx(0x02AE1, 0, FSL_ATOMIC);
 
-  puts("D");
   // Add some safety noops and wait briefly
   putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
   putfslx(0x02000, 0, FSL_ATOMIC); // Type 1 NOP
-  puts("E");
 
   // Trigger the FSL peripheral to drain the FIFO into the ICAP.
   // Wait briefly for the read to occur.
   putfslx(FINISH_FSL_BIT, 0, FSL_ATOMIC);
-  puts("F");
   udelay(1000);
-  puts("F.5");
   getfslx(readValue, 0, FSL_ATOMIC); // Read the ICAP result
-  puts("G");
-
-  puts("Read general5\n");
 
   return readValue;
 }
