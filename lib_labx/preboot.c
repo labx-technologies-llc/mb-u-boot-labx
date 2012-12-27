@@ -182,16 +182,16 @@ static int check_crcs(const char *crc_vars[][5], int num) {
     if(!(part_size_var = getenv(crc_vars[i][2]))) {
       printf("required environment variable \"%s\" not defined.\n", crc_vars[i][2]);
       success = 0;
-      break;
+      continue;
     } else { part_size = simple_strtoul(part_size_var, NULL, 16); }
     if(part_size > 0x800000 || hdr_ddr->ih_size > part_size) {
       puts("failed sanity checks: exuberant sizes reported.\n");
       success = 0;
-      break;
+      continue;
     } else if(hdr_ddr->ih_size == 0) {
       puts("failed sanity checks: zero size reported.\n");
       success = 0;
-      break;
+      continue;
     }
 
     // Data image.
