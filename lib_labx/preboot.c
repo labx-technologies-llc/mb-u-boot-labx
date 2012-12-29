@@ -26,6 +26,9 @@
 #error "Support for the ICAP module is required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)"
 #endif
 
+/* Implementation of U-Boot memcpy command. */
+//extern int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
+
 /* Arrays for variables that hold the locations
  * of all of the images to check CRCs for. These
  * variables need to be defined as part of the
@@ -66,7 +69,7 @@ int labx_preboot(int bootdelay) {
 
 #if CONFIG_BOOTDELAY > 0
     /* Print if we are in development mode. */
-    puts("Development build\n");
+    puts("Development build. Not checking CRCs.\n");
 #else
     /* Only check CRCs and perform related logic if
      * we are not in development mode (i.e. no boot
@@ -115,15 +118,12 @@ void labx_print_cmdhelp(void) {
 static int check_crcs(const char *crc_vars[][5], int num) {
   int success = 1;
   char start_var[11], hdr_var[11], *part_size_var;
-  unsigned long int i, start_off, hdr_off, part_size, crc_in_image;
+  unsigned int i, start_off, hdr_off, part_size, crc_in_image;
   const unsigned int hdr_len = sizeof(image_header_t);
   static unsigned char *ddr = NULL;
   image_header_t *hdr_ddr;
 #ifdef CONFIG_SPI_FLASH
   static struct spi_flash *spiflash = NULL;
-#else
-  char ddr_str[11], ddr_str_hdr[11], len_str[11]; // These strings need to hold "0xXXXXXXXX"
-  char *cp_cmd[4];
 #endif
 
   // Use the start of DDR memory for temporary storage.
@@ -133,10 +133,6 @@ static int check_crcs(const char *crc_vars[][5], int num) {
       return 0;
     } else {
       hdr_ddr = (image_header_t*)ddr;
-#ifndef CONFIG_SPI_FLASH
-      snprintf(ddr_str,     sizeof(ddr_str),     "0x%08X", (unsigned int)ddr);
-      snprintf(ddr_str_hdr, sizeof(ddr_str_hdr), "0x%08X", (unsigned int)(ddr + hdr_len));
-#endif
     }
   }
 
@@ -179,40 +175,30 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 #ifdef CONFIG_SPI_FLASH
     spi_flash_read(spiflash, hdr_off, hdr_len, ddr);
 #else
-    // Emulate "cp.b" command.
-    // TODO: this code hasn't been tested yet.
-    snprintf(len_str, sizeof(len_str), "0x%08X", hdr_len);
-    snprintf(hdr_var, sizeof(hdr_var), "0x%08X", hdr_off + XPAR_FLASH_CNTLR_MEM0_BASEADDR0)
-    cp_cmd = { "cp.b", hdr_var, ddr_str, len_str };
-    do_mem_cpy(NULL, 0, 4, cp_cmd);
+    memcpy(ddr, hdr_off, hdr_len);
 #endif
 
     // Sanity checks.
     if(!(part_size_var = getenv(crc_vars[i][2]))) {
       printf("required environment variable \"%s\" not defined.\n", crc_vars[i][2]);
       success = 0;
-      break;
+      continue;
     } else { part_size = simple_strtoul(part_size_var, NULL, 16); }
     if(part_size > 0x800000 || hdr_ddr->ih_size > part_size) {
       puts("failed sanity checks: exuberant sizes reported.\n");
       success = 0;
-      break;
+      continue;
     } else if(hdr_ddr->ih_size == 0) {
       puts("failed sanity checks: zero size reported.\n");
       success = 0;
-      break;
+      continue;
     }
 
     // Data image.
 #ifdef CONFIG_SPI_FLASH
     spi_flash_read(spiflash, start_off, hdr_ddr->ih_size, ddr + hdr_len);
 #else
-    // Emulate "cp.b" command.
-    // TODO: this code hasn't been tested yet.
-    snprintf(len_str,   sizeof(len_str),   "0x%08X", hdr_ddr->ih_size);
-    snprintf(start_var, sizeof(start_var), "0x%08X", start_off + XPAR_FLASH_CNTLR_MEM0_BASEADDR0)
-    cp_cmd = { "cp.b", start_var, ddr_str_hdr, len_str };
-    do_mem_cpy(NULL, 0, 4, cp_cmd);
+    memcpy(ddr + hdr_len, (const void*)(start_off), hdr_ddr->ih_size);
 #endif
 
     // Perform CRC check.

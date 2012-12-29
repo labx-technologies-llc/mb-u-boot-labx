@@ -10,7 +10,6 @@
 // Assuming this will get brought in.
 extern void mdelay(unsigned int msec);
 
-#define RUNTIME_FPGA_BASE (0x00A40000)
 #define BOOT_FPGA_BASE (0x00000000)
 
 #ifndef RUNTIME_FPGA_BASE

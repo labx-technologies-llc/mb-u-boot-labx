@@ -38,7 +38,7 @@
 		serial0 = &serial_console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2432K(bootfpga),2432K(fpga),256K(boot),4096K(image),2048K(rootfs),4096K(romfs),17152K(settingsfs),128K(fdt),128K(bootenv) root=mtd4 rootfstype=romfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=86000000.flash:2560K(bootfpga),2560K(fpga),256K(boot),128K(bootenv),128K(goldenfdt),1536K(goldenkernel),1024K(goldenrootfs),2560K(goldenromfs),5632K(empty1),128K(fdt),384K(empty2),1536K(kernel),1024K(rootfs),3584K(romfs),2560K(settingsfs) root=/dev/mtdblock12 rootfstype=squashfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -327,17 +327,30 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rx-filters-per-port = <0x8>;
 		} ;
-		eth01_audio_packetizer: avb-ep-packetizer-tdm8@82090000 {
-			compatible = "xlnx,avb-ep-packetizer-tdm8-1.00.a";
-			interrupt-parent = <&irq_control>;
-			interrupts = < 9 2 >;
-			reg = < 0x82090000 0x10000 >;
-			xlnx,device = "6slx45";
-			xlnx,family = "spartan6";
-			xlnx,include-dphase-timer = <0x0>;
-			xlnx,package = "fgg484";
-		} ;
-		eth0: ethernet@82050000 {
+		eth01_audio_packetizer: labx-audio-packetizer@82090000 {
+                        compatible = "xlnx,labx-audio-packetizer-1.05.a";
+                        interrupt-parent = <&irq_control>;
+                        interrupts = < 9 2 >;
+                        reg = < 0x82090000 0x10000 >;
+                        xlnx,cache-address-width = <0xd>;
+                        xlnx,cache-data-width = <0x4>;
+                        xlnx,cache-data-words = <0x400>;
+                        xlnx,cache-enable-width = <0x1>;
+                        xlnx,device = "6slx45";
+                        xlnx,family = "spartan6";
+                        xlnx,has-internal-cache-ram = <0x1>;
+                        xlnx,include-dphase-timer = <0x0>;
+                        xlnx,is-dual-headed = <0x1>;
+                        xlnx,num-clock-domains = <0x1>;
+                        xlnx,package = "fgg484";
+                        xlnx,saxi-data-width = <0x20>;
+                        xlnx,saxi-protocol = "AXI4LITE";
+                        xlnx,slave-awidth = <0x20>;
+                        xlnx,slave-dwidth = <0x20>;
+                        xlnx,slave-interconnect = "PLB";
+                        xlnx,slave-native-dwidth = <0x20>;
+                } ;
+                eth0: ethernet@82050000 {
 			compatible = "xlnx,labx-ethernet-1.03.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
@@ -591,18 +604,37 @@
 			xlnx,trig0-assert = <0x1>;
 			xlnx,trig1-assert = <0x1>;
 		} ;
-		tdm_output: avb-ep-tdm8-output@820d0000 {
-			compatible = "xlnx,avb-ep-tdm8-output-1.01.a";
-			interrupt-parent = <&irq_control>;
-			interrupts = < 12 2 >;
-			reg = < 0x820d0000 0x10000 >;
-			xlnx,ext-dma-cache-address-width = <0x8>;
-			xlnx,ext-dma-data-width = <0x20>;
-			xlnx,family = "spartan6";
-			xlnx,include-dphase-timer = <0x0>;
-			xlnx,param-address-width = <0xa>;
-		} ;
-		xps_gpio_0: gpio@820f0000 {
+	        labx_tdm_audio_0: labx-tdm-audio@820b0000 {
+                        compatible = "xlnx,labx-tdm-audio-1.03.a";
+                        interrupt-parent = <&irq_control>;
+                        interrupts = < 12 2 >;
+                        reg = < 0x820b0000 0x10000 >;
+                        xlnx,device = "6slx45";
+                        xlnx,ext-cache-addr-width = <0xa>;
+                        xlnx,family = "spartan6";
+                        xlnx,has-dynamic-sample-rates = <0x0>;
+                        xlnx,has-tdm-analyzer = <0x1>;
+                        xlnx,has-tdm-loopback = <0x0>;
+                        xlnx,has-tdm-slave-manager = <0x0>;
+                        xlnx,include-dphase-timer = <0x0>;
+                        xlnx,local-osc-ratio = <0x400>;
+                        xlnx,max-num-streams = <0x40>;
+                        xlnx,mclk-ratio = <0x400>;
+                        xlnx,package = "fgg484";
+                        xlnx,param-address-width = <0xa>;
+                        xlnx,redundant = <0x1>;
+                        xlnx,saxi-data-width = <0x20>;
+                        xlnx,saxi-protocol = "AXI4LITE";
+                        xlnx,slave-awidth = <0x20>;
+                        xlnx,slave-dwidth = <0x20>;
+                        xlnx,slave-interconnect = "PLB";
+                        xlnx,slave-native-dwidth = <0x20>;
+                        xlnx,tdm-lane-count = <0x8>;
+                        xlnx,tdm-max-burst-length = <0x10>;
+                        xlnx,tdm-max-slot-density = <0x8>;
+                        xlnx,write-cache-addr-width = <0xd>;
+                } ;	
+                xps_gpio_0: gpio@820f0000 {
 			compatible = "xlnx,xps-gpio-2.00.a", "xlnx,xps-gpio-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 14 2 >;

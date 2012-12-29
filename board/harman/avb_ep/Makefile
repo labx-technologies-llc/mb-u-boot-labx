@@ -25,12 +25,24 @@ include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).a
 CFLAGS	+= -I. 
-COBJS	= $(BOARD).o firmware-update.o
-
+COBJS	= $(BOARD).o
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
-$(LIB):	$(OBJS) 
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+ifneq (CONFIG_LABX_PREBOOT,)
+# This is how to include our libraries. The .o files
+# in these folders get linked in (the library files
+# themselves are not used).
+LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
+endif
+
+$(LIB):	$(OBJS) libs
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
+
+libs:
+# Don't know why do_idls needs to be executed separately.
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl
+	$(MAKE) -C $(TOPDIR)/lib_labx
 
 distclean:	clean
 	rm -f $(LIB) core *.bak $(obj).depend
