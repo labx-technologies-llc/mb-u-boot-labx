@@ -14,8 +14,7 @@ extern void mdelay(unsigned int msec);
 
 #ifndef RUNTIME_FPGA_BASE
 #error "RUNTIME_FPGA_BASE not defined for platform"
-#endif
-#if RUNTIME_FPGA_BASE == BOOT_FPGA_BASE
+#elif RUNTIME_FPGA_BASE == BOOT_FPGA_BASE
 // If this was a warning, it would be missed in
 // the midst of the rest of U-Boot's build output.
 #error "RUNTIME_FPGA_BASE and BOOT_FPGA_BASE are the same"

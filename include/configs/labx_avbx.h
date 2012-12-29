@@ -31,6 +31,9 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
+/* Location or runtime FPGA on this platform. */
+#define RUNTIME_FPGA_BASE 0xA40000
+
 // Leave commented out, disables the firmware update check for updates
 // over the host interface and configures a boot delay to break into
 // the bootloader
