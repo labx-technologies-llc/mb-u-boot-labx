@@ -18,7 +18,7 @@ setenv temp_nohdr       0x89000040 # Ditto.
 
 setenv eraseenv 'run spiprobe;sf erase ${bootenvstart} ${bootenvsize}'
 
-echo Boot Configuration:
+echo Boot Configuration
 setenv bootcmd 'bootm ${kernstart} - ${fdtstart}'
 setenv bootglnx 'bootm ${goldenkernstart} - ${goldenfdtstart}'
 setenv bootdelay 3
@@ -70,7 +70,7 @@ echo Load/Install Commands
 # mkimage utility), which gives us automatic CRC checking. The install commands
 # copy the image into flash either with that header or without it. They also
 # copy the U-Boot headers to specified locations. ${filesize} and ${filesize_nohdr}
-# are setenv by U-Boot/tftp automatically. Saves us from writing the full sector
+# are set by U-Boot/tftp automatically. Saves us from writing the full sector
 # when our images are smaller than the sectors that they sit in.
 setenv run_script       'source ${clobstart}' # The only way to have a failed command stop the next command from executing is by having those commands in variables and using 'run <var1> <var2> ...'
 setenv load             'tftp ${clobstart} ${imgname}'

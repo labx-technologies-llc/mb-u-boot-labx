@@ -184,7 +184,6 @@
  */
 /*#define	CONFIG_ENV_IS_IN_FLASH	1   */
 #define	CONFIG_ENV_SECT_SIZE	0x40000	 /* 256K */
-/*#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      */
 #define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
 #define CONFIG_ENV_OFFSET	0x1C0000	
 
