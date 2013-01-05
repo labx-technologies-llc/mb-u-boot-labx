@@ -30,15 +30,12 @@ OBJS	:= $(addprefix $(obj),$(COBJS))
 # This is how to include our libraries. The .o files
 # in these folders get linked in (the library files
 # themselves are not used).
-LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
+LIBDIRS  = $(TOPDIR)/lib_labx
 
 $(LIB): $(OBJS) libs
 	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
 
 libs:
-# Don't know why do_idls needs to be executed separately.
-	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls
-	$(MAKE) -C $(TOPDIR)/lib_labx/idl
 	$(MAKE) -C $(TOPDIR)/lib_labx
 
 .PHONY: libs

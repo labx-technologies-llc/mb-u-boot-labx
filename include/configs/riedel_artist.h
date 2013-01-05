@@ -34,7 +34,7 @@
 
 // This is the entire firmware update module,
 // and includes GPIO-checking.
-#define CONFIG_FIRMWARE_UPDATE
+//#define CONFIG_FIRMWARE_UPDATE
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 

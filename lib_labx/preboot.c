@@ -26,9 +26,6 @@
 #error "Support for the ICAP module is required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)"
 #endif
 
-/* Implementation of U-Boot memcpy command. */
-//extern int do_mem_cp ( cmd_tbl_t *cmdtp, int flag, int argc, char *argv[]);
-
 /* Arrays for variables that hold the locations
  * of all of the images to check CRCs for. These
  * variables need to be defined as part of the
