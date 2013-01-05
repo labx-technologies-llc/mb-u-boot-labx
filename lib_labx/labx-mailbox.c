@@ -1,3 +1,5 @@
+#ifdef CONFIG_FIRMWARE_UPDATE
+
 #include "labx-mailbox.h"
 
 #ifndef FALSE
@@ -107,3 +109,6 @@ void TrigAsyncLabXMailbox(void)
 {
   LABX_MBOX_WRITE_REG(SUPRV_TRIG_ASYNC_REG, SUPRV_IRQ_1);
 }
+
+#endif /* CONFIG_FIRMWARE_UPDATE */
+
