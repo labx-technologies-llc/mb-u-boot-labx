@@ -30,7 +30,11 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-//#define CONFIG_FIRMWARE_UPDATE
+#define RUNTIME_FPGA_BASE 0x87A40000
+
+// This is the entire firmware update module,
+// and includes GPIO-checking.
+#define CONFIG_FIRMWARE_UPDATE
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
@@ -83,6 +87,37 @@
 #ifdef XPAR_GPIO_0_BASEADDR
 #  define	CONFIG_SYS_GPIO_0		1
 #  define	CONFIG_SYS_GPIO_0_ADDR		XILINX_GPIO_BASEADDR
+#endif
+
+/* ICAP peripheral controller */
+#define FINISH_FSL_BIT (0x80000000)
+#define ICAP_FSL_FAILED (0x80000000)
+
+#define USE_ICAP_FSL
+#define XPAR_ICAP_CR_ABORT		BIT(4)
+#define XPAR_ICAP_CR_RESET		BIT(3)
+#define XPAR_ICAP_CR_FIFO_CLEAR	BIT(2)
+#define XPAR_ICAP_CR_READ		BIT(1)
+#define XPAR_ICAP_CR_WRITE		BIT(0)
+
+#define XPAR_ICAP_SR_CFGERR		BIT(8)
+#define XPAR_ICAP_SR_DALIGN		BIT(7)
+#define XPAR_ICAP_SR_READ_IP	BIT(6)
+#define XPAR_ICAP_SR_IN_ABORT	BIT(5)
+#define XPAR_ICAP_SR_DONE		BIT(0)
+
+#ifdef XPAR_XPS_HWICAP_0_BASEADDR
+#define	CONFIG_SYS_ICAP_ADDR	XPAR_XPS_HWICAP_0_BASEADDR
+#define	CONFIG_SYS_ICAP_GIE		(CONFIG_SYS_ICAP_ADDR + 0x01C)
+#define	CONFIG_SYS_ICAP_IPISR	(CONFIG_SYS_ICAP_ADDR + 0x020)
+#define	CONFIG_SYS_ICAP_IPIER	(CONFIG_SYS_ICAP_ADDR + 0x028)
+#define	CONFIG_SYS_ICAP_WF		(CONFIG_SYS_ICAP_ADDR + 0x100)
+#define	CONFIG_SYS_ICAP_RF		(CONFIG_SYS_ICAP_ADDR + 0x104)
+#define	CONFIG_SYS_ICAP_SZ		(CONFIG_SYS_ICAP_ADDR + 0x108)
+#define	CONFIG_SYS_ICAP_CR		(CONFIG_SYS_ICAP_ADDR + 0x10C)
+#define	CONFIG_SYS_ICAP_SR		(CONFIG_SYS_ICAP_ADDR + 0x110)
+#define	CONFIG_SYS_ICAP_WFV		(CONFIG_SYS_ICAP_ADDR + 0x114)
+#define	CONFIG_SYS_ICAP_RFO		(CONFIG_SYS_ICAP_ADDR + 0x118)
 #endif
 
 /* interrupt controller */
@@ -141,17 +176,24 @@
 #define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/riedel/artist/ub.config.scr!
- *        These definitions locate the environment within the last few
- *        top-boot parameter sectors on the Flash.
+ *        variables in ../../board/<vendor>/<product>/ub.config.scr!
+ *        These definitions locate the environment within one of
+ *        the sectors of Flash.
  */
 #define	CONFIG_ENV_IS_IN_FLASH	1
 #define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
-#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)
+#define	CONFIG_ENV_ADDR		0x871C0000
 #define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
 
-/* Perform the normal bootdelay checking */
-#define CONFIG_BOOTDELAY 1
+/* If this is defined and zero, the system will auto-boot
+ * ("production" mode). If it is defined and > 0, there
+ * will be a delay to allow the user to stop auto-boot,
+ * if desired. If it is not defined, auto-boot will be
+ * compiled out completely. */
+#define CONFIG_BOOTDELAY 3
+
+/* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
+#define CONFIG_LABX_PREBOOT
 
 /* Data Cache */
 #ifdef XPAR_MICROBLAZE_0_USE_DCACHE
