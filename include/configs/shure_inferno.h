@@ -31,14 +31,17 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
+/* Location or runtime FPGA on this platform. */
+#define RUNTIME_FPGA_BASE 0xA40000
+
 // This is the entire firmware update module,
 // and includes GPIO-checking.
 #define CONFIG_FIRMWARE_UPDATE
 
 // GPIO pins to request a boot
 // delay or a firmware update.
-#define GPIO_BOOT_DELAY_BIT      0x2
-#define GPIO_FIRMWARE_UPDATE_BIT 0x3
+#define GPIO_BOOT_DELAY_BIT      2
+#define GPIO_FIRMWARE_UPDATE_BIT 3
 
 // Configuration for SPI OTP
 #define CFG_SPI_OTP
