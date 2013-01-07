@@ -34,10 +34,14 @@
 /* Location or runtime FPGA on this platform. */
 #define RUNTIME_FPGA_BASE 0xA40000
 
-// Leave commented out, disables the firmware update check for updates
-// over the host interface and configures a boot delay to break into
-// the bootloader
-//#define CONFIG_FIRMWARE_UPDATE
+// This is the entire firmware update module,
+// and includes GPIO-checking.
+#define CONFIG_FIRMWARE_UPDATE
+
+// GPIO pins to request a boot
+// delay or a firmware update.
+#define GPIO_BOOT_DELAY_BIT      17
+#define GPIO_FIRMWARE_UPDATE_BIT 18
 
 /* Configuration for SPI OTP */
 #define CFG_SPI_OTP
