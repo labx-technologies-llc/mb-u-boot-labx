@@ -34,7 +34,14 @@
 /* Location or runtime FPGA on this platform. */
 #define RUNTIME_FPGA_BASE 0x280000
 
-//#define CONFIG_FIRMWARE_UPDATE
+// This is the entire firmware update module,
+// and includes GPIO-checking.
+#define CONFIG_FIRMWARE_UPDATE
+
+// GPIO pins to request a boot
+// delay or a firmware update.
+#define GPIO_BOOT_DELAY_BIT      2
+#define GPIO_FIRMWARE_UPDATE_BIT 3
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
