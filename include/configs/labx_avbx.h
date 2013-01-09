@@ -36,7 +36,7 @@
 
 // This is the entire firmware update module,
 // and includes GPIO-checking.
-//#define CONFIG_FIRMWARE_UPDATE
+#define CONFIG_FIRMWARE_UPDATE
 
 // GPIO pins to request a boot
 // delay or a firmware update.
