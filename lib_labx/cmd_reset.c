@@ -57,9 +57,6 @@ void icap_reset(int resetProduction)
 		putfsl(0x0AA99, 0); // SYNC
 		putfsl(0x05566, 0); // SYNC
 
-		// TODO: the non-SPI flash part of
-		// this code has not been tested yet.
-
 #ifndef CONFIG_SPI_FLASH
 		// Set the Mode register so that fallback images will be manipulated
 		// correctly.  Use bitstream mode instead of physical mode (required
