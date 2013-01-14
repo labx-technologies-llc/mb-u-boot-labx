@@ -24,7 +24,7 @@
 #ifndef _LABRINTH_AVB_H_
 #define _LABRINTH_AVB_H_
 
-#include "../board/biamp/labrinth-avb/xparameters.h"
+#include "../board/labx/labrinth-avb/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -140,7 +140,7 @@
 #define CONFIG_SYS_FLASH_USE_BUFFER_WRITE 1 /* Accelerate Flash writes with on-chip buffers */
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/biamp/labrinth_avb/ub.config.scr!
+ *        variables in ../../board/labx/labrinth_avb/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
