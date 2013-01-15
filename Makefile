@@ -3548,7 +3548,7 @@ microblaze-generic_config:	unconfig
 
 labrinth-avb_config:	unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb biamp
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb labx
 
 aud8822-sp601_config:	unconfig
 	@mkdir -p $(obj)include
@@ -3803,7 +3803,7 @@ clean:
 	       $(obj)tools/gen_eth_addr    $(obj)tools/img2srec		  \
 	       $(obj)tools/mkimage	   $(obj)tools/mpc86x_clk	  \
 	       $(obj)tools/ncb		   $(obj)tools/ubsha1
-	@rm -f $(obj)board/biamp/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
+	@rm -f $(obj)board/labx/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
 	@rm -f $(obj)lib_idl/{FirmwareUpdate.h,AvbDefs.h,*_type.*,*_stub.*,*_unmarshal.*,*.pyc}	  \
 	@rm -f $(obj)board/cray/L1/{bootscript.c,bootscript.image}	  \
 	       $(obj)board/netstar/{eeprom,crcek,crcit,*.srec,*.bin}	  \
