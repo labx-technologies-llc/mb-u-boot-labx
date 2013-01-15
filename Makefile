@@ -3606,9 +3606,9 @@ shure_inferno_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno shure
 
-bose_charaii_config: unconfig
+labx_revolver_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze charaii bose
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze revolver labx
 
 #========================================================================
 # Blackfin

@@ -24,10 +24,10 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _BOSE_CHARAII_H_
-#define _BOSE_CHARAII_H_
+#ifndef _LABX_REVOLVER_H_
+#define _LABX_REVOLVER_H_
 
-#include "../board/bose/charaii/xparameters.h"
+#include "../board/labx/revolver/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -239,7 +239,7 @@
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
 /* Some appropriate defaults for network settings */
-#define CONFIG_HOSTNAME		bose-charaii
+#define CONFIG_HOSTNAME		    revolver
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 
