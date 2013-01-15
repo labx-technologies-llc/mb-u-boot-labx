@@ -190,7 +190,7 @@
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 
-/* TEMPORARY - This is a Xilinx OUI, need to replace with Biamp's */
+/* TEMPORARY - This is a Xilinx OUI, need to replace with vendor's */
 #define CONFIG_ETHADDR          00:0A:35:00:33:01
 
 /* Permit a single-time overwrite of the ethaddr */
