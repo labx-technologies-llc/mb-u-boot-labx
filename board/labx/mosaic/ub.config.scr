@@ -1,4 +1,4 @@
-echo Setting up Riedel Artist environment
+echo Setting up Lab X Mosaic environment
 echo -----------------------------------
 echo Network Configuration
 set autoload no
