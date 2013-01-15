@@ -3572,7 +3572,7 @@ avid_garcia_config:	unconfig
 
 labx_mosaic_config:   unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labx mosaic
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze mosaic labx
 
 meyer_sound_CAL_ICS_config: unconfig
 	@mkdir -p $(obj)include
