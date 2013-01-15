@@ -272,8 +272,8 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rx-filters-per-port = <0x8>;
 		} ;
-		labrinth_spi_mailbox_0: labrinth-spi-mailbox@820c0000 {
-			compatible = "xlnx,labrinth-spi-mailbox-1.00.a";
+		biamp_spi_mailbox_0: biamp-spi-mailbox@820c0000 {
+			compatible = "xlnx,biamp-spi-mailbox-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 13 2 >;
 			reg = < 0x820c0000 0x10000 >;
