@@ -3605,6 +3605,11 @@ labx_avbx_config: unconfig
 shure_inferno_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno shure
+
+labx_revolver_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze revolver labx
+
 #========================================================================
 # Blackfin
 #========================================================================
