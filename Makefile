@@ -3570,9 +3570,9 @@ avid_garcia_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia avid
 
-riedel_artist_config:   unconfig
+labx_mosaic_config:   unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze artist riedel
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze mosaic labx
 
 meyer_sound_CAL_ICS_config: unconfig
 	@mkdir -p $(obj)include
