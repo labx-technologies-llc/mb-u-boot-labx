@@ -3566,9 +3566,9 @@ s3d1800a_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze s3d1800a labx
 
-avid_garcia_config:	unconfig
+labx_garcia_config:	unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia avid
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia labx
 
 riedel_artist_config:   unconfig
 	@mkdir -p $(obj)include

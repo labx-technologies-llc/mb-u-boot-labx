@@ -22,10 +22,10 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _AVID_GARCIA_H_
-#define _AVID_GARCIA_H_
+#ifndef _LABX_GARCIA_H_
+#define _LABX_GARCIA_H_
 
-#include "../board/avid/garcia/xparameters.h"
+#include "../board/labx/garcia/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -213,7 +213,7 @@ static inline void wrreg32(unsigned long int n, unsigned long int v) {
 #define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/avid/garcia/ub.config.scr!
+ *        variables in ../../board/labx/garcia/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
@@ -304,4 +304,4 @@ static inline void wrreg32(unsigned long int n, unsigned long int v) {
 #define CONFIG_SYS_BOOTMAPSZ	(8 << 20)       /* Initial Memory map for Linux */
 #define CONFIG_LMB
 
-#endif	/* _AVID_GARCIA_H_ */
+#endif	/* _LABX_GARCIA_H_ */
