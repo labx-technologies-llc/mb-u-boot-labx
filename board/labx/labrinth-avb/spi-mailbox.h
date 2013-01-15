@@ -1,5 +1,5 @@
-#ifndef BIAMP_LABRINTH_SPI_MAILBOX
-#define BIAMP_LABRINTH_SPI_MAILBOX
+#ifndef LABX_LABRINTH_SPI_MAILBOX
+#define LABX_LABRINTH_SPI_MAILBOX
 #include "xparameters.h"
 #include <linux/types.h> 
 
