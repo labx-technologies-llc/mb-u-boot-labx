@@ -1,4 +1,4 @@
-echo Setting up Riedel Artist environment
+echo Setting up Lab X Mosaic environment
 echo -----------------------------------
 echo Network Configuration
 setenv autoload no
@@ -101,7 +101,7 @@ setenv tempkernstart 0x88800000
 setenv tempfdtstart 0x88700000
 setenv temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 
-echo Riedel Artist Firmware Update
+echo Lab X Mosaic Firmware Update
 setenv blobname           artistUpdate.bin.ub
 setenv goldenblobname     artistGoldenUpdate.bin.ub
 setenv blobrunstart       0x88000040
