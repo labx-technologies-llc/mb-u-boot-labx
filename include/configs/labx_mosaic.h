@@ -22,10 +22,10 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _RIEDEL_ARTIST_H_
-#define _RIEDEL_ARTIST_H_
+#ifndef _LABX_MOSAIC_H_
+#define _LABX_MOSAIC_H_
 
-#include "../board/riedel/artist/xparameters.h"
+#include "../board/labx/mosaic/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -141,7 +141,7 @@
 #define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
 
 /* NOTE - The configuration environment address must align with the environment
- *        variables in ../../board/riedel/artist/ub.config.scr!
+ *        variables in ../../board/labx/mosaic/ub.config.scr!
  *        These definitions locate the environment within the last few
  *        top-boot parameter sectors on the Flash.
  */
@@ -205,7 +205,7 @@
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
 /* Some appropriate defaults for network settings */
-#define CONFIG_HOSTNAME		riedel-artist
+#define CONFIG_HOSTNAME		labx-mosaic
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 
