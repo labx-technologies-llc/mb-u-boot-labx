@@ -3610,6 +3610,9 @@ labx_revolver_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze revolver labx
 
+labx_inferno_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno labx
 #========================================================================
 # Blackfin
 #========================================================================

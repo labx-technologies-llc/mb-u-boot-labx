@@ -23,10 +23,10 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _SHURE_INFERNO_H_
-#define _SHURE_INFERNO_H_
+#ifndef _LABX_INFERNO_H_
+#define _LABX_INFERNO_H_
 
-#include "../board/shure/inferno/xparameters.h"
+#include "../board/labx/inferno/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -277,7 +277,7 @@
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
 /* Some appropriate defaults for network settings */
-#define CONFIG_HOSTNAME		shure-inferno
+#define CONFIG_HOSTNAME		labx-inferno
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 

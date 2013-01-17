@@ -38,7 +38,7 @@
 		serial1 = &host_serial;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=spi32766.0:1536K(bootfpga),256K(empty),256K(bootenv),256K(boot),1280K(kernel),1280K(goldenkernel),3328K(romfs),2304K(goldenromfs),1536K(fpga),1024K(rootfs),1024K(goldenrootfs),2304K(settingsfs) root=/dev/mtdblock9 rootfstype=squashfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=spi32766.0:2048K(bootfpga),256K(boot),256K(fdt),3840K(image),2048K(rootfs),2048K(romfs),2048K(fpga),2048K(settingsfs),256K(bootenv) root=/dev/mtdblock4 rootfstype=squashfs init=/bin/init";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
@@ -376,7 +376,7 @@
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0x71>;
-			xlnx,num-intr-inputs = <0x10>;
+			xlnx,num-intr-inputs = <0x11>;
 		} ;
 		labx_dma_0: labx-dma@820e0000 {
 			compatible = "xlnx,labx-dma-1.04.a";
@@ -405,7 +405,7 @@
 			xlnx,maxi-supports-threads = <0x0>;
 			xlnx,maxi-supports-write = <0x1>;
 			xlnx,maxi-thread-id-width = <0x1>;
-			xlnx,microcode-words = <0x400>;
+			xlnx,microcode-words = <0x800>;
 			xlnx,mplb-awidth = <0x20>;
 			xlnx,mplb-dwidth = <0x20>;
 			xlnx,mplb-p2p = <0x0>;
@@ -464,21 +464,28 @@
 		} ;
 		labx_tdm_audio_0: labx-tdm-audio@820b0000 {
 			compatible = "xlnx,labx-tdm-audio-1.02.a";
+                        interrupt-parent = <&irq_control>;
+                        interrupts = < 16 2 >;
 			reg = < 0x820b0000 0x10000 >;
-			xlnx,device = "6slx45";
-			xlnx,dma-burst-length = <0x4>;
-			xlnx,family = "spartan6";
+                        xlnx,device = "6slx45";
+                        xlnx,dma-burst-length = <0x4>;
+                        xlnx,ext-cache-addr-width = <0x9>;
+                        xlnx,family = "spartan6";
                         xlnx,has-tdm-loopback = <0x0>;
                         xlnx,has-tdm-slave-manager = <0x1>;
+                        xlnx,has-tdm-analyzer = <0x1>;
+                        xlnx,has-dynamic-sample-rates = <0x1>;
                         xlnx,include-dphase-timer = <0x0>;
                         xlnx,local-osc-ratio = <0x400>;
                         xlnx,max-num-streams = <0x40>;
                         xlnx,mclk-ratio = <0x400>;
                         xlnx,package = "csg324";
-                        xlnx,param-address-width = <0x9>;
+                        xlnx,param-address-width = <0x10>;
                         xlnx,redundant = <0x0>;
-                        xlnx,tdm-lane-count = <0x4>;
+                        xlnx,tdm-lane-count = <0x8>;
                         xlnx,tdm-max-slot-density = <0x10>;
+                        xlnx,tdm-max-burst-length = <0x10>;
+                        xlnx,write-cache-addr-width = <0xd>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.00.b";
