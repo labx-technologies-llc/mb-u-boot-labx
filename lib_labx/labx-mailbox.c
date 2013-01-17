@@ -1,3 +1,5 @@
+#include "config.h"
+
 #ifdef CONFIG_FIRMWARE_UPDATE
 
 #include "labx-mailbox.h"
