@@ -41,7 +41,9 @@
 // GPIO pins to request a boot
 // delay or a firmware update.
 #define GPIO_BOOT_DELAY_BIT      17
-#define GPIO_FIRMWARE_UPDATE_BIT 18
+// Disabling jumper, needed for switching serial console
+// when on MTF or HPX
+//#define GPIO_FIRMWARE_UPDATE_BIT 18
 
 /* Configuration for SPI OTP */
 #define CFG_SPI_OTP
