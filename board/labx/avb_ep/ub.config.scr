@@ -18,9 +18,18 @@ setenv temp_nohdr       0x89000040 # Ditto.
 
 setenv eraseenv 'run spiprobe;sf erase ${bootenvstart} ${bootenvsize}'
 
+<<<<<<< HEAD:board/harman/avb_ep/ub.config.scr
 echo Boot Configuration
 setenv bootcmd 'bootm ${kernstart} - ${fdtstart}'
 setenv bootglnx 'bootm ${goldenkernstart} - ${goldenfdtstart}'
+=======
+# Otherwise, Linux can't properly perform firmware updates (with this flash part).
+setenv unprotect_flash 'protect off ${fpgastart} +${fpgasize}; protect off ${fdtstart} +${fdtsize}; protect off ${kernstart} +${kernsize}; protect off ${rootfsstart} +${rootfssize}; protect off ${romfsstart} +${romfssize}; protect off ${settingsfsstart} +${settingsfssize}'
+
+echo Boot Configuration:
+setenv bootcmd 'run unprotect_flash; bootm ${kernstart} - ${fdtstart}'
+setenv bootglnx 'run unprotect_flash; bootm ${goldenkernstart} - ${goldenfdtstart}'
+>>>>>>> AVBEPBranch:board/labx/avb_ep/ub.config.scr
 setenv bootdelay 3
 
 echo Flash Map
