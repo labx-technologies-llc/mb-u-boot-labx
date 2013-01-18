@@ -3546,10 +3546,6 @@ microblaze-generic_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze microblaze-generic xilinx
 
-labrinth-avb_config:	unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb biamp
-
 aud8822-sp601_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze aud8822-sp601 labx
@@ -3569,22 +3565,6 @@ s3d1800a_config:	unconfig
 labx_garcia_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia labx
-
-riedel_artist_config:   unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze artist riedel
-
-meyer_sound_CAL_ICS_config: unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze CAL_ICS meyer_sound
-
-beyerdynamic_avb_sp605_config:   unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 beyerdynamic
-
-harman_avbx_config: unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx harman
 
 #========================================================================
 # Blackfin
