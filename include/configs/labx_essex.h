@@ -23,21 +23,25 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _HARMAN_ITHD_H_
-#define _HARMAN_ITHD_H_
+#ifndef _LABX_ESSEX_H_
+#define _LABX_ESSEX_H_
 
-#include "../board/harman/ithd/xparameters.h"
+#include "../board/labx/essex/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-//#define CONFIG_FIRMWARE_UPDATE
+#define CONFIG_FIRMWARE_UPDATE
+
+// Configuration for SPI OTP
+#define CFG_SPI_OTP
+#define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
 #define	CONFIG_XILINX_UARTLITE
-#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_1_BASEADDR
-#define	CONFIG_BAUDRATE		XPAR_UARTLITE_1_BAUDRATE
+#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_2_BASEADDR
+#define	CONFIG_BAUDRATE		XPAR_UARTLITE_2_BAUDRATE
 #define	CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
 
 /* Ethernet port */
@@ -234,7 +238,7 @@
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
 /* Some appropriate defaults for network settings */
-#define CONFIG_HOSTNAME		harman-ithd
+#define CONFIG_HOSTNAME		labx-essex
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 

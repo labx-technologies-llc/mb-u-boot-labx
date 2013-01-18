@@ -24,13 +24,17 @@
 include $(TOPDIR)/config.mk
 
 LIB	= $(obj)lib$(BOARD).a
-CFLAGS	+= -I. 
-COBJS	= $(BOARD).o firmware-update.o
+CFLAGS	+= -I$(TOPDIR)/lib_idl -I. 
+COBJS	= $(BOARD).o firmware-update.o labx-mailbox.o
 
 OBJS	:= $(addprefix $(obj),$(COBJS))
 
-$(LIB):	$(OBJS) 
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+$(LIB):	do_idls $(OBJS) 
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(TOPDIR)/lib_idl/*.o
+
+do_idls:
+	$(MAKE) -C $(TOPDIR)/lib_idl do_idls
+	$(MAKE) -C $(TOPDIR)/lib_idl
 
 distclean:	clean
 	rm -f $(LIB) core *.bak $(obj).depend

@@ -3578,21 +3578,17 @@ meyer_sound_CAL_ICS_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze CAL_ICS meyer_sound
 
-beyerdynamic_avb_sp605_config:   unconfig
+labx_avb_sp605_config:   unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 beyerdynamic
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 labx
 
-harman_avbx_config: unconfig
+labx_essex_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx harman
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze essex labx
 
-harman_ithd_config: unconfig
+labx_avb_ep_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze ithd harman
-	
-harman_avb_ep_config: unconfig
-	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_ep harman
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_ep labx
 
 labx_sanfrancesco_config: unconfig
 	@mkdir -p $(obj)include
@@ -3602,9 +3598,14 @@ labx_avbx_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx labx
 
-shure_inferno_config: unconfig
+labx_revolver_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno shure
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze revolver labx
+
+labx_inferno_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno labx
+
 #========================================================================
 # Blackfin
 #========================================================================
