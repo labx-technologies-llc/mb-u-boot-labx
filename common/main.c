@@ -437,6 +437,12 @@ void main_loop (void)
   labx_preboot_res = labx_preboot(bootdelay);
 	if(labx_preboot_res == -1) bootdelay = -1;
   else if(labx_preboot_res == 0) bootdelay = 0;
+
+#ifdef CONFIG_88E1116PHY_FIX
+    parse_string_outer("ping ${serverip}",
+                       (FLAG_PARSE_SEMICOLON | FLAG_EXIT_FROM_LOOP));
+#endif
+
 #endif
 
 #ifdef CONFIG_BOOTCOUNT_LIMIT
