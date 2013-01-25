@@ -541,7 +541,7 @@
 			xlnx,dout-default = <0x0>;
 			xlnx,dout-default-2 = <0x0>;
 			xlnx,family = "spartan6";
-			xlnx,gpio-width = <0xe>;
+			xlnx,gpio-width = <0x20>;
 			xlnx,gpio2-width = <0x20>;
 			xlnx,interrupt-present = <0x1>;
 			xlnx,is-dual = <0x0>;
