@@ -169,7 +169,7 @@
 #define CONFIG_ENV_SPI_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
 #define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
 #define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
-#define CONFIG_SPI_FLASH_SPANSION 1
+#define CONFIG_SPI_FLASH_STMICRO 1
 
 /* Definitions for peripheral FLASH_CONTROL */
 #define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1
