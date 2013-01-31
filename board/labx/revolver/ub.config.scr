@@ -104,8 +104,8 @@ setenv temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdt
 setenv spiprobe 'sf probe 0:0 40000000 3'
 
 echo LabX Revolver Firmware Update
-setenv blobname           labx_revolverUpdate.bin.ub
-setenv goldenblobname     labx_revolverGoldenUpdate.bin.ub
+setenv blobname           revolverUpdate.bin.ub
+setenv goldenblobname     revolverGoldenUpdate.bin.ub
 setenv blobrunstart       0x88000040
 setenv load_blob          'tftp ${clobstart} ${blobname}'
 setenv load_golden_blob   'tftp ${clobstart} ${goldenblobname}'
