@@ -41,7 +41,7 @@
 // GPIO pins to request a boot
 // delay or a firmware update.
 //#define GPIO_BOOT_DELAY_BIT      2
-#define GPIO_FIRMWARE_UPDATE_BIT 3
+//#define GPIO_FIRMWARE_UPDATE_BIT 3
 
 // Temporary fix for PHY not set properly in uClinux
 #define CONFIG_88E1116PHY_FIX
