@@ -293,7 +293,7 @@
 			xlnx,package = "fgg484";
 		} ;
 		backplane_bridge: legacy-bridge@820e0000 {
-                        compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
+      compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
 			device_type = "network";
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x820e0000 0x10000 >;
