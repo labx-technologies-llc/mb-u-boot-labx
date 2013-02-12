@@ -50,8 +50,8 @@ setenv bak_fdt              'setenv bakstart ${fdtstart};             setenv bak
 
 setenv check_settingsfs_crc 'sf read 0x88000040 ${settingsfsstart} ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
 
-setenv update_boot_fpga     'setenv imgname Avbx_Fpga-failsafe.bin.ub;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load spiprobe bak_golden_fdt install unbak'
-setenv update_golden_fdt    'setenv imgname avbx-golden.dtb.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv hdrlocdram ${goldenfdthdrdram};setenv secoffdram ${goldenfdtdram};run load spiprobe install_in_sector'
+setenv update_boot_fpga     'setenv imgname labx_Avbx_Fpga.bin.ub ;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load spiprobe bak_golden_fdt install unbak'
+setenv update_golden_fdt    'setenv imgname labx_Avbx_Fpga-failsafe.bin.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv hdrlocdram ${goldenfdthdrdram};setenv secoffdram ${goldenfdtdram};run load spiprobe install_in_sector'
 setenv update_boot_env      'setenv imgname ub.config.img;            setenv imgstart ${bootenvstart};     setenv imgsize ${bootenvsize};                                      run load run_script'
 setenv update_uboot         'setenv imgname u-boot.bin.ub;            setenv imgstart ${bootstart};        setenv imgsize ${bootsize};        setenv hdrloc ${boothdr};        run load spiprobe install'
 setenv update_kernel        'setenv imgname linux.ub;                 setenv imgstart ${kernstart};        setenv imgsize ${kernsize};                                         run load spiprobe install_with_hdr'
