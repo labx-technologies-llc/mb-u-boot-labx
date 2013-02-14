@@ -44,7 +44,7 @@
 //#define GPIO_FIRMWARE_UPDATE_BIT 3
 
 // Temporary fix for PHY not set properly in uClinux
-#define CONFIG_88E1116PHY_FIX
+//#define CONFIG_88E1116PHY_FIX
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
