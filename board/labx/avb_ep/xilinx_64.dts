@@ -630,7 +630,8 @@
                         xlnx,slave-interconnect = "PLB";
                         xlnx,slave-native-dwidth = <0x20>;
                         xlnx,tdm-lane-count = <0x8>;
-                        xlnx,tdm-max-burst-length = <0x20>;
+                        xlnx,tdm-min-burst-length = <0x08>;
+                        xlnx,tdm-max-burst-multiple = <0x04>;
                         xlnx,tdm-max-slot-density = <0x8>;
                         xlnx,write-cache-addr-width = <0xd>;
                 } ;	
