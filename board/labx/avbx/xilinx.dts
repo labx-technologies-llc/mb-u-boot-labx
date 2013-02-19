@@ -493,7 +493,7 @@
 			xlnx,device = "6slx45";
 			xlnx,ext-cache-addr-width = <0x9>;
 			xlnx,family = "spartan6";
-			xlnx,has-dynamic-sample-rates = <0x0>;
+			xlnx,has-dynamic-sample-rates = <0x1>;
 			xlnx,has-tdm-analyzer = <0x1>;
 			xlnx,has-tdm-loopback = <0x0>;
 			xlnx,has-tdm-slave-manager = <0x0>;
@@ -511,9 +511,9 @@
 			xlnx,slave-interconnect = "PLB";
 			xlnx,slave-native-dwidth = <0x20>;
 			xlnx,tdm-lane-count = <0x4>;
-			xlnx,tdm-max-burst-multiple = <0x1>;
 			xlnx,tdm-max-slot-density = <0x10>;
 			xlnx,tdm-min-burst-length = <0x8>;
+			xlnx,tdm-max-burst-multiple = <0x4>;
 			xlnx,write-cache-addr-width = <0xd>;
 		} ;
 		mdm_0: debug@82010000 {
