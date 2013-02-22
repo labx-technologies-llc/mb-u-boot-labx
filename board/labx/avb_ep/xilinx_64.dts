@@ -398,7 +398,7 @@
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 6 2 5 2 >;
-			local-mac-address = [ 00 0a 35 cd 71 01 ];
+			local-mac-address = [ 00 0a 35 cd 8a 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82060000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
