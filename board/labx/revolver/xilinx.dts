@@ -403,6 +403,15 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
+		} ;		
+		backplane_bridge: legacy-bridge@820a0000 {
+			compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
+			device_type = "network";
+			phy-mdio-controller = <&eth0>;
+			reg = < 0x820a0000 0x10000 >;
+			xlnx,phy-addr = <0x4>;
+			xlnx,phy-type = <0x1>;
+			xlnx,rx-filters-per-port = <0x8>;
 		} ;
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
