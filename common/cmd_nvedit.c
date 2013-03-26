@@ -254,6 +254,9 @@ int _do_setenv (int flag, int argc, char *argv[])
 		    (strcmp (name, "serial#") == 0) ||
 #endif
 		    ((strcmp (name, "ethaddr") == 0)
+#ifdef LABX_MAC_ADDR_FLASH_LOC
+         && 0
+#endif
 #if defined(CONFIG_OVERWRITE_ETHADDR_ONCE) && defined(CONFIG_ETHADDR)
 		     && (strcmp ((char *)env_get_addr(oldval),MK_STR(CONFIG_ETHADDR)) != 0)
 #endif	/* CONFIG_OVERWRITE_ETHADDR_ONCE && CONFIG_ETHADDR */
