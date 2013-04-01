@@ -48,18 +48,18 @@
 			clock-frequency = <62500000>;
 			compatible = "xlnx,microblaze-8.40.b";
 			d-cache-baseaddr = <0x88000000>;
-			d-cache-highaddr = <0x8fffffff>;
+			d-cache-highaddr = <0x8bffffff>;
 			d-cache-line-size = <0x10>;
 			d-cache-size = <0x2000>;
 			device_type = "cpu";
 			i-cache-baseaddr = <0x88000000>;
-			i-cache-highaddr = <0x8fffffff>;
+			i-cache-highaddr = <0x8bffffff>;
 			i-cache-line-size = <0x10>;
 			i-cache-size = <0x2000>;
 			model = "microblaze,8.40.b";
 			reg = <0>;
 			timebase-frequency = <62500000>;
-			xlnx,addr-tag-bits = <0xe>;
+			xlnx,addr-tag-bits = <0xd>;
 			xlnx,allow-dcache-wr = <0x1>;
 			xlnx,allow-icache-wr = <0x1>;
 			xlnx,archiver = "32";
@@ -75,7 +75,7 @@
 			xlnx,d-lmb = <0x1>;
 			xlnx,d-plb = <0x1>;
 			xlnx,data-size = <0x20>;
-			xlnx,dcache-addr-tag = <0xe>;
+			xlnx,dcache-addr-tag = <0xd>;
 			xlnx,dcache-always-used = <0x1>;
 			xlnx,dcache-byte-size = <0x2000>;
 			xlnx,dcache-data-width = <0x0>;
@@ -275,7 +275,7 @@
 	} ;
 	ddr2_control: memory@88000000 {
 		device_type = "memory";
-		reg = < 0x88000000 0x8000000 >;
+		reg = < 0x88000000 0x4000000 >;
 	} ;
 	peripheral_bus: plb@0 {
 		#address-cells = <1>;
