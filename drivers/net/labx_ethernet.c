@@ -484,14 +484,17 @@ inline void bcm54xx_exp_write(unsigned long int phy_addr, unsigned int shadow, u
 
 inline unsigned int bcm54xx_aux_read(unsigned long int phy_addr, unsigned int shadow)
 {
-  write_phy_register(phy_addr, MII_AUXCTL,
-      ((shadow | MII_AUX_SHADOW_MASK) << MII_AUX_SHADOW_READSHIFT) | MII_AUX_SELECT_MISCCTL);
+  unsigned int addr;
+  addr = ((shadow << MII_AUX_SHADOW_READSHIFT) | MII_AUX_SELECT_MISCCTL);
+  write_phy_register(phy_addr, MII_AUXCTL, addr);
   return(read_phy_register(phy_addr, MII_AUXCTL));
 }
 
 inline void bcm54xx_aux_write(unsigned long int phy_addr, unsigned int shadow, unsigned int phy_data)
 {
-  write_phy_register(phy_addr, MII_AUXCTL, (shadow | MII_AUX_SHADOW_MASK) | (phy_data & ~MII_AUX_SHADOW_MASK));
+  unsigned int reg;
+  reg = (phy_data & ~MII_AUX_SHADOW_MASK) | shadow;
+  write_phy_register(phy_addr, MII_AUXCTL, reg);
 }
 
 /* Writes a value to a MAC register */
@@ -548,12 +551,6 @@ static int labx_eth_phy_ctrl(void)
     {
         if ((id_low & BCM548x_ID_LOW_MASK) == BCM5481_ID_LOW) { // Special stuff for BCM5481
             printf("BCM5481 PHY setup\n");
-            result = read_phy_register(phy_addr, MII_AUXCTL);
-            result = result | BCM5481_SHADOW_WRITE | BCM5481_HPE_REGISTER_SELECT;
-            result = result & ~BCM5481_HIGH_PERFORMANCE_ENABLE;
-            printf("High-Performance Enable: %d (0x%04X) => %d\n",
-	                ((result & BCM5481_HIGH_PERFORMANCE_ENABLE) != 0), result,
-	                ((read_phy_register(phy_addr, MII_AUXCTL) & BCM5481_HIGH_PERFORMANCE_ENABLE) != 0));
             write_phy_register(phy_addr, MII_AUXCTL, BCM5481_RX_SKEW_REGISTER_SEL);
             result = read_phy_register(phy_addr, MII_AUXCTL);
             write_phy_register(phy_addr, MII_AUXCTL,
