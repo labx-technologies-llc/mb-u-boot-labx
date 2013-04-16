@@ -338,7 +338,7 @@
 		eth01_audio_packetizer: labx-audio-packetizer@82090000 {
 			compatible = "xlnx,labx-audio-packetizer-1.06.a", "xlnx,labx-audio-packetizer-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 8 2 >;
+			interrupts = < 9 2 >;
 			reg = < 0x82090000 0x10000 >;
 			xlnx,cache-address-width = <0xf>;
 			xlnx,cache-data-width = <0x8>;
@@ -363,12 +363,12 @@
 			compatible = "xlnx,labx-ethernet-1.03.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 3 2 2 2 >;
+			interrupts = < 4 2 3 2 >;
 			local-mac-address = [ 00 0a 35 49 89 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
 			xlnx,has-mdio = <0x1>;
-			xlnx,phy-addr = <0x1>;
+			xlnx,phy-addr = <0x8>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
@@ -377,7 +377,7 @@
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 9 2 >;
+			interrupts = < 10 2 >;
 			reg = < 0x82100000 0x10000 >;
 			xlnx,cache-address-width = <0xe>;
 			xlnx,cache-data-width = <0x20>;
@@ -425,12 +425,12 @@
 			compatible = "xlnx,labx-ethernet-1.03.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 5 2 4 2 >;
+			interrupts = < 6 2 5 2 >;
 			local-mac-address = [ 00 0a 35 49 89 01 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
-			xlnx,phy-addr = <0x2>;
+			xlnx,phy-addr = <0x9>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
@@ -439,7 +439,7 @@
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 10 2 >;
+			interrupts = < 11 2 >;
 			reg = < 0x82110000 0x10000 >;
 			xlnx,cache-address-width = <0xe>;
 			xlnx,cache-data-width = <0x20>;
@@ -576,13 +576,13 @@
 			compatible = "xlnx,xps-intc-2.01.a", "xlnx,xps-intc-1.00.a";
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
-			xlnx,kind-of-intr = <0xc1>;
-			xlnx,num-intr-inputs = <0x10>;
+			xlnx,kind-of-intr = <0x181>;
+			xlnx,num-intr-inputs = <0x11>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
 			compatible = "xlnx,labx-ptp-1.06.c", "xlnx,labx-ptp-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 1 2 >;
+			interrupts = < 2 2 >;
 			port-interface-0 = <&eth0>;
 			port-interface-1 = <&eth1>;
 			reg = < 0x82080000 0x10000 >;
@@ -612,7 +612,7 @@
 		labx_spi_mailbox_0: labx-spi-mailbox@820c0000 {
 			compatible = "xlnx,labx-spi-mailbox-1.00.a", "xlnx,labx-mailbox-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 12 2 >;
+			interrupts = < 13 2 >;
 			reg = < 0x820c0000 0x10000 >;
 			xlnx,device = "6slx75";
 			xlnx,family = "spartan6";
@@ -622,7 +622,7 @@
 		labx_tdm_audio_0: labx-tdm-audio@820b0000 {
 			compatible = "xlnx,labx-tdm-audio-1.04.a", "xlnx,labx-tdm-audio-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 11 2 >;
+			interrupts = < 12 2 >;
 			reg = < 0x820b0000 0x10000 >;
 			xlnx,device = "6slx75";
 			xlnx,ext-cache-addr-width = <0xc>;
@@ -657,7 +657,7 @@
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.10.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 6 0 >;
+			interrupts = < 7 0 >;
 			reg = < 0x82010000 0x10000 >;
 			xlnx,family = "spartan6";
 			xlnx,interconnect = <0x1>;
@@ -675,7 +675,7 @@
 			current-speed = <115200>;
 			device_type = "serial";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 7 0 >;
+			interrupts = < 8 0 >;
 			port-number = <0>;
 			reg = < 0x82020000 0x10000 >;
 			xlnx,baudrate = <0x1c200>;
@@ -700,7 +700,7 @@
 		xps_gpio_0: gpio@820f0000 {
 			compatible = "xlnx,xps-gpio-2.00.a", "xlnx,xps-gpio-1.00.a";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 13 2 >;
+			interrupts = < 14 2 >;
 			reg = < 0x820f0000 0x10000 >;
 			xlnx,all-inputs = <0x0>;
 			xlnx,all-inputs-2 = <0x0>;
