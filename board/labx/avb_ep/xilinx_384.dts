@@ -629,7 +629,7 @@
 			xlnx,device = "6slx75";
 			xlnx,ext-cache-addr-width = <0xc>;
 			xlnx,family = "spartan6";
-			xlnx,has-dynamic-sample-rates = <0x0>;
+			xlnx,has-dynamic-sample-rates = <0x1>;
 			xlnx,has-tdm-analyzer = <0x1>;
 			xlnx,has-tdm-loopback = <0x0>;
 			xlnx,has-tdm-slave-manager = <0x0>;
