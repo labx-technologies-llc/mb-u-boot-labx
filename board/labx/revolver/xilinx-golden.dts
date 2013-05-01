@@ -435,13 +435,13 @@
 		host_serial: serial@82040000 {
 			clock-frequency = <62500000>;
 			compatible = "xlnx,xps-uartlite-1.02.a", "xlnx,xps-uartlite-1.00.a";
-			current-speed = <115200>;
+			current-speed = <19200>;
 			device_type = "serial";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 7 0 >;
 			port-number = <1>;
 			reg = < 0x82040000 0x10000 >;
-			xlnx,baudrate = <0x1c200>;
+			xlnx,baudrate = <0x4b00>;
 			xlnx,data-bits = <0x8>;
 			xlnx,family = "spartan6";
 			xlnx,odd-parity = <0x1>;
