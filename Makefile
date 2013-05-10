@@ -3546,6 +3546,10 @@ microblaze-generic_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze microblaze-generic xilinx
 
+labrinth-avb_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze labrinth-avb labx
+
 aud8822-sp601_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze aud8822-sp601 labx
@@ -3562,9 +3566,49 @@ s3d1800a_config:	unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze s3d1800a labx
 
+labx_garcia_config:	unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze garcia labx
+
+labx_mosaic_config:   unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze mosaic labx
+
+meyer_sound_CAL_ICS_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze CAL_ICS meyer_sound
+
+labx_avb_sp605_config:   unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_sp605 labx
+
+labx_essex_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze essex labx
+
+labx_avb_ep_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avb_ep labx
+
+labx_sanfrancesco_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze sanfrancesco labx
+
+labx_avbx_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze avbx labx
+
+labx_revolver_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze revolver labx
+
 labx_inferno_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze inferno labx
+
+labx_hats_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze hats labx
 #========================================================================
 # Blackfin
 #========================================================================
@@ -3758,8 +3802,8 @@ clean:
 	       $(obj)tools/gen_eth_addr    $(obj)tools/img2srec		  \
 	       $(obj)tools/mkimage	   $(obj)tools/mpc86x_clk	  \
 	       $(obj)tools/ncb		   $(obj)tools/ubsha1
-	@rm -f $(obj)board/biamp/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
-	@rm -f $(obj)lib_idl/{FirmwareUpdate.h,AvbDefs.h,*_type.*,*_stub.*,*_unmarshal.*,*.pyc}	  \
+	@rm -f $(obj)board/labx/labrinth-avb/IDL/{*.c,*.h,*.pyc}	  \
+	@rm -f $(obj)lib_labx/idl/{FirmwareUpdate.h,AvbDefs.h,*_type.*,*_stub.*,*_unmarshal.*,*.pyc}	  \
 	@rm -f $(obj)board/cray/L1/{bootscript.c,bootscript.image}	  \
 	       $(obj)board/netstar/{eeprom,crcek,crcit,*.srec,*.bin}	  \
 	       $(obj)board/trab/trab_fkt   $(obj)board/voiceblue/eeprom   \

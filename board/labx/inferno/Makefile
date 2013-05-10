@@ -23,19 +23,26 @@
 
 include $(TOPDIR)/config.mk
 
-LIB	= $(obj)lib$(BOARD).a
-CFLAGS	+= -I$(TOPDIR)/lib_idl -I. 
-COBJS	= $(BOARD).o firmware-update.o labx-mailbox.o
-COBJS	+= mvSwitch_6350R.o
+LIB      = $(obj)lib$(BOARD).a
+COBJS    = $(BOARD).o
+COBJS   += mvSwitch_6350R.o
+OBJS    := $(addprefix $(obj),$(COBJS))
 
-OBJS	:= $(addprefix $(obj),$(COBJS))
+# This is how to include our libraries. The .o files
+# in these folders get linked in (the library files
+# themselves are not used).
+LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
 
-$(LIB):	do_idls $(OBJS) 
-	$(AR) $(ARFLAGS) $@ $(OBJS) $(TOPDIR)/lib_idl/*.o
+$(LIB): $(OBJS) libs
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
 
-do_idls:
-	$(MAKE) -C $(TOPDIR)/lib_idl do_idls
-	$(MAKE) -C $(TOPDIR)/lib_idl
+libs:
+# Don't know why do_idls needs to be executed separately.
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl
+	$(MAKE) -C $(TOPDIR)/lib_labx
+
+.PHONY: libs
 
 distclean:	clean
 	rm -f $(LIB) core *.bak $(obj).depend

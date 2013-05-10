@@ -1,0 +1,119 @@
+echo Setting up Garcia u-boot environment
+echo -----------------------------------
+echo Network Configuration:
+echo TODO - Use a real OUI for MAC address
+set autoload no
+set ethaddr 00:0a:35:00:44:01
+set ipaddr 192.168.1.1
+set serverip 192.168.1.100
+set netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01
+
+echo Clobber DRAM Configuration:
+set clobstart 0x88000000
+
+echo FPGA_RO Configuration:
+set fpgarosize 0x340000
+set fpgarostart 0x87000000
+
+echo FPGA Configuration:
+set fpgasize 0x340000
+set fpgastart 0x87340000
+set fpganame45 GarciaFPGA-LX45.bin
+set fpganame45v2 GarciaFPGA-LX45_v2.bin
+set fpganame100 GarciaFPGA-LX100.bin
+set fpganame150 GarciaFPGA-LX150.bin
+set fpganame45ro GarciaFPGA-LX45-golden.bin
+set fpganame45v2ro GarciaFPGA-LX45_v2-golden.bin
+set fpganame100ro GarciaFPGA-LX100-golden.bin
+
+echo Bootloader Configuration:
+set bootsize 0x40000
+set bootstart 0x87680000
+set bootenvsize 0x08000
+set bootenvstart 0x87FE0000
+set boottextbase 0x8BCC0000
+set eraseenv 'protect off ${bootenvstart} +${bootenvsize}; erase ${bootenvstart} +${bootenvsize}'
+
+echo Flattened Device Tree Configuration:
+set fdtsize 0x10000
+set fdtstart 0x87FE8000
+set fdtname45 garcia-LX45.dtb
+set fdtname45v2 garcia-LX45_v2.dtb
+set fdtname100 garcia-LX100.dtb
+set fdtname150 garcia-LX150.dtb
+
+echo Kernel Configuration:
+set kernsize 0x300000
+set kernstart 0x876C0000
+
+echo Root Filesystem Configuration:
+set rootfssize 0x160000
+set rootfsstart 0x879C0000
+
+echo ROM Filesystem Configuration:
+set romfssize 0x380000
+set romfsstart 0x87B20000
+
+echo Settings Filesystem Configuration:
+set settingsfssize 0x140000
+set settingsfsstart 0x87EA0000
+
+echo Boot Configuration:
+set bootcmd 'bootm ${kernstart} - ${fdtstart}'
+set bootdelay 3
+
+set try_load_fpga45 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45}; else echo; fi'
+set try_load_fpga100 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100}; else echo; fi'
+set try_load_fpga150 'if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame150}; else echo; fi'
+set try_load_fpga45v2 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2}; else echo; fi'
+set install_fpga 'protect off ${fpgastart} +${fpgasize};erase ${fpgastart} +${fpgasize};cp.b ${fileaddr} ${fpgastart} ${fpgasize}'
+set update_fpga run try_load_fpga45 try_load_fpga100 try_load_fpga150 try_load_fpga45v2 install_fpga
+set try_load_fpga45_ro 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45ro}; else echo; fi'
+set try_load_fpga100_ro 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame100ro}; else echo; fi'
+set try_load_fpga45v2_ro 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fpganame45v2ro}; else echo; fi'
+set install_fpga_ro 'protect off ${fpgarostart} +${fpgarosize};erase ${fpgarostart} +${fpgarosize};cp.b ${fileaddr} ${fpgarostart} ${fpgarosize}'
+set update_fpga_ro run try_load_fpga45_ro try_load_fpga100_ro try_load_fpga150 try_load_fpga45v2_ro install_fpga_ro
+
+set kernname linux.ub
+set load_kernel 'tftp ${clobstart} ${kernname}'
+set install_kernel 'protect off ${kernstart} +${kernsize};erase ${kernstart} +${kernsize};cp.b ${fileaddr} ${kernstart} ${filesize}'
+set update_kernel run load_kernel install_kernel
+
+set load_uboot 'tftp ${clobstart} u-boot.bin'
+set install_uboot 'protect off ${bootstart} +${bootsize};erase ${bootstart} +${bootsize};cp.b ${fileaddr} ${bootstart} ${filesize}'
+set update_uboot run load_uboot install_uboot
+
+set load_rootfs 'tftp ${clobstart} rootfs.romfs'
+set install_rootfs 'protect off ${rootfsstart} +${rootfssize};erase ${rootfsstart} +${rootfssize};cp.b ${fileaddr} ${rootfsstart} ${filesize}'
+set update_rootfs run load_rootfs install_rootfs
+
+set load_romfs 'tftp ${clobstart} usr.romfs'
+set install_romfs 'protect off ${romfsstart} +${romfssize};erase ${romfsstart} +${romfssize};cp.b ${fileaddr} ${romfsstart} ${filesize}'
+set update_romfs run load_romfs install_romfs
+
+set try_load_fdt45 'if itest.b 0x00 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45}; else echo; fi'
+set try_load_fdt100 'if itest.b 0x40 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname100}; else echo; fi'
+set try_load_fdt150 'if itest.b 0x80 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname150}; else echo; fi'
+set try_load_fdt45v2 'if itest.b 0xC0 -eq "*0x80002002 &0xC0"; then tftp ${clobstart} ${fdtname45v2}; else echo; fi'
+set install_fdt 'protect off ${fdtstart} +${fdtsize};erase ${fdtstart} +${fdtsize};cp.b ${fileaddr} ${fdtstart} ${filesize}'
+set update_fdt run try_load_fdt45 try_load_fdt100 try_load_fdt150 try_load_fdt45v2 install_fdt
+
+set load_settingsfs 'tftp ${clobstart} settings.jffs2'
+set install_settingsfs 'protect off ${settingsfsstart} +${settingsfssize};erase ${settingsfsstart} +${settingsfssize};cp.b ${fileaddr} ${settingsfsstart} ${filesize}'
+set update_settingsfs run load_settingsfs install_settingsfs
+
+set update_all 'ping ${serverip} ; run update_fpga update_uboot update_fdt update_kernel update_rootfs update_romfs update_settingsfs'
+
+echo Shortcuts for Development:
+set tempkernstart 0x88800000
+set tempfdtstart 0x88700000
+set temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
+set ipset 'setenv ipaddr 192.168.1.1; setenv serverip 192.168.1.100; ping ${serverip}'
+
+echo Firmware Update Configuration
+set blob_update 'tftp 0x88000000 EthernetSnake.bin; source 0x88000040'
+
+echo Saving Configurations...
+saveenv
+
+echo Configuration Completed
