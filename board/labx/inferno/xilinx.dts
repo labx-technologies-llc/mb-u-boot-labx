@@ -484,7 +484,8 @@
                         xlnx,redundant = <0x0>;
                         xlnx,tdm-lane-count = <0x8>;
                         xlnx,tdm-max-slot-density = <0x10>;
-                        xlnx,tdm-max-burst-length = <0x10>;
+			xlnx,tdm-min-burst-length = <0x4>;
+			xlnx,tdm-max-burst-multiple = <0x4>;
                         xlnx,write-cache-addr-width = <0xd>;
 		} ;
 		mdm_0: debug@82010000 {
