@@ -40,9 +40,12 @@
 // hacks in cmd_nvedit.c).
 #define LABX_MAC_ADDR_FLASH_LOC 0x180000
 
-// This is the entire firmware update module,
-// and includes GPIO-checking.
+// This is the firmware update module.
 //#define CONFIG_FIRMWARE_UPDATE
+
+// GPIO pins to request a boot
+// delay or a firmware update.
+#define GPIO_BOOT_DELAY_BIT 8
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 

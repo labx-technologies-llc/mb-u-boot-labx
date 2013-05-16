@@ -9,6 +9,7 @@
 #include <asm/io.h>
 #include <image.h>
 #include "preboot.h"
+#include "xparameters.h"
 
 #ifdef CONFIG_SPI_FLASH
 #include <spi_flash.h>
@@ -56,8 +57,12 @@ static const char *crc_vars[][5] = {
 };
 static const unsigned int num_crcs = sizeof(crc_vars) / sizeof(crc_vars[0]);
 
-/* Pre-boot function. */
+/* Pre-boot function. Returns a new (or the same) bootdelay. */
 int labx_preboot(int bootdelay) {
+#ifdef GPIO_BOOT_DELAY_BIT
+  volatile unsigned long* gpio_baseaddr = 0;
+#endif
+
   if(labx_is_golden_fpga()) {
 #ifdef CONFIG_BOOTDELAY /* If auto-boot is compiled in. */
     /* The auto-boot will reconfigure
@@ -68,6 +73,26 @@ int labx_preboot(int bootdelay) {
     /* Print if we are in development mode. */
     puts("Development build. Not checking CRCs.\n");
 #else
+
+#ifdef GPIO_BOOT_DELAY_BIT
+    /* Allow the use of a GPIO bit to request a boot delay. */
+#ifdef XPAR_XPS_GPIO_0_BASEADDR
+    gpio_baseaddr = XPAR_XPS_GPIO_0_BASEADDR;
+#elif defined(XPAR_GPIO_BASEADDR)
+    gpio_baseaddr = XPAR_GPIO_BASEADDR;
+#else
+#error Boot-delay GPIO set, but no GPIO peripheral found (no suitable *_BASEADDR #define found)
+#endif
+
+    if(bootdelay == 0 && (~*gpio_baseaddr & (0x1 << GPIO_BOOT_DELAY_BIT))) {
+      /* Unfortunately, it's not easy to make a "bootcmd" environment
+       * variable that will do what is done below, with all of the CRC
+       * checks, so we lose the code below when we allow a boot delay. */
+      puts("GPIO boot delay request\n");
+      bootdelay = 3;
+    }
+#endif
+
     /* Only check CRCs and perform related logic if
      * we are not in development mode (i.e. no boot
      * delay is configured, and we try to boot right
@@ -87,7 +112,7 @@ int labx_preboot(int bootdelay) {
           return -1; /* Abort auto-boot (i.e. stay in U-Boot). */
         } else {
           puts("Golden CRC checks passed. Golden Linux will be booted.\n");
-          return 0; /* Continue to boot right away. */
+          return bootdelay; /* Continue to boot right away. */
         }
       } else {
         puts("Runtime CRC checks passed. Booting Linux.\n");
@@ -98,7 +123,7 @@ int labx_preboot(int bootdelay) {
 #endif
 #endif
     /* Do not affect boot-up mode (delay or not). */
-    return 1;
+    return bootdelay;
   } else {
     /* In the production FPGA, we always try to boot right away. */
     return 0;
