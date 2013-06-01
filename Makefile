@@ -3609,6 +3609,11 @@ labx_inferno_config: unconfig
 labx_hats_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze hats labx
+
+lawo_metalheart_config: unconfig
+	@mkdir -p $(obj)include
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze metalheart lawo
+
 #========================================================================
 # Blackfin
 #========================================================================
