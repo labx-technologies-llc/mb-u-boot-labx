@@ -20,32 +20,22 @@ setenv eraseenv 'run spiprobe;sf erase ${bootenvstart} ${bootenvsize}'
 
 echo Boot Configuration
 setenv bootcmd 'run spiprobe;sf read ${tempkernstart} ${kernstart} ${kernsize};sf read ${tempfdtstart} ${fdtstart} ${fdtsize};bootm ${tempkernstart} - ${tempfdtstart}'
-setenv bootglnx 'run spiprobe; sf read ${tempkernstart} ${goldenkernstart} ${goldenkernsize}; sf read ${tempfdtstart} ${goldenfdtstart} ${goldenfdtsize}; bootm ${tempkernstart} - ${tempfdtstart}'
 setenv bootdelay 3
 
 echo Flash Map
 # We can't do arithmetic on the fly in hush shell, so we have to precalculate everything.
-setenv bootfpgasize     0x180000; setenv bootfpgastart     0x000000; setenv bootfpgahdr        0x177FC0
-setenv goldenfdtsize    0x008000; setenv goldenfdtstart    0x178000; setenv goldenfdthdr       0x17FFC0
-setenv goldenfdtsector  0x140000; setenv goldenfdtdram   0x88038000; setenv goldenfdthdrdram 0x8803FFC0
-setenv unusedsize       0x040000; setenv unusedstart       0x180000
-setenv bootenvsize      0x040000; setenv bootenvstart      0x1C0000
+setenv bootenvsize      0x040000; setenv bootenvstart      0xe40000
 setenv bootsize         0x040000; setenv bootstart         0x200000; setenv boothdr            0x23FFC0
-setenv kernsize         0x140000; setenv kernstart         0x240000
-setenv goldenkernsize   0x140000; setenv goldenkernstart   0x380000
-setenv romfssize        0x340000; setenv romfsstart        0x4C0000; setenv romfshdr           0x7FFFC0
-setenv goldenromfssize  0x240000; setenv goldenromfsstart  0x800000; setenv goldenromfshdr     0xA3FFC0
-setenv fpgasize         0x180000; setenv fpgastart         0xA40000; setenv fpgahdr            0xBB7FC0
-setenv fdtsize          0x008000; setenv fdtstart          0xBB8000; setenv fdthdr             0xBBFFC0
+setenv kernsize         0x3C0000; setenv kernstart         0x280000
+setenv romfssize        0x200000; setenv romfsstart        0x840000; setenv romfshdr           0x7FFFC0
+setenv fdtsize          0x040000; setenv fdtstart          0x240000; setenv fdthdr             0x247FC0
 setenv fdtsector        0xB80000; setenv fdtdram         0x88038000; setenv fdthdrdram       0x8803FFC0
-setenv rootfssize       0x100000; setenv rootfsstart       0xBC0000; setenv rootfshdr          0xCBFFC0
-setenv goldenrootfssize 0x100000; setenv goldenrootfsstart 0xCC0000; setenv goldenrootfshdr    0xDBFFC0
-setenv settingsfssize   0x240000; setenv settingsfsstart   0xDC0000 # SettingsFS is read-write. It doesn't store a CRC. We only check once, after flashing.
+setenv rootfssize       0x200000; setenv rootfsstart       0x640000; setenv rootfshdr          0xCBFFC0
+setenv settingsfssize   0x200000; setenv settingsfsstart   0xc40000 # SettingsFS is read-write. It doesn't store a CRC. We only check once, after flashing.
 
 echo Update Commands
 # FDTs and FPGAs share sectors. These procedures properly handle
 # this, so that the FDTs and FPGAs can be updated separately.
-setenv bak_golden_fdt       'setenv bakstart ${goldenfdtstart};       setenv baksize ${goldenfdtsize};     run bak'
 setenv bak_fdt              'setenv bakstart ${fdtstart};             setenv baksize ${fdtsize};           run bak'
 
 setenv check_settingsfs_crc 'sf read 0x88000040 ${settingsfsstart} ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
@@ -56,9 +46,8 @@ setenv update_kernel        'setenv imgname linux.ub;                 setenv img
 setenv update_romfs         'setenv imgname usr.romfs.ub;             setenv imgstart ${romfsstart};       setenv imgsize ${romfssize};       setenv hdrloc ${romfshdr};       run load spiprobe install'
 setenv update_fdt           'setenv imgname lawo.dtb.ub;              setenv flashsec ${fdtsector};        setenv imgsize ${fdtsize};         setenv hdrlocdram ${fdthdrdram}; setenv secoffdram ${fdtdram}; run load spiprobe install_in_sector'
 setenv update_rootfs        'setenv imgname rootfs.sqfs.ub;           setenv imgstart ${rootfsstart};      setenv imgsize ${rootfssize};      setenv hdrloc ${rootfshdr};      run load spiprobe install'
-setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;    setenv imgstart ${goldenrootfsstart};setenv imgsize ${goldenrootfssize};setenv hdrloc ${goldenrootfshdr};run load spiprobe install'
 setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;      setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};  setenv hdrloc ${settingsfshdr};  run load spiprobe install_no_hdr check_settingsfs_crc'
-setenv update_all           'ping ${serverip}; run update_boot_env update_boot_fpga update_golden_fdt update_uboot update_kernel update_golden_kernel update_romfs update_golden_romfs update_fpga update_fdt update_rootfs update_golden_rootfs update_settingsfs'
+setenv update_all           'ping ${serverip}; run update_boot_env update_uboot update_kernel update_romfs update_fdt update_rootfs update_settingsfs'
 
 echo Load/Install Commands
 # Files are transferred over with a 64-byte U-Boot header (created by U-Boot's
@@ -102,10 +91,8 @@ echo Lawo MetalHeart Firmware Update
 setenv blobname           lawo_MetalHeartUpdate.bin.ub
 setenv blobrunstart       0x88000040
 setenv load_blob          'tftp ${clobstart} ${blobname}'
-setenv load_golden_blob   'tftp ${clobstart} ${goldenblobname}'
 setenv install_blob       'if test ${crcreturn} -eq 0; then source ${blobrunstart}; fi'
 setenv update_blob        'run load_blob install_blob'
-setenv update_golden_blob 'run load_golden_blob install_blob'
 
 echo Saving Configurations...
 saveenv

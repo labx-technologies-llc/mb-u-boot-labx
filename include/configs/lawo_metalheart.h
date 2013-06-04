@@ -36,7 +36,7 @@
 
 // This is the entire firmware update module,
 // and includes GPIO-checking.
-#define CONFIG_FIRMWARE_UPDATE
+//#define CONFIG_FIRMWARE_UPDATE
 
 // GPIO pins to request a boot
 // delay or a firmware update.
@@ -45,15 +45,13 @@
 // when on MTF or HPX
 //#define GPIO_FIRMWARE_UPDATE_BIT 18
 
-/* Configuration for SPI OTP */
-#define CFG_SPI_OTP
-#define NUM_ETH_PORTS 2
+#define NUM_ETH_PORTS 1
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
 #define	CONFIG_XILINX_UARTLITE
-#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_2_BASEADDR
-#define	CONFIG_BAUDRATE		XPAR_UARTLITE_2_BAUDRATE
+#define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_0_BASEADDR
+#define	CONFIG_BAUDRATE		XPAR_UARTLITE_0_BAUDRATE
 #define	CONFIG_SYS_BAUDRATE_TABLE	{ CONFIG_BAUDRATE }
 
 /* Ethernet port */
@@ -196,12 +194,12 @@
 #define	CONFIG_ENV_SECT_SIZE	0x40000	 /* 256K */
 /*#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      */
 #define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
-#define CONFIG_ENV_OFFSET	0x1C0000	
+#define CONFIG_ENV_OFFSET	0xe40000
 
 /* Enable support of SPI Flash */
 #define CONFIG_SYS_NO_FLASH
-#define CONFIG_SPI
-#define CONFIG_XILINX_SPI /* Xilinx xps SPI controller */
+//#define CONFIG_SPI
+//#define CONFIG_XILINX_SPI /* Xilinx xps SPI controller */
 #define CONFIG_SPI_FLASH /* SPI Flash subsystem */
 #define CONFIG_CMD_SF /* Command line interface sf */
 #define CONFIG_SF_DEFAULT_SPEED 40000000 /* speed to run the SPI flash */
@@ -211,20 +209,20 @@
 #define CONFIG_ENV_SPI_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
 #define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
 #define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
-#define CONFIG_SPI_FLASH_SPANSION 1
+#define CONFIG_SPI_FLASH_MTDBRIDGE 1
 
 /* Definitions for peripheral FLASH_CONTROL */
 #define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1
 
 /* Definitions for peripheral FLASH_CONTROL */
-#define XPAR_FLASH_CONTROL_MEM0_BASEADDR XPAR_SPI_0_BASEADDR 
-#define XPAR_FLASH_CONTROL_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
+//#define XPAR_FLASH_CONTROL_MEM0_BASEADDR XPAR_SPI_0_BASEADDR 
+//#define XPAR_FLASH_CONTROL_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
 
 /* Canonical definitions for peripheral FLASH_CONTROL */
-#define XPAR_EMC_0_NUM_BANKS_MEM 1
-#define XPAR_EMC_0_MEM0_BASEADDR XPAR_SPI_0_BASEADDR
-#define XPAR_EMC_0_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
-#define XPAR_XPS_MCH_EMC
+//#define XPAR_EMC_0_NUM_BANKS_MEM 1
+//#define XPAR_EMC_0_MEM0_BASEADDR XPAR_SPI_0_BASEADDR
+//#define XPAR_EMC_0_MEM0_HIGHADDR XPAR_SPI_0_HIGHADDR
+//#define XPAR_XPS_MCH_EMC
 
 /* If this is defined and zero, the system will auto-boot
  * ("production" mode). If it is defined and > 0, there

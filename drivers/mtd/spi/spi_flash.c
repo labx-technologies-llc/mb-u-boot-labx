@@ -107,6 +107,12 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
 	struct spi_flash *flash;
 	int ret;
 	u8 idcode[5];
+	
+#ifdef CONFIG_SPI_FLASH_MTDBRIDGE
+	spi = NULL;
+	flash = spi_flash_probe_spansion(spi, idcode);
+	return flash;
+#else
 
 	spi = spi_setup_slave(bus, cs, max_hz, spi_mode);	
 	if (!spi) {
@@ -173,7 +179,6 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
 		goto err_manufacturer_probe;
 
 	spi_release_bus(spi);
-
 	return flash;
 
 err_manufacturer_probe:
@@ -182,10 +187,13 @@ err_read_id:
 err_claim_bus:
 	spi_free_slave(spi);
 	return NULL;
+#endif
 }
 
 void spi_flash_free(struct spi_flash *flash)
 {
+#ifndef CONFIG_SPI_FLASH_MTDBRIDGE
 	spi_free_slave(flash->spi);
+#endif
 	free(flash);
 }
