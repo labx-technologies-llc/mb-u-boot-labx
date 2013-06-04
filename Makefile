@@ -3610,9 +3610,9 @@ labx_hats_config: unconfig
 	@mkdir -p $(obj)include
 	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze hats labx
 
-lawo_metalheart_config: unconfig
+labx_metalheart_config: unconfig
 	@mkdir -p $(obj)include
-	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze metalheart lawo
+	@$(MKCONFIG) -a $(@:_config=) microblaze microblaze metalheart labx
 
 #========================================================================
 # Blackfin
