@@ -307,9 +307,6 @@ void main_loop (void)
 #ifdef CONFIG_PREBOOT
 	char *p;
 #endif
-#ifdef CONFIG_LABX_PREBOOT
-  int labx_preboot_res;
-#endif
 #ifdef CONFIG_BOOTCOUNT_LIMIT
 	unsigned long bootcount = 0;
 	unsigned long bootlimit = 0;
@@ -403,19 +400,15 @@ void main_loop (void)
 
 	debug ("### main_loop entered: bootdelay=%d\n\n", bootdelay);
 
-#if defined(CONFIG_FIRMWARE_UPDATE) && defined(CONFIG_LABX_PREBOOT)
-  /* CheckFirmwareUpdate() returns a 1 if a boot delay was
-   * manually requested by the host or by the user. Otherwise,
-   * it returns zero. If it performs a firmware update, it
-   * never returns. */
-  if(labx_is_golden_fpga() && CheckFirmwareUpdate() && bootdelay == 0) {
-    /* This will set up a boot delay based on the
-     * "bootdelay" environment variable (which just
-     * happened, above) or a default value even if
-     * CONFIG_BOOTDELAY is 0 (which is what this 'if'
-     * is for -- bootdelay == 0 iff CONFIG_BOOTDELAY == 0). */
+#if defined(CONFIG_LABX_PREBOOT) && defined(CONFIG_FIRMWARE_UPDATE)
+    /* CheckFirmwareUpdate() returns a 1 if a boot delay was
+     * manually requested by the host or by the user. Otherwise,
+     * it returns zero. If it performs a firmware update, it
+     * never returns. (CheckFirmwareUpdate() must come before
+     * bootdelay == 0 because firmware updates are unconditional
+     * with regards to the boot delay.) */
+  if(labx_is_golden_fpga() && CheckFirmwareUpdate() && bootdelay == 0)
     bootdelay = 3;
-  }
 #endif
 
 #if defined(CONFIG_GPIO_INIT)
@@ -434,9 +427,13 @@ void main_loop (void)
 #endif /* CONFIG_POST */
 
 #if defined(CONFIG_LABX_PREBOOT)
-  labx_preboot_res = labx_preboot(bootdelay);
-	if(labx_preboot_res == -1) bootdelay = -1;
-  else if(labx_preboot_res == 0) bootdelay = 0;
+  /*
+   * bootdelay values:
+   *   0: boot immediately
+   *  1+: boot delay, allowing user to stop in U-Boot
+   *  -1: stay in U-Boot unconditionally
+   */
+  bootdelay = labx_preboot(bootdelay);
 #endif
 
 #ifdef CONFIG_BOOTCOUNT_LIMIT
