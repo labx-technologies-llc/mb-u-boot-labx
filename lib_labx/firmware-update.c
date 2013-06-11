@@ -332,19 +332,11 @@ int CheckFirmwareUpdate(void)
   if(!doUpdate) {
     /* Check GPIOs, if any are defined for the platform,
        for boot delay and for firmware update mode. */
-#ifdef XPAR_XPS_GPIO_0_BASEADDR
-#ifdef GPIO_BOOT_DELAY_BIT
-    if(~*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & (0x1 << GPIO_BOOT_DELAY_BIT)) {
-      puts("Boot delay requested via GPIO\n");
-      bootDelay = 1;
-    }
-#endif
-#ifdef GPIO_FIRMWARE_UPDATE_BIT
+#if defined(XPAR_XPS_GPIO_0_BASEADDR) && defined(GPIO_FIRMWARE_UPDATE_BIT)
     if(~*((volatile unsigned long*)XPAR_XPS_GPIO_0_BASEADDR) & (0x1 << GPIO_FIRMWARE_UPDATE_BIT)) {
       puts("Firmware update requested via GPIO\n");
       doUpdate = 1;
     }
-#endif
 #endif
   }
 
