@@ -12,6 +12,18 @@
 
 #include "spi_flash_internal.h"
 
+#ifdef CONFIG_SPI_FLASH_MTDBRIDGE
+inline int _spi_xfer(struct spi_slave *slave, unsigned int bitlen, const void *dout,
+		void *din, unsigned long flags) { return 0; }
+#define spi_xfer _spi_xfer
+inline struct spi_slave *spi_setup_slave(unsigned int bus, unsigned int cs,
+		unsigned int max_hz, unsigned int mode) { return NULL; }
+inline int spi_claim_bus(struct spi_slave *slave) { return 0; }
+inline int spi_flash_cmd(struct spi_slave *spi, u8 cmd, void *response, size_t len) { *(u8 *)response = 0; return 0; }
+inline void spi_release_bus(struct spi_slave *slave) { return; }
+inline void spi_free_slave(struct spi_slave *slave) { return; }
+#else
+
 int spi_flash_cmd(struct spi_slave *spi, u8 cmd, void *response, size_t len)
 {
 	unsigned long flags = SPI_XFER_BEGIN;
@@ -35,6 +47,8 @@ int spi_flash_cmd(struct spi_slave *spi, u8 cmd, void *response, size_t len)
 
 	return ret;
 }
+
+#endif
 
 int spi_flash_cmd_read(struct spi_slave *spi, const u8 *cmd,
 		size_t cmd_len, void *data, size_t data_len)
@@ -107,7 +121,7 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
 	struct spi_flash *flash;
 	int ret;
 	u8 idcode[5];
-
+	
 	spi = spi_setup_slave(bus, cs, max_hz, spi_mode);	
 	if (!spi) {
 		debug("SF: Failed to set up slave\n");
@@ -163,6 +177,11 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
 		flash = spi_flash_probe_sst(spi, idcode);
 		break;
 #endif
+#ifdef CONFIG_SPI_FLASH_MTDBRIDGE
+	case 0:
+		flash = spi_flash_probe_mtdbridge(spi, idcode);
+		break;
+#endif
 	default:
 		debug("SF: Unsupported manufacturer %02X\n", idcode[0]);
 		flash = NULL;
@@ -173,7 +192,6 @@ struct spi_flash *spi_flash_probe(unsigned int bus, unsigned int cs,
 		goto err_manufacturer_probe;
 
 	spi_release_bus(spi);
-
 	return flash;
 
 err_manufacturer_probe:

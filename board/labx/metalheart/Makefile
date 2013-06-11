@@ -1,5 +1,5 @@
 #
-# (C) Copyright 2006
+# (C) Copyright 2000-2006
 # Wolfgang Denk, DENX Software Engineering, wd@denx.de.
 #
 # See file CREDITS for list of people who contributed to this
@@ -12,7 +12,7 @@
 #
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
@@ -23,26 +23,28 @@
 
 include $(TOPDIR)/config.mk
 
-LIB	:= $(obj)libspi_flash.a
+LIB	     = $(obj)lib$(BOARD).a
+COBJS    = $(BOARD).o
+OBJS	  := $(addprefix $(obj),$(COBJS))
 
-COBJS-$(CONFIG_SPI_FLASH)	+= spi_flash.o
-COBJS-$(CONFIG_SPI_FLASH_ATMEL)	+= atmel.o
-COBJS-$(CONFIG_SPI_FLASH_MACRONIX)	+= macronix.o
-COBJS-$(CONFIG_SPI_FLASH_SPANSION)	+= spansion.o
-COBJS-$(CONFIG_SPI_FLASH_SST)	+= sst.o
-COBJS-$(CONFIG_SPI_FLASH_STMICRO)	+= stmicro.o
-COBJS-$(CONFIG_SPI_FLASH_WINBOND)	+= winbond.o
-COBJS-$(CONFIG_SPI_M95XXX) += eeprom_m95xxx.o
-COBJS-$(CONFIG_SPI_FLASH_MTDBRIDGE)	+= mtdbridge.o
+# This is how to include our libraries. The .o files
+# in these folders get linked in (the library files
+# themselves are not used).
+LIBDIRS  = $(TOPDIR)/lib_labx $(TOPDIR)/lib_labx/idl
 
-COBJS	:= $(COBJS-y)
-SRCS	:= $(COBJS:.o=.c)
-OBJS	:= $(addprefix $(obj),$(COBJS))
+$(LIB): $(OBJS) libs
+	$(AR) $(ARFLAGS) $@ $(OBJS) $(LIBDIRS:%=%/*.o)
 
-all:	$(LIB)
+libs:
+# Don't know why do_idls needs to be executed separately.
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl do_idls
+	$(MAKE) -C $(TOPDIR)/lib_labx/idl
+	$(MAKE) -C $(TOPDIR)/lib_labx
 
-$(LIB): $(obj).depend $(OBJS)
-	$(AR) $(ARFLAGS) $@ $(OBJS)
+.PHONY: libs
+
+distclean:	clean
+	rm -f $(LIB) core *.bak $(obj).depend
 
 #########################################################################
 
