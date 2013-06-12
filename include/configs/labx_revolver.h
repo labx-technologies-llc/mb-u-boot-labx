@@ -35,6 +35,16 @@
 /* Location or runtime FPGA on this platform. */
 #define RUNTIME_FPGA_BASE 0xA40000
 
+// If defined, we will try to pull a MAC
+// address out of flash at this location.
+// Also makes U-Boot allow changes to
+// environment variable ethaddr (via code
+// hacks in cmd_nvedit.c).
+#define LABX_MAC_ADDR_FLASH_LOC 0x180000
+
+/* Command line MAC programming */
+#define CONFIG_CMD_MAC_PROG
+
 // This is the entire firmware update module,
 // and includes GPIO-checking.
 #define CONFIG_FIRMWARE_UPDATE
@@ -47,7 +57,7 @@
 //#define GPIO_FIRMWARE_UPDATE_BIT 18
 
 /* Configuration for SPI OTP */
-#define CFG_SPI_OTP
+#define CONFIG_SPI_OTP
 #define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
