@@ -387,7 +387,7 @@ int do_eraseconfig(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
  
   printf("Erasing persistent storage flash partition...\n");
-  ret = spi_flash_erase(spiflash, LABX_MAC_ADDR_FLASH_LOC, USER_CONFIG_SECT_SIZE);
+  ret = spi_flash_erase(spiflash, LABX_MAC_ADDR_FLASH_LOC, PLATFORM_CONFIG_SIZE);
 	
   if (ret) {
     printf("SPI erase %s failed\n", argv[0]);

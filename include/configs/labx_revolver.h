@@ -41,7 +41,7 @@
 // environment variable ethaddr (via code
 // hacks in cmd_nvedit.c).
 #define LABX_MAC_ADDR_FLASH_LOC 0x180000
-#define	USER_CONFIG_SECT_SIZE	0x40000	 /* 256K */
+#define	PLATFORM_CONFIG_SIZE	0x40000	 /* 256K */
 
 /* Command line MAC programming */
 #define NUM_ETH_PORTS 2
