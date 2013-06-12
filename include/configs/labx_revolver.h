@@ -41,8 +41,10 @@
 // environment variable ethaddr (via code
 // hacks in cmd_nvedit.c).
 #define LABX_MAC_ADDR_FLASH_LOC 0x180000
+#define	USER_CONFIG_SECT_SIZE	0x40000	 /* 256K */
 
 /* Command line MAC programming */
+#define NUM_ETH_PORTS 2
 #define CONFIG_CMD_MAC_PROG
 
 // This is the entire firmware update module,
@@ -55,10 +57,6 @@
 // Disabling jumper, needed for switching serial console
 // when on MTF or HPX
 //#define GPIO_FIRMWARE_UPDATE_BIT 18
-
-/* Configuration for SPI OTP */
-#define CONFIG_SPI_OTP
-#define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 

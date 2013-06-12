@@ -1000,41 +1000,7 @@ static int labx_eth_addr_setup(struct labx_eth_private * lp)
   char * env_p;
   char * end;
   int i;
-#ifdef LABX_MAC_ADDR_FLASH_LOC
-  char mac_string[18] = { 0 };
-  const char zeroes[6] = { 0 };
-  const char ffs[6] = { -1, -1, -1, -1, -1, -1 };
-#ifdef CONFIG_SPI_FLASH
-  static struct spi_flash *spiflash = NULL;
-#endif
-#endif
-
-#ifdef LABX_MAC_ADDR_FLASH_LOC
- #ifdef CONFIG_SPI_FLASH
-  if(!spiflash) {
-    if(!(spiflash = spi_flash_probe(0, 0, 40000000, 3))) {
-      puts("Failed to initialize SPI flash device at 0:0.\n");
-      return 0;
-    }
-  }
-  spi_flash_read(spiflash, LABX_MAC_ADDR_FLASH_LOC, 6, lp->dev_addr);
- #else
-  memcpy(lp->dev_addr, LABX_MAC_ADDR_FLASH_LOC, 6);
- #endif
-  if(memcmp(zeroes, lp->dev_addr, 6) != 0 &&
-     memcmp(ffs, lp->dev_addr, 6) != 0) {
-    sprintf(mac_string, "%02X:%02X:%02X:%02X:%02X:%02X",
-            (unsigned char)lp->dev_addr[0],
-            (unsigned char)lp->dev_addr[1],
-            (unsigned char)lp->dev_addr[2],
-            (unsigned char)lp->dev_addr[3],
-            (unsigned char)lp->dev_addr[4],
-            (unsigned char)lp->dev_addr[5]);
-    setenv("ethaddr", mac_string);
-    printf("Got MAC address from flash: %s\n", mac_string);
-  }
-#endif /* LABX_MAC_ADDR_FLASH_LOC */
-
+  
   env_p = getenv("ethaddr");
   if (env_p == NULL) {
     printf("cannot get enviroment for \"ethaddr\".\n");
