@@ -33,6 +33,10 @@
 #include <asm/processor.h>
 #include "labx_ethernet.h"
 
+#if defined(LABX_MAC_ADDR_FLASH_LOC) && defined(CONFIG_SPI_FLASH)
+#include <spi_flash.h>
+#endif
+
 DECLARE_GLOBAL_DATA_PTR;
 
 #ifndef LABX_PRIMARY_ETH_BASEADDR

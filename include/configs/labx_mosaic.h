@@ -1,7 +1,8 @@
 /*
- * (C) Copyright 2010 Eldridge M. Mount IV, Peter McLoone
+ * (C) Copyright 2010 Eldridge M. Mount IV, Peter McLoone, Yuriy Dragunov
  *                    eldridge.mount@labxtechnologies.com
  *                    peter.mcloone@labxtechnologies.com
+ *                    yuriy.dragunov@labxtechnologies.com
  *
  * See file CREDITS for list of people who contributed to this
  * project.
@@ -30,11 +31,21 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-#define RUNTIME_FPGA_BASE 0x87A40000
+#define RUNTIME_FPGA_BASE 0xA40000
 
-// This is the entire firmware update module,
-// and includes GPIO-checking.
+// If defined, we will try to pull a MAC
+// address out of flash at this location.
+// Also makes U-Boot allow changes to
+// environment variable ethaddr (via code
+// hacks in cmd_nvedit.c).
+#define LABX_MAC_ADDR_FLASH_LOC 0x180000
+
+// This is the firmware update module.
 //#define CONFIG_FIRMWARE_UPDATE
+
+// GPIO pins to request a boot
+// delay or a firmware update.
+#define GPIO_BOOT_DELAY_BIT 8
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
@@ -167,30 +178,58 @@
 
 #define	CONFIG_SYS_FLASH_BASE		XPAR_FLASH_CONTROL_MEM0_BASEADDR
 #define	CONFIG_SYS_FLASH_SIZE		(XPAR_FLASH_CONTROL_MEM0_HIGHADDR - XPAR_FLASH_CONTROL_MEM0_BASEADDR + 1)
-#define	CONFIG_SYS_FLASH_CFI		1
-#define	CONFIG_FLASH_CFI_DRIVER		1
-#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	/* ?empty sector */
-#define	CONFIG_SYS_MAX_FLASH_BANKS	1	/* max number of memory banks */
-#define	CONFIG_SYS_MAX_FLASH_SECT	512	/* max number of sectors on one chip */
-#define	CONFIG_SYS_FLASH_PROTECTION		/* hardware flash protection */
-#define CONFIG_SYS_FLASH_USE_BUFFER_WRITE
+/*#define	CONFIG_SYS_FLASH_CFI		1                                                                                */
+/*#define	CONFIG_FLASH_CFI_DRIVER		1                                                                              */
+/*#define	CONFIG_SYS_FLASH_EMPTY_INFO	1	  */                 /* ?empty sector */
+/*#define	CONFIG_SYS_MAX_FLASH_BANKS	1	  */                 /* max number of memory banks */
+/*#define	CONFIG_SYS_MAX_FLASH_SECT	512	  */                 /* max number of sectors on one chip */
+/*#define	CONFIG_SYS_FLASH_PROTECTION		  */                 /* hardware flash protection */
 
 /* NOTE - The configuration environment address must align with the environment
  *        variables in ../../board/<vendor>/<product>/ub.config.scr!
  *        These definitions locate the environment within one of
  *        the sectors of Flash.
  */
-#define	CONFIG_ENV_IS_IN_FLASH	1
-#define	CONFIG_ENV_SECT_SIZE	0x20000	/* 128K */
-#define	CONFIG_ENV_ADDR		0x871C0000
+/*#define	CONFIG_ENV_IS_IN_FLASH	1   */
+#define	CONFIG_ENV_SECT_SIZE	0x10000	 /* 64K */
+/*#define	CONFIG_ENV_ADDR		(CONFIG_SYS_FLASH_BASE + CONFIG_SYS_FLASH_SIZE - CONFIG_ENV_SECT_SIZE)      */
 #define	CONFIG_ENV_SIZE		0x08000 /* Only 32K actually allocated */
+#define CONFIG_ENV_OFFSET	0x1C0000	
+
+/* Enable support of SPI Flash */
+#define CONFIG_SYS_NO_FLASH
+#define CONFIG_SPI
+#define CONFIG_XILINX_SPI /* Xilinx xps SPI controller */
+#define CONFIG_SPI_FLASH /* SPI Flash subsystem */
+#define CONFIG_CMD_SF /* Command line interface sf */
+#define CONFIG_SF_DEFAULT_SPEED 40000000 /* speed to run the SPI flash */
+#define CONFIG_SF_DEFAULT_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
+#define CONFIG_ENV_IS_IN_SPI_FLASH 1/* store the env in SPI flash */
+#define CONFIG_ENV_SPI_MAX_HZ 40000000 /* speed to run the SPI flash */
+#define CONFIG_ENV_SPI_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
+#define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
+#define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
+#define CONFIG_SPI_FLASH_STMICRO 1
+
+/* Definitions for peripheral FLASH_CONTROL */
+#define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1
+
+/* Definitions for peripheral FLASH_CONTROL */
+#define XPAR_FLASH_CONTROL_MEM0_BASEADDR XPAR_SPI_1_BASEADDR 
+#define XPAR_FLASH_CONTROL_MEM0_HIGHADDR XPAR_SPI_1_HIGHADDR
+
+/* Canonical definitions for peripheral FLASH_CONTROL */
+//#define XPAR_EMC_0_NUM_BANKS_MEM 1
+//#define XPAR_EMC_0_MEM0_BASEADDR XPAR_SPI_1_BASEADDR
+//#define XPAR_EMC_0_MEM0_HIGHADDR XPAR_SPI_1_HIGHADDR
+//#define XPAR_XPS_MCH_EMC
 
 /* If this is defined and zero, the system will auto-boot
  * ("production" mode). If it is defined and > 0, there
  * will be a delay to allow the user to stop auto-boot,
  * if desired. If it is not defined, auto-boot will be
  * compiled out completely. */
-#define CONFIG_BOOTDELAY 3
+#define CONFIG_BOOTDELAY 0
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
 #define CONFIG_LABX_PREBOOT
@@ -226,8 +265,8 @@
 #endif
 
 #define CONFIG_CMD_ECHO
-#define CONFIG_CMD_FLASH
-#define CONFIG_CMD_IMLS
+//#define CONFIG_CMD_FLASH
+//#define CONFIG_CMD_IMLS
 #define CONFIG_CMD_JFFS2
 
 #define CONFIG_CMD_SAVEENV
@@ -236,7 +275,7 @@
 /* JFFS2 partitions */
 #define CONFIG_CMD_MTDPARTS	/* mtdparts command line support */
 #define CONFIG_MTD_DEVICE	/* needed for mtdparts commands */
-#define CONFIG_FLASH_CFI_MTD
+//#define CONFIG_FLASH_CFI_MTD
 
 /* Miscellaneous configurable options */
 #define	CONFIG_SYS_PROMPT	"U-Boot> "
