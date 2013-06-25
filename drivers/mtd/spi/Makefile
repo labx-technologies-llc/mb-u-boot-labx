@@ -34,6 +34,8 @@ COBJS-$(CONFIG_SPI_FLASH_STMICRO)	+= stmicro.o
 COBJS-$(CONFIG_SPI_FLASH_WINBOND)	+= winbond.o
 COBJS-$(CONFIG_SPI_M95XXX) += eeprom_m95xxx.o
 
+COBJS-$(CONFIG_MTD_FLASH_BRIDGE) += mtd_flash_bridge.o
+
 COBJS	:= $(COBJS-y)
 SRCS	:= $(COBJS:.o=.c)
 OBJS	:= $(addprefix $(obj),$(COBJS))

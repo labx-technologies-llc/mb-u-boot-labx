@@ -31,12 +31,16 @@
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
 
-/* Location or runtime FPGA on this platform. */
-#define RUNTIME_FPGA_BASE 0xA40000
+/* The golden FPGA is the runtime FPGA; just defining this to make the
+ * Lab X library layer happy
+ */
+#define RUNTIME_FPGA_BASE 0x00A40000
 
 #define NUM_ETH_PORTS 1
 
-/* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
+/* UARTLITE0 is used for MDM. Use UARTLITE2 for the dedicated console port
+ * on MetalHeart
+ */
 
 #define	CONFIG_XILINX_UARTLITE
 #define	CONFIG_SERIAL_BASE	XPAR_UARTLITE_2_BASEADDR
@@ -68,26 +72,11 @@
  */
 #define LABX_MDIO_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
 
-#if (WHICH_ETH_PORT == 0)
-  /* Use port zero; the base address of the primary register file and the
-   * FIFO used for data are specified, as well as the corresponding PHY address.
-   */
-#  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x01)
-
-#else
-
-  /* Use port one instead */
-#  define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH1_BASEADDR)
-#  define LABX_ETHERNET_PHY_ADDR  (0x02)
-
-#endif /* if(U_BOOT_PORT = 0) */
-
-/* gpio */
-#ifdef XPAR_XPS_GPIO_0_BASEADDR
-#  define	CONFIG_SYS_GPIO_0		1
-#  define	CONFIG_SYS_GPIO_0_ADDR		XPAR_XPS_GPIO_0_BASEADDR
-#endif
+/* Use port zero; the base address of the primary register file and the
+ * FIFO used for data are specified, as well as the corresponding PHY address.
+ */
+#define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
+#define LABX_ETHERNET_PHY_ADDR  (0x01)
 
 /* ICAP peripheral controller */
 #define FINISH_FSL_BIT (0x80000000)
@@ -185,20 +174,11 @@
 #define	CONFIG_ENV_SIZE		0x08000  /* Only 32K actually allocated */
 #define CONFIG_ENV_OFFSET	0x1C0000	
 
-/* Enable support of SPI Flash */
+/* Enable support of SPI Flash, mimicked by the MTD bridge peripheral */
 #define CONFIG_SYS_NO_FLASH
-#define CONFIG_SPI
-#define CONFIG_XILINX_SPI /* Xilinx xps SPI controller */
-#define CONFIG_SPI_FLASH /* SPI Flash subsystem */
+#define CONFIG_MTD_FLASH_BRIDGE
 #define CONFIG_CMD_SF /* Command line interface sf */
-#define CONFIG_SF_DEFAULT_SPEED 40000000 /* speed to run the SPI flash */
-#define CONFIG_SF_DEFAULT_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
 #define CONFIG_ENV_IS_IN_SPI_FLASH 1/* store the env in SPI flash */
-#define CONFIG_ENV_SPI_MAX_HZ 40000000 /* speed to run the SPI flash */
-#define CONFIG_ENV_SPI_MODE SPI_MODE_3 /* by default, SPI_MODE_3 is used */
-#define CONFIG_ENV_SPI_BUS 0/* by default, bus 0 is used */
-#define CONFIG_ENV_SPI_CS 0 /* by default, the CS the bootrom uses */
-#define CONFIG_SPI_FLASH_SPANSION 1
 
 /* Definitions for peripheral FLASH_CONTROL */
 #define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1
