@@ -75,8 +75,8 @@
 /* Use port zero; the base address of the primary register file and the
  * FIFO used for data are specified, as well as the corresponding PHY address.
  */
-#define LABX_PRIMARY_ETH_BASEADDR    (XPAR_ETH0_BASEADDR)
-#define LABX_ETHERNET_PHY_ADDR  (0x01)
+#define LABX_PRIMARY_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
+#define LABX_ETHERNET_PHY_ADDR     (0x00)
 
 /* ICAP peripheral controller */
 #define FINISH_FSL_BIT (0x80000000)
@@ -202,7 +202,10 @@
 #define CONFIG_BOOTDELAY 3
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
-#define CONFIG_LABX_PREBOOT
+/* This is not included in this target, because the FPGA does not operate as
+ * its own configuration master.
+ */
+/* #define CONFIG_LABX_PREBOOT */
 
 /* Data Cache */
 #ifdef XPAR_MICROBLAZE_0_USE_DCACHE
