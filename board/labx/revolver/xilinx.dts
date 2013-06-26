@@ -285,7 +285,7 @@
 		compatible = "xlnx,plb-v46-1.05.a", "xlnx,plb-v46-1.00.a", "simple-bus";
 		ranges ;
 		depacketizer_dma: labx-dma@820e0000 {
-			compatible = "xlnx,labx-dma-1.04.a", "xlnx,labx-dma-1.00.a";
+			compatible = "xlnx,labx-dma-1.05.b", "xlnx,labx-dma-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 10 2 >;
 			reg = < 0x820e0000 0x10000 >;
@@ -330,7 +330,7 @@
 			xlnx,slave-native-dwidth = <0x20>;
 		} ;
 		eth01_audio_packetizer: labx-audio-packetizer@82090000 {
-			compatible = "xlnx,labx-audio-packetizer-1.04.a", "xlnx,labx-audio-packetizer-1.00.a";
+			compatible = "xlnx,labx-audio-packetizer-1.05.a", "xlnx,labx-audio-packetizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82090000 0x10000 >;
@@ -345,6 +345,12 @@
 			xlnx,is-dual-headed = <0x1>;
 			xlnx,num-clock-domains = <0x1>;
 			xlnx,package = "csg324";
+			xlnx,saxi-data-width = <0x20>;
+			xlnx,saxi-protocol = "AXI4LITE";
+			xlnx,slave-awidth = <0x20>;
+			xlnx,slave-dwidth = <0x20>;
+			xlnx,slave-interconnect = "PLB";
+			xlnx,slave-native-dwidth = <0x20>;
 		} ;
 		eth0: ethernet@82050000 {
 			compatible = "xlnx,labx-ethernet-1.03.a";
@@ -362,7 +368,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 11 2 >;
 			reg = < 0x82100000 0x10000 >;
@@ -376,11 +382,24 @@
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "CACHE_RAM";
 			xlnx,is-mcr-host = <0x1>;
+			xlnx,master-awidth = <0x20>;
+			xlnx,master-dwidth = <0x20>;
+			xlnx,master-native-dwidth = <0x20>;
+			xlnx,maxi-addr-pipe-depth = <0x1>;
+			xlnx,maxi-addr-width = <0x20>;
+			xlnx,maxi-data-width = <0x20>;
+			xlnx,maxi-length-width = <0xc>;
+			xlnx,maxi-max-burst-len = <0x10>;
+			xlnx,maxi-protocol = "AXI4";
+			xlnx,maxi-supports-narrow-burst = <0x0>;
+			xlnx,maxi-supports-read = <0x1>;
+			xlnx,maxi-supports-threads = <0x0>;
+			xlnx,maxi-supports-write = <0x1>;
+			xlnx,maxi-thread-id-width = <0x1>;
 			xlnx,mcb-data-width = <0x20>;
+			xlnx,microcode-words = <0x400>;
 			xlnx,mplb-awidth = <0x20>;
-			xlnx,mplb-clk-period-ps = <0x2710>;
-			xlnx,mplb-dwidth = <0x80>;
-			xlnx,mplb-native-dwidth = <0x20>;
+			xlnx,mplb-dwidth = <0x20>;
 			xlnx,mplb-p2p = <0x0>;
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,npi-data-width = <0x20>;
@@ -388,6 +407,12 @@
 			xlnx,num-streams = <0x20>;
 			xlnx,package = "csg324";
 			xlnx,param-address-width = <0x9>;
+			xlnx,saxi-data-width = <0x20>;
+			xlnx,saxi-protocol = "AXI4LITE";
+			xlnx,slave-awidth = <0x20>;
+			xlnx,slave-dwidth = <0x20>;
+			xlnx,slave-interconnect = "PLB";
+			xlnx,slave-native-dwidth = <0x20>;
 		} ;
 		eth1: ethernet@82070000 {
 			compatible = "xlnx,labx-ethernet-1.03.a";
@@ -403,18 +428,9 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
-		} ;		
-		backplane_bridge: legacy-bridge@820a0000 {
-			compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
-			device_type = "network";
-			phy-mdio-controller = <&eth0>;
-			reg = < 0x820a0000 0x10000 >;
-			xlnx,phy-addr = <0x4>;
-			xlnx,phy-type = <0x1>;
-			xlnx,rx-filters-per-port = <0x8>;
 		} ;
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 12 2 >;
 			reg = < 0x82110000 0x10000 >;
@@ -428,11 +444,24 @@
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,interface-type = "CACHE_RAM";
 			xlnx,is-mcr-host = <0x0>;
+			xlnx,master-awidth = <0x20>;
+			xlnx,master-dwidth = <0x20>;
+			xlnx,master-native-dwidth = <0x20>;
+			xlnx,maxi-addr-pipe-depth = <0x1>;
+			xlnx,maxi-addr-width = <0x20>;
+			xlnx,maxi-data-width = <0x20>;
+			xlnx,maxi-length-width = <0xc>;
+			xlnx,maxi-max-burst-len = <0x10>;
+			xlnx,maxi-protocol = "AXI4";
+			xlnx,maxi-supports-narrow-burst = <0x0>;
+			xlnx,maxi-supports-read = <0x1>;
+			xlnx,maxi-supports-threads = <0x0>;
+			xlnx,maxi-supports-write = <0x1>;
+			xlnx,maxi-thread-id-width = <0x1>;
 			xlnx,mcb-data-width = <0x20>;
+			xlnx,microcode-words = <0x400>;
 			xlnx,mplb-awidth = <0x20>;
-			xlnx,mplb-clk-period-ps = <0x2710>;
-			xlnx,mplb-dwidth = <0x80>;
-			xlnx,mplb-native-dwidth = <0x20>;
+			xlnx,mplb-dwidth = <0x20>;
 			xlnx,mplb-p2p = <0x0>;
 			xlnx,mplb-smallest-slave = <0x20>;
 			xlnx,npi-data-width = <0x20>;
@@ -440,6 +469,12 @@
 			xlnx,num-streams = <0x20>;
 			xlnx,package = "csg324";
 			xlnx,param-address-width = <0x9>;
+			xlnx,saxi-data-width = <0x20>;
+			xlnx,saxi-protocol = "AXI4LITE";
+			xlnx,slave-awidth = <0x20>;
+			xlnx,slave-dwidth = <0x20>;
+			xlnx,slave-interconnect = "PLB";
+			xlnx,slave-native-dwidth = <0x20>;
 		} ;
 		host_serial: serial@82040000 {
 			clock-frequency = <62500000>;
@@ -462,7 +497,7 @@
 			interrupt-controller ;
 			reg = < 0x82000000 0x10000 >;
 			xlnx,kind-of-intr = <0x1c1>;
-			xlnx,num-intr-inputs = <0x10>;
+			xlnx,num-intr-inputs = <0x12>;
 		} ;
 		labx_ptp0: labx-ptp@82080000 {
 			compatible = "xlnx,labx-ptp-1.06.b", "xlnx,labx-ptp-1.00.a";
@@ -495,16 +530,35 @@
 			xlnx,timer-prescaler = <0x3e8>;
 		} ;
 		labx_tdm_audio_0: labx-tdm-audio@820b0000 {
-			compatible = "xlnx,labx-tdm-audio-1.01.a", "xlnx,labx-tdm-audio-1.00.a";
+			compatible = "xlnx,labx-tdm-audio-1.03.b", "xlnx,labx-tdm-audio-1.00.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 17 2 >;
 			reg = < 0x820b0000 0x10000 >;
 			xlnx,device = "6slx45";
+			xlnx,ext-cache-addr-width = <0x8>;
 			xlnx,family = "spartan6";
+			xlnx,has-dynamic-sample-rates = <0x1>;
+			xlnx,has-tdm-analyzer = <0x1>;
+			xlnx,has-tdm-loopback = <0x0>;
+			xlnx,has-tdm-slave-manager = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
-			xlnx,num-streams = <0x40>;
+			xlnx,local-osc-ratio = <0x400>;
+			xlnx,max-num-streams = <0x40>;
+			xlnx,mclk-ratio = <0x400>;
 			xlnx,package = "csg324";
+			xlnx,param-address-width = <0x9>;
 			xlnx,redundant = <0x1>;
+			xlnx,saxi-data-width = <0x20>;
+			xlnx,saxi-protocol = "AXI4LITE";
+			xlnx,slave-awidth = <0x20>;
+			xlnx,slave-dwidth = <0x20>;
+			xlnx,slave-interconnect = "PLB";
+			xlnx,slave-native-dwidth = <0x20>;
 			xlnx,tdm-lane-count = <0x4>;
-			xlnx,tdm-slot-density = <0x10>;
+			xlnx,tdm-max-burst-multiple = <0x4>;
+			xlnx,tdm-max-slot-density = <0x10>;
+			xlnx,tdm-min-burst-length = <0x4>;
+			xlnx,write-cache-addr-width = <0xd>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.10.a";
@@ -520,6 +574,17 @@
 			xlnx,s-axi-protocol = "AXI4LITE";
 			xlnx,use-bscan = <0x0>;
 			xlnx,use-uart = <0x1>;
+		} ;
+		packet_bridge: legacy-bridge@820a0000 {
+			compatible = "xlnx,labx-legacy-bridge-1.00.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 17 2 >;
+			device_type = "network";
+			phy-mdio-controller = <&eth0>;
+			reg = < 0x820a0000 0x10000 >;
+			xlnx,phy-addr = <0x4>;
+			xlnx,phy-type = <0x1>;
+			xlnx,rx-filters-per-port = <0x8>;
 		} ;
 		serial_console: serial@82020000 {
 			clock-frequency = <62500000>;
