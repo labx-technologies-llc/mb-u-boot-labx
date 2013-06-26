@@ -77,6 +77,8 @@
  */
 #define LABX_PRIMARY_ETH_BASEADDR  (XPAR_ETH0_BASEADDR)
 #define LABX_ETHERNET_PHY_ADDR     (0x00)
+#define STANDARD_MII_LINK_REGS     1
+
 
 /* ICAP peripheral controller */
 #define FINISH_FSL_BIT (0x80000000)
@@ -177,8 +179,9 @@
 /* Enable support of SPI Flash, mimicked by the MTD bridge peripheral */
 #define CONFIG_SYS_NO_FLASH
 #define CONFIG_MTD_FLASH_BRIDGE
-#define CONFIG_CMD_SF /* Command line interface sf */
-#define CONFIG_ENV_IS_IN_SPI_FLASH 1/* store the env in SPI flash */
+#define MTD_BRIDGE_BASEADDR  XPAR_LAWO_MTD_BRIDGE_0_BASEADDR
+#define CONFIG_CMD_SF                 /* SPI Flash command line interface */
+#define CONFIG_ENV_IS_IN_SPI_FLASH 1  /* store the env in SPI flash */
 
 /* Definitions for peripheral FLASH_CONTROL */
 #define XPAR_FLASH_CONTROL_NUM_BANKS_MEM 1

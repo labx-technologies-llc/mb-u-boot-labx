@@ -664,7 +664,8 @@ static int labx_eth_phy_ctrl(void)
     return 1;
   }
 
-  #if 0
+#ifdef STANDARD_MII_LINK_REGS
+
   if((read_phy_register(phy_addr, MII_1GBSTAT) & 0x0800) != 0 &&
       (read_phy_register(phy_addr, MII_1GBCTL) & 0x0200) != 0) {
     labx_eth_write_mac_reg(MAC_SPEED_SELECT_REG, MAC_SPEED_1_GBPS);
@@ -684,7 +685,8 @@ static int labx_eth_phy_ctrl(void)
     printf("Half Duplex not supported\n");
     rc = 0;
   }
-  #else
+
+#else
   
   if (id_high == MV881116R_ID_HIGH && (id_low & MV881116R_ID_LOW_MASK) == MV881116R_ID_LOW) 
   { 
@@ -694,6 +696,7 @@ static int labx_eth_phy_ctrl(void)
   else 
   {
     result = read_phy_register(phy_addr, MII_AUXSTAT);
+    printf("AUXSTAT = 0x%04X\n", result);
   }
 
     switch(result & MII_ANEG_LINK_MASK)
@@ -743,7 +746,8 @@ static int labx_eth_phy_ctrl(void)
     labx_eth_write_mac_reg(MAC_TX_CONFIG_REG, TX_SOFT_RESET);
   }
 
-  #endif
+#endif
+
   return rc;
 }
 
