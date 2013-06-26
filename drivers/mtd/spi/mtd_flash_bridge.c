@@ -95,62 +95,72 @@ static int mtd_bridge_write(struct spi_flash *flash,
 static int mtd_bridge_read(struct spi_flash *flash,
                            u32 offset, size_t len, void *buf) {
   int timeout;
-	int rc = 0;
+	int rc;
+  size_t len_rem;
+  size_t next_len;
+  u32 *word_ptr;
 
-  // Issue a read command to the MTD bridge:
-  //
-  // * Clear the "operation complete" IRQ flag bit
-  // * Set the Flash offset and length
-  // * Trigger the operation by writing the opcode
-	MTDBRIDGE_WRITE(MTDBRIDGE_IRQ_REG_ADDR, MTDBRIDGE_IRQ_COMPLETE_BIT);
-	MTDBRIDGE_WRITE(MTDBRIDGE_ADDRESS_REG_ADDR, offset);
+  // Loop, performing reads over the MTD bridge in chunks sized to match the
+  // peripheral's memory buffer
+  rc       = 0;
+  len_rem  = len;
+  word_ptr = (u32*) buf;
+  while((rc == 0) & (len_rem > 0)) {
+    // Size the next request
+    next_len  = (len_rem > MTDBRIDGE_BUFFER_SIZE) ? MTDBRIDGE_BUFFER_SIZE : len_rem;
+    len_rem  -= next_len;
 
-  /* TEMPORARY - only do 1 KiB to start!! */
-	MTDBRIDGE_WRITE(MTDBRIDGE_LENGTH_REG_ADDR, 1024);
-	MTDBRIDGE_WRITE(MTDBRIDGE_COMMAND_REG_ADDR, MTDBRIDGE_OPCODE_READ);
+    // Issue a read command to the MTD bridge:
+    //
+    // * Clear the "operation complete" IRQ flag bit
+    // * Set the Flash offset and length
+    // * Trigger the operation by writing the opcode
+    MTDBRIDGE_WRITE(MTDBRIDGE_IRQ_REG_ADDR, MTDBRIDGE_IRQ_COMPLETE_BIT);
+    MTDBRIDGE_WRITE(MTDBRIDGE_ADDRESS_REG_ADDR, offset);
+    MTDBRIDGE_WRITE(MTDBRIDGE_LENGTH_REG_ADDR, next_len);
+    MTDBRIDGE_WRITE(MTDBRIDGE_COMMAND_REG_ADDR, MTDBRIDGE_OPCODE_READ);
 
-	// Poll until a response is received from the MTD bridge daemon, or we time out
-  timeout = MTDBRIDGE_TIMEOUT_WAITS;
-	while ((MTDBRIDGE_READ(MTDBRIDGE_IRQ_REG_ADDR) & MTDBRIDGE_IRQ_COMPLETE_BIT) == 0) {
-    if(!timeout--) {
-			rc = MTDBRIDGE_SR_NORESP;
-			break;
-		}
-    mdelay(MTDBRIDGE_TIMEOUT_SLICE);
-	}
-
-	// Fetch the response if there was one
-	if(rc == 0) rc = MTDBRIDGE_READ(MTDBRIDGE_STATUS_REG_ADDR);
-
-  // Loop waiting if the returned code was "operation in progress", up until
-  // the timeout period
-  timeout = MTDBRIDGE_TIMEOUT_WAITS;
-	while((rc & MTDBRIDGE_SR_OIP) != 0) {
-    if(!timeout--) {
-			// Break loop with the "operation in progress" status pending
-			break;
-		}
-    mdelay(MTDBRIDGE_TIMEOUT_SLICE);
-		rc = MTDBRIDGE_READ(MTDBRIDGE_STATUS_REG_ADDR);
-	}
-
-  /* If the read returned without an error code, print some bytes for now */
-  if(rc == 0) {
-    int word_index;
-    int offset = MTDBRIDGE_MAILBOX_RAM_ADDR;
-    
-    printf("Good read!  First words:\n");
-    for(word_index = 0; word_index < 8; word_index++) {
-      printf("0x%08X ", MTDBRIDGE_READ(offset));
-      offset += 4;
+    // Poll until a response is received from the MTD bridge daemon, or we time out
+    timeout = MTDBRIDGE_TIMEOUT_WAITS;
+    while ((MTDBRIDGE_READ(MTDBRIDGE_IRQ_REG_ADDR) & MTDBRIDGE_IRQ_COMPLETE_BIT) == 0) {
+      if(!timeout--) {
+        rc = MTDBRIDGE_SR_NORESP;
+        break;
+      }
+      mdelay(MTDBRIDGE_TIMEOUT_SLICE);
     }
-    printf("\n");
-  }
 
-  /* Just return erased bytes for the moment */
-  memset(buf, 0xFF, len);
-  printf("mtd_bridge_read(off %lu, len %lu)\n", offset, len);
-	return 0;
+    // Fetch the response if there was one
+    if(rc == 0) rc = MTDBRIDGE_READ(MTDBRIDGE_STATUS_REG_ADDR);
+
+    // Loop waiting if the returned code was "operation in progress", up until
+    // the timeout period
+    timeout = MTDBRIDGE_TIMEOUT_WAITS;
+    while((rc & MTDBRIDGE_SR_OIP) != 0) {
+      if(!timeout--) {
+        // Break loop with the "operation in progress" status pending
+        break;
+      }
+      mdelay(MTDBRIDGE_TIMEOUT_SLICE);
+      rc = MTDBRIDGE_READ(MTDBRIDGE_STATUS_REG_ADDR);
+    }
+
+    /* If the read returned without an error code, copy bytes into the destination buffer */
+    if(rc == 0) {
+      int word_index;
+      int word_len;
+      int buf_offset = MTDBRIDGE_MAILBOX_RAM_ADDR;
+    
+      /* Transfer in 32-bit words */
+      word_len = ((next_len + 3) >> 2);
+      for(word_index = 0; word_index < word_len; word_index++) {
+        *word_ptr++ = MTDBRIDGE_READ(buf_offset);
+        offset += 4;
+      }
+    }
+  } // while(bytes left and no error)
+
+	return rc;
 }
 
 int mtd_bridge_erase(struct spi_flash *flash, u32 offset, size_t len) {
