@@ -159,18 +159,8 @@ static int mtd_bridge_write(struct spi_flash *flash,
     // Copy the next buffer's worth of data to the bridge peripheral 
     buf_offset = MTDBRIDGE_MAILBOX_RAM_ADDR;
     word_len = ((next_len + 3) >> 2);
-    //    printf("\nWrite to 0x%08X : \n", offset);
     for(word_index = 0; word_index < word_len; word_index++) {
-      //      printf("%08X ", *word_ptr);
-      //      if((word_index % 8) == 7) printf("\n");
-      // TEMPORARY - Do a byte swap in software
-      u32 write_word = ((*word_ptr >> 24) | 
-                        ((*word_ptr >> 8) & 0x0000FF00) |
-                        ((*word_ptr << 8) & 0x00FF0000) |
-                        (*word_ptr << 24));
-        
-      MTDBRIDGE_WRITE(buf_offset, write_word); // *word_ptr++);
-      word_ptr++;
+      MTDBRIDGE_WRITE(buf_offset, *word_ptr++);
       buf_offset += 4;
     }
 
@@ -211,11 +201,8 @@ static int mtd_bridge_read(struct spi_flash *flash, u32 offset, size_t len, void
     
       // Transfer in 32-bit words
       word_len = ((next_len + 3) >> 2);
-      //      printf("\nRead from 0x%08X : \n", offset);
       for(word_index = 0; word_index < word_len; word_index++) {
         *word_ptr++ = MTDBRIDGE_READ(buf_offset);
-        //        printf("%08X ", *(word_ptr - 1));
-        //        if((word_index % 8) == 7) printf("\n");
         buf_offset += 4;
       }
     }
