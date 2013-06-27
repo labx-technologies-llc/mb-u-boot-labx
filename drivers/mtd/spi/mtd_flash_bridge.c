@@ -57,7 +57,7 @@
 
 /* Timeout, in milliseconds, associated with MTD bridge operations */
 #define MTDBRIDGE_TIMEOUT_MS     500
-#define MTDBRIDGE_TIMEOUT_SLICE  100
+#define MTDBRIDGE_TIMEOUT_SLICE  1
 #define MTDBRIDGE_TIMEOUT_WAITS  ((MTDBRIDGE_TIMEOUT_MS + MTDBRIDGE_TIMEOUT_SLICE - 1) / MTDBRIDGE_TIMEOUT_SLICE)
 
 /* Stubbed out SPI Flash functions */
