@@ -319,7 +319,7 @@
 			xlnx,package = "fgg484";
 		} ;
 		backplane_bridge: legacy-bridge@820e0000 {
-			compatible = "xlnx,avb-ep-legacy-bridge-1.00.a";
+                        compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
 			device_type = "network";
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x820e0000 0x10000 >;
@@ -354,7 +354,7 @@
 			compatible = "xlnx,labx-ethernet-1.03.a";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 4 2 3 2 15 2 >;
+			interrupts = < 4 2 3 2 >;
 			local-mac-address = [ 00 0a 35 cd 8a 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
@@ -612,7 +612,7 @@
                         xlnx,device = "6slx45";
                         xlnx,ext-cache-addr-width = <0xa>;
                         xlnx,family = "spartan6";
-                        xlnx,has-dynamic-sample-rates = <0x0>;
+                        xlnx,has-dynamic-sample-rates = <0x1>;
                         xlnx,has-tdm-analyzer = <0x1>;
                         xlnx,has-tdm-loopback = <0x0>;
                         xlnx,has-tdm-slave-manager = <0x0>;
@@ -630,7 +630,8 @@
                         xlnx,slave-interconnect = "PLB";
                         xlnx,slave-native-dwidth = <0x20>;
                         xlnx,tdm-lane-count = <0x8>;
-                        xlnx,tdm-max-burst-length = <0x10>;
+                        xlnx,tdm-max-burst-length = <0x08>;
+                        xlnx,tdm-max-burst-multiple = <0x04>;
                         xlnx,tdm-max-slot-density = <0x8>;
                         xlnx,write-cache-addr-width = <0xd>;
                 } ;	
