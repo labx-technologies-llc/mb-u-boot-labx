@@ -330,7 +330,7 @@
 			xlnx,slave-native-dwidth = <0x20>;
 		} ;
 		eth01_audio_packetizer: labx-audio-packetizer@82090000 {
-			compatible = "xlnx,labx-audio-packetizer-1.04.a", "xlnx,labx-audio-packetizer-1.00.a";
+			compatible = "xlnx,labx-audio-packetizer-1.06.a", "xlnx,labx-audio-packetizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 9 2 >;
 			reg = < 0x82090000 0x10000 >;
@@ -340,7 +340,7 @@
 			xlnx,cache-enable-width = <0x1>;
 			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
-			xlnx,has-internal-cache-ram = <0x1>;
+			xlnx,has-internal-cache-ram = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,is-dual-headed = <0x1>;
 			xlnx,num-clock-domains = <0x1>;
@@ -362,7 +362,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth0_audio_depacketizer: labx-audio-depacketizer@82100000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 11 2 >;
 			reg = < 0x82100000 0x10000 >;
@@ -405,7 +405,7 @@
 			xlnx,txcsum = <0x0>;
 		} ;
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
-			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
+			compatible = "xlnx,labx-audio-depacketizer-1.08.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 12 2 >;
 			reg = < 0x82110000 0x10000 >;
@@ -486,7 +486,7 @@
 			xlnx,timer-prescaler = <0x3e8>;
 		} ;
 		labx_tdm_audio_0: labx-tdm-audio@820b0000 {
-			compatible = "xlnx,labx-tdm-audio-1.03.a", "xlnx,labx-tdm-audio-1.00.a";
+			compatible = "xlnx,labx-tdm-audio-1.04.a", "xlnx,labx-tdm-audio-1.00.a";
 			interrupt-parent = <&irq_control>;
 			interrupts = < 17 2 >;
 			reg = < 0x820b0000 0x10000 >;
@@ -514,7 +514,10 @@
 			xlnx,tdm-max-slot-density = <0x10>;
 			xlnx,tdm-min-burst-length = <0x8>;
 			xlnx,tdm-max-burst-multiple = <0x4>;
-			xlnx,write-cache-addr-width = <0xd>;
+			xlnx,tdm-num-receivers = <0x1>;
+			xlnx,tdm-num-transmitters = <0x1>;
+			xlnx,packetizer-cache-addr-width = <0xc>;
+			xlnx,packetizer-cache-data-words = <0x400>;
 		} ;
 		mdm_0: debug@82010000 {
 			compatible = "xlnx,mdm-2.10.a";
