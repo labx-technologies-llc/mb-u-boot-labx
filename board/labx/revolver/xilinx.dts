@@ -403,16 +403,7 @@
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
 			xlnx,txcsum = <0x0>;
-		} ;		
-		backplane_bridge: legacy-bridge@820a0000 {
-			compatible = "xlnx,avb-ep-legacy-bridge-1.00.a", "xlnx,labx-legacy-bridge-1.00.a";
-			device_type = "network";
-			phy-mdio-controller = <&eth0>;
-			reg = < 0x820a0000 0x10000 >;
-			xlnx,phy-addr = <0x4>;
-			xlnx,phy-type = <0x1>;
-			xlnx,rx-filters-per-port = <0x8>;
-		} ;
+		} ;	
 		eth1_audio_depacketizer: labx-audio-depacketizer@82110000 {
 			compatible = "xlnx,labx-audio-depacketizer-1.07.a", "xlnx,labx-audio-depacketizer-1.00.a";
 			interrupt-parent = <&irq_control>;
@@ -500,7 +491,7 @@
 			xlnx,device = "6slx45";
 			xlnx,family = "spartan6";
 			xlnx,include-dphase-timer = <0x0>;
-			xlnx,num-streams = <0x40>;
+			xlnx,num-streams = <0x20>;
 			xlnx,package = "csg324";
 			xlnx,redundant = <0x1>;
 			xlnx,tdm-lane-count = <0x4>;
@@ -520,6 +511,17 @@
 			xlnx,s-axi-protocol = "AXI4LITE";
 			xlnx,use-bscan = <0x0>;
 			xlnx,use-uart = <0x1>;
+		} ;
+		packet_bridge: legacy-bridge@820a0000 {
+			compatible = "xlnx,labx-legacy-bridge-1.00.a";
+			interrupt-parent = <&irq_control>;
+			interrupts = < 16 0 >;
+			device_type = "network";
+			phy-mdio-controller = <&eth0>;
+			reg = < 0x820a0000 0x10000 >;
+			xlnx,phy-addr = <0x4>;
+			xlnx,phy-type = <0x1>;
+			xlnx,rx-filters-per-port = <0x8>;
 		} ;
 		serial_console: serial@82020000 {
 			clock-frequency = <62500000>;
