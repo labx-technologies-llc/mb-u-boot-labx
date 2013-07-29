@@ -34,7 +34,7 @@
 //#define CONFIG_FIRMWARE_UPDATE
 
 // Configuration for SPI OTP
-#define CFG_SPI_OTP
+#define CONFIG_SPI_OTP
 #define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */

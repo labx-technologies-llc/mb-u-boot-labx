@@ -1274,12 +1274,6 @@ int do_flash_rom_image(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 	const char * const script_list[] = {
 			"echo Starting Flash ROM image load",
 			"echo --------------------------------",
-			"setenv autoload no",
-			"setenv ethaddr 00:0a:35:00:44:01",
-			"setenv ipaddr 192.168.1.1",
-			"setenv serverip 192.168.1.100",
-			"setenv netkargs labx_eth_llink.macaddr=0x00,0x0a,0x35,0x00,0x44,0x01",
-			"ping 192.168.1.100",
 			NULL,
 #ifdef CONFIG_SYS_FLASH_CFI
 			"protect off 0x87000000 +0x1000000",
