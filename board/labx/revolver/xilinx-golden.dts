@@ -39,7 +39,7 @@
 		serial1 = &host_serial;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=spi32766.0:1536K(bootfpga),256K(config),256K(bootenv),256K(boot),1280K(kernel),1280K(goldenkernel),3328K(romfs),2304K(goldenromfs),1536K(fpga),1024K(rootfs),1024K(goldenrootfs),2304K(settingsfs) root=/dev/mtdblock10 rootfstype=squashfs init=/bin/init broadcom.led_default=19,26,26,22 broadcom.bc5481_auto_negotiate_enable=1" flash_config_part=1 labx_direct_ethernet.flash_config_mac_offset=0";
+		bootargs = "console=ttyUL0 mtdparts=spi32766.0:1536K(bootfpga),256K(config),256K(bootenv),256K(boot),1280K(kernel),1280K(goldenkernel),3328K(romfs),2304K(goldenromfs),1536K(fpga),1024K(rootfs),1024K(goldenrootfs),2304K(settingsfs) root=/dev/mtdblock10 rootfstype=squashfs init=/bin/init broadcom.led_default=19,26,26,22 broadcom.bc5481_auto_negotiate_enable=1 flash_config_part=1 labx_direct_ethernet.flash_config_mac_offset=0";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
