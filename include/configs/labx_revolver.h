@@ -158,7 +158,7 @@
 /* #define	CONFIG_SYS_FSL_2 */
 /* #define	FSL_INTR_2	1 */
 
-/* DDR2 SDRAM, main memory */
+/* DDR3 SDRAM, main memory */
 #define	CONFIG_SYS_SDRAM_BASE		XPAR_MPMC_0_MPMC_BASEADDR
 #define	CONFIG_SYS_SDRAM_SIZE		(XPAR_MPMC_0_MPMC_HIGHADDR - XPAR_MPMC_0_MPMC_BASEADDR + 1)
 
@@ -240,7 +240,7 @@
  * will be a delay to allow the user to stop auto-boot,
  * if desired. If it is not defined, auto-boot will be
  * compiled out completely. */
-#define CONFIG_BOOTDELAY 3
+#define CONFIG_BOOTDELAY 0
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
 #define CONFIG_LABX_PREBOOT
