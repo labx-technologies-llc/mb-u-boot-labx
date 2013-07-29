@@ -1,5 +1,8 @@
 #ifndef _LABX_MAILBOX_H_
 #define _LABX_MAILBOX_H_
+
+#ifdef CONFIG_LABX_MAILBOX
+
 #include "xparameters.h"
 #include <linux/types.h>
 
@@ -58,4 +61,12 @@ extern void SetupLabXMailbox(void);
 extern int ReadLabXMailbox(uint8_t *buffer, uint32_t *size, uint8_t pollForMsg);
 extern void WriteLabXMailbox(uint8_t *buffer, uint32_t size);
 extern void TrigAsyncLabXMailbox(void);
+
+#else
+#define SetupLabXMailbox()      (void)0
+#define ReadLabXMailbox(x,y,z)  0
+#define WriteLabXMailbox(x,y)   (void)0
+#define TrigAsyncLabXMailbox()  (void)0
+#endif
+
 #endif

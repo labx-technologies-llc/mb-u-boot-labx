@@ -30,3 +30,5 @@
 TEXT_BASE = 0x89F00000
 
 PLATFORM_CPPFLAGS += -mno-xl-soft-mul -mno-xl-soft-div -mxl-barrel-shift -mxl-pattern-compare
+
+CONFIG_LABX_MAILBOX = y
