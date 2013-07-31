@@ -37,7 +37,7 @@
 		serial0 = &serial_console;
 	} ;
 	chosen {
-		bootargs = "console=ttyUL0 mtdparts=mtdbridge0:1536K(bootfpga),256K(empty),256K(bootenv),256K(boot),1280K(kernel),1280K(goldenkernel),3328K(romfs),2304K(goldenromfs),1536K(fpga),1024K(rootfs),1024K(goldenrootfs),2304K(settingsfs) root=/dev/mtdblock9 rootfstype=squashfs init=/bin/init";
+		bootargs = "console=ttyUL0 mtdparts=mtdbridge0:1536K(bootfpga),256K(macaddrs),256K(bootenv),256K(boot),1280K(kernel),1280K(goldenkernel),3328K(romfs),2304K(goldenromfs),1536K(fpga),1024K(rootfs),1024K(goldenrootfs),2304K(settingsfs) root=/dev/mtdblock9 rootfstype=squashfs init=/bin/init flash_config_part=1 labx_direct_ethernet.flash_config_mac_offset=0";
 		linux,stdout-path = "/plb@0/serial@82020000";
 	} ;
 	cpus {
