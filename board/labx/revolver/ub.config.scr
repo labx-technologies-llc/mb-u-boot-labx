@@ -28,7 +28,7 @@ echo Flash Map
 setenv bootfpgasize     0x180000; setenv bootfpgastart     0x000000; setenv bootfpgahdr        0x177FC0
 setenv goldenfdtsize    0x008000; setenv goldenfdtstart    0x178000; setenv goldenfdthdr       0x17FFC0
 setenv goldenfdtsector  0x140000; setenv goldenfdtdram   0x88038000; setenv goldenfdthdrdram 0x8803FFC0
-setenv unusedsize       0x040000; setenv unusedstart       0x180000
+setenv configsize       0x040000; setenv configstart       0x180000
 setenv bootenvsize      0x040000; setenv bootenvstart      0x1C0000
 setenv bootsize         0x040000; setenv bootstart         0x200000; setenv boothdr            0x23FFC0
 setenv kernsize         0x140000; setenv kernstart         0x240000

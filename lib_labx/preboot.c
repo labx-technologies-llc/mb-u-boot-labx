@@ -150,8 +150,8 @@ static int check_crcs(const char *crc_vars[][5], int num) {
 
   // Use the start of DDR memory for temporary storage.
   if(!ddr) {
-    if(!(ddr = map_physmem(XPAR_DDR2_CONTROL_MPMC_BASEADDR, XPAR_DDR2_CONTROL_MPMC_HIGHADDR - XPAR_DDR2_CONTROL_MPMC_BASEADDR, MAP_WRBACK))) {
-      printf("Failed to map physical memory at 0x%08X\n", XPAR_DDR2_CONTROL_MPMC_BASEADDR);
+    if(!(ddr = map_physmem(DDR_CONTROL_MPMC_BASEADDR, DDR_CONTROL_MPMC_HIGHADDR - DDR_CONTROL_MPMC_BASEADDR, MAP_WRBACK))) {
+      printf("Failed to map physical memory at 0x%08X\n", DDR_CONTROL_MPMC_BASEADDR);
       return 0;
     } else {
       hdr_ddr = (image_header_t*)ddr;

@@ -27,7 +27,7 @@
 #error "Lab X pre-boot procedures required for firmware update support (CONFIG_LABX_PREBOOT not defined)."
 #endif
 
-#define FWUPDATE_BUFFER XPAR_DDR2_CONTROL_MPMC_BASEADDR
+#define FWUPDATE_BUFFER DDR_CONTROL_MPMC_BASEADDR
 
 /* Constant definitions for event types supported by the AVB platform.
 * These are hash values computed from the stream class names.
@@ -85,13 +85,13 @@ AvbDefs__ErrorCode startFirmwareUpdate(string_t cmd,
                  e_EC_UPDATE_ALREADY_IN_PROGRESS : e_EC_SUCCESS);
 
   /* Initialize the firware update context; load the binary image to the "clobber"
-   * region, which is at the start of DDR2.
+   * region, which is at the start of DDR.
    */
   fwUpdateCtxt.bUpdateInProgress     = TRUE;
   fwUpdateCtxt.length                = length;
   fwUpdateCtxt.cmd                   = cmd;
   fwUpdateCtxt.bytesReceived         = 0;
-  fwUpdateCtxt.fwImageBase           = (uint8_t*) XPAR_DDR2_CONTROL_MPMC_BASEADDR;
+  fwUpdateCtxt.fwImageBase           = (uint8_t*) DDR_CONTROL_MPMC_BASEADDR;
   fwUpdateCtxt.fwImagePtr            = fwUpdateCtxt.fwImageBase;
   
   return(returnValue);

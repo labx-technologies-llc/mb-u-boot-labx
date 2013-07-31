@@ -110,6 +110,7 @@ COBJS-$(CONFIG_CMD_LICENSE) += cmd_license.o
 COBJS-y += cmd_load.o
 COBJS-$(CONFIG_LOGBUFFER) += cmd_log.o
 COBJS-$(CONFIG_ID_EEPROM) += cmd_mac.o
+COBJS-$(CONFIG_CMD_MAC_PROG) += cmd_mac_prog.o
 COBJS-$(CONFIG_CMD_MEMORY) += cmd_mem.o
 COBJS-$(CONFIG_CMD_MFSL) += cmd_mfsl.o
 COBJS-$(CONFIG_CMD_MG_DISK) += cmd_mgdisk.o

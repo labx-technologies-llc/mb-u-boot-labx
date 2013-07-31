@@ -35,6 +35,18 @@
 /* Location or runtime FPGA on this platform. */
 #define RUNTIME_FPGA_BASE 0xA40000
 
+// If defined, we will try to pull a MAC
+// address out of flash at this location.
+// Also makes U-Boot allow changes to
+// environment variable ethaddr (via code
+// hacks in cmd_nvedit.c).
+#define LABX_MAC_ADDR_FLASH_LOC 0x180000
+#define	PLATFORM_CONFIG_SIZE	0x40000	 /* 256K */
+
+/* Command line MAC programming */
+#define NUM_ETH_PORTS 2
+#define CONFIG_CMD_MAC_PROG
+
 // This is the entire firmware update module,
 // and includes GPIO-checking.
 #define CONFIG_FIRMWARE_UPDATE
@@ -45,10 +57,6 @@
 // Disabling jumper, needed for switching serial console
 // when on MTF or HPX
 //#define GPIO_FIRMWARE_UPDATE_BIT 18
-
-/* Configuration for SPI OTP */
-#define CFG_SPI_OTP
-#define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
 
@@ -150,7 +158,7 @@
 /* #define	CONFIG_SYS_FSL_2 */
 /* #define	FSL_INTR_2	1 */
 
-/* DDR2 SDRAM, main memory */
+/* DDR3 SDRAM, main memory */
 #define	CONFIG_SYS_SDRAM_BASE		XPAR_MPMC_0_MPMC_BASEADDR
 #define	CONFIG_SYS_SDRAM_SIZE		(XPAR_MPMC_0_MPMC_HIGHADDR - XPAR_MPMC_0_MPMC_BASEADDR + 1)
 
@@ -159,6 +167,9 @@
 
 #define	CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
 #define	CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 0x1000)
+
+#define DDR_CONTROL_MPMC_BASEADDR XPAR_DDR3_CONTROL_MPMC_BASEADDR
+#define DDR_CONTROL_MPMC_HIGHADDR XPAR_DDR3_CONTROL_MPMC_HIGHADDR
 
 /* global pointer */
 #define	CONFIG_SYS_GBL_DATA_SIZE	128 /* size of global data */
@@ -232,7 +243,7 @@
  * will be a delay to allow the user to stop auto-boot,
  * if desired. If it is not defined, auto-boot will be
  * compiled out completely. */
-#define CONFIG_BOOTDELAY 3
+#define CONFIG_BOOTDELAY 0
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
 #define CONFIG_LABX_PREBOOT

@@ -24,13 +24,20 @@
 
 include $(TOPDIR)/config.mk
 
+ifeq ($(CONFIG_LABX_MAILBOX),y)
+CFLAGS += -DCONFIG_LABX_MAILBOX
+endif
+
 LIB     = lib_labx.a
 
 CFLAGS += -I$(TOPDIR)/board/$(BOARDDIR) -I$(TOPDIR)
 COBJS   = preboot.o
 COBJS  += cmd_reset.o
 COBJS  += firmware-update.o
+
+ifeq ($(CONFIG_LABX_MAILBOX),y)
 COBJS  += labx-mailbox.o
+endif
 
 OBJS   := $(addprefix $(obj),$(COBJS))
 

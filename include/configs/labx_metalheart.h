@@ -23,10 +23,10 @@
  * MA 02111-1307 USA
  */
 
-#ifndef _LAWO_METALHEART_H_
-#define _LAWO_METALHEART_H_
+#ifndef _LABX_METALHEART_H_
+#define _LABX_METALHEART_H_
 
-#include "../board/lawo/metalheart/xparameters.h"
+#include "../board/labx/metalheart/xparameters.h"
 
 #define	CONFIG_MICROBLAZE	1	/* MicroBlaze CPU */
 #define	MICROBLAZE_V5		1
@@ -157,6 +157,9 @@
 #define	CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
 #define	CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 0x1000)
 
+#define DDR_CONTROL_MPMC_BASEADDR XPAR_DDR2_CONTROL_MPMC_BASEADDR
+#define DDR_CONTROL_MPMC_HIGHADDR XPAR_DDR2_CONTROL_MPMC_HIGHADDR
+
 /* global pointer */
 #define	CONFIG_SYS_GBL_DATA_SIZE	128 /* size of global data */
 /* start of global data */
@@ -286,7 +289,7 @@
 #define	CONFIG_SYS_LOAD_ADDR	XILINX_RAM_START /* default load address */
 
 /* Some appropriate defaults for network settings */
-#define CONFIG_HOSTNAME		lawo-metalheart
+#define CONFIG_HOSTNAME		labx-metalheart
 #define CONFIG_IPADDR           192.168.1.1
 #define CONFIG_SERVERIP         192.168.1.100
 

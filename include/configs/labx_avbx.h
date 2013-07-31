@@ -46,7 +46,7 @@
 //#define GPIO_FIRMWARE_UPDATE_BIT 18
 
 /* Configuration for SPI OTP */
-#define CFG_SPI_OTP
+#define CONFIG_SPI_OTP
 #define NUM_ETH_PORTS 2
 
 /* UARTLITE0 is used for MDM. Use UARTLITE1 for Microblaze */
@@ -159,6 +159,9 @@
 #define	CONFIG_SYS_MEMTEST_START	CONFIG_SYS_SDRAM_BASE
 #define	CONFIG_SYS_MEMTEST_END		(CONFIG_SYS_SDRAM_BASE + 0x1000)
 
+#define DDR_CONTROL_MPMC_BASEADDR XPAR_DDR2_CONTROL_MPMC_BASEADDR
+#define DDR_CONTROL_MPMC_HIGHADDR XPAR_DDR2_CONTROL_MPMC_HIGHADDR
+
 /* global pointer */
 #define	CONFIG_SYS_GBL_DATA_SIZE	128 /* size of global data */
 /* start of global data */
@@ -231,7 +234,7 @@
  * will be a delay to allow the user to stop auto-boot,
  * if desired. If it is not defined, auto-boot will be
  * compiled out completely. */
-#define CONFIG_BOOTDELAY 3
+#define CONFIG_BOOTDELAY 0
 
 /* Include Lab X pre-boot routines (CRC-checking, FPGA reconfiguration, etc.) */
 #define CONFIG_LABX_PREBOOT
