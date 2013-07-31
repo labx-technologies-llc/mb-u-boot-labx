@@ -1,4 +1,4 @@
-echo Setting up Harman AVBX environment
+echo Setting up Lab X Essex environment
 echo -----------------------------------
 echo Network Configuration:
 echo TODO - Use something for MAC address
@@ -50,16 +50,16 @@ setenv bak_fdt              'setenv bakstart ${fdtstart};             setenv bak
 
 setenv check_settingsfs_crc 'sf read 0x88000040 ${settingsfsstart} ${settingsfssize}; echo "\\cChecking CRC... "; crc32 0x88000040 ${settingsfssize} 0x88000000; if cmp.l 0x88000000 0x88000018 1; then echo CRC check successful.; else echo CRC check failed.; fi'
 
-setenv update_boot_fpga     'setenv imgname labx_Avbx_Fpga-failsafe.bin.ub ;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load spiprobe bak_golden_fdt install unbak'
-setenv update_golden_fdt    'setenv imgname labx_Avbx_Fpga-failsafe.bin.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv hdrlocdram ${goldenfdthdrdram};setenv secoffdram ${goldenfdtdram};run load spiprobe install_in_sector'
+setenv update_boot_fpga     'setenv imgname Avbx_Fpga-failsafe.bin.ub ;setenv imgstart ${bootfpgastart};    setenv imgsize ${bootfpgasize};    setenv hdrloc ${bootfpgahdr};    run load spiprobe bak_golden_fdt install unbak'
+setenv update_golden_fdt    'setenv imgname Avbx_Fpga-failsafe.bin.ub;       setenv flashsec ${goldenfdtsector};  setenv imgsize ${goldenfdtsize};   setenv hdrlocdram ${goldenfdthdrdram};setenv secoffdram ${goldenfdtdram};run load spiprobe install_in_sector'
 setenv update_boot_env      'setenv imgname ub.config.img;            setenv imgstart ${bootenvstart};     setenv imgsize ${bootenvsize};                                      run load run_script'
 setenv update_uboot         'setenv imgname u-boot.bin.ub;            setenv imgstart ${bootstart};        setenv imgsize ${bootsize};        setenv hdrloc ${boothdr};        run load spiprobe install'
 setenv update_kernel        'setenv imgname linux.ub;                 setenv imgstart ${kernstart};        setenv imgsize ${kernsize};                                         run load spiprobe install_with_hdr'
 setenv update_golden_kernel 'setenv imgname linux-golden.ub;          setenv imgstart ${goldenkernstart};  setenv imgsize ${goldenkernsize};                                   run load spiprobe install_with_hdr'
 setenv update_romfs         'setenv imgname usr.romfs.ub;             setenv imgstart ${romfsstart};       setenv imgsize ${romfssize};       setenv hdrloc ${romfshdr};       run load spiprobe install'
 setenv update_golden_romfs  'setenv imgname usr-golden.romfs.ub;      setenv imgstart ${goldenromfsstart}; setenv imgsize ${goldenromfssize}; setenv hdrloc ${goldenromfshdr}; run load spiprobe install'
-setenv update_fpga          'setenv imgname labx_Avbx_Fpga.bin.ub;         setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        setenv hdrloc ${fpgahdr};        run load spiprobe bak_fdt install unbak'
-setenv update_fdt           'setenv imgname avbx.dtb.ub;              setenv flashsec ${fdtsector};        setenv imgsize ${fdtsize};         setenv hdrlocdram ${fdthdrdram}; setenv secoffdram ${fdtdram}; run load spiprobe install_in_sector'
+setenv update_fpga          'setenv imgname Avbx_Fpga.bin.ub;         setenv imgstart ${fpgastart};        setenv imgsize ${fpgasize};        setenv hdrloc ${fpgahdr};        run load spiprobe bak_fdt install unbak'
+setenv update_fdt           'setenv imgname essex.dtb.ub;              setenv flashsec ${fdtsector};        setenv imgsize ${fdtsize};         setenv hdrlocdram ${fdthdrdram}; setenv secoffdram ${fdtdram}; run load spiprobe install_in_sector'
 setenv update_rootfs        'setenv imgname rootfs.sqfs.ub;           setenv imgstart ${rootfsstart};      setenv imgsize ${rootfssize};      setenv hdrloc ${rootfshdr};      run load spiprobe install'
 setenv update_golden_rootfs 'setenv imgname rootfs-golden.sqfs.ub;    setenv imgstart ${goldenrootfsstart};setenv imgsize ${goldenrootfssize};setenv hdrloc ${goldenrootfshdr};run load spiprobe install'
 setenv update_settingsfs    'setenv imgname settingsfs.jffs2.ub;      setenv imgstart ${settingsfsstart};  setenv imgsize ${settingsfssize};  setenv hdrloc ${settingsfshdr};  run load spiprobe install_no_hdr check_settingsfs_crc'
@@ -103,9 +103,9 @@ setenv tempfdtstart 0x88700000
 setenv temp_kernel 'tftp ${tempkernstart} ${kernname};tftp ${tempfdtstart} ${fdtname};bootm ${tempkernstart} - ${tempfdtstart}'
 setenv spiprobe 'sf probe 0:0 40000000 3'
 
-echo Harman AVBX Firmware Update
-setenv blobname           labx_avbxUpdate.bin.ub
-setenv goldenblobname     labx_avbxGoldenUpdate.bin.ub
+echo Lab X Essex Firmware Update
+setenv blobname           avbxUpdate.bin.ub
+setenv goldenblobname     avbxGoldenUpdate.bin.ub
 setenv blobrunstart       0x88000040
 setenv load_blob          'tftp ${clobstart} ${blobname}'
 setenv load_golden_blob   'tftp ${clobstart} ${goldenblobname}'
