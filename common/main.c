@@ -51,11 +51,7 @@ extern int CheckFirmwareUpdate(void);
 #if defined(CONFIG_LABX_PREBOOT)
 extern int labx_preboot(int bootdelay);
 extern void labx_print_cmdhelp(void);
-#if defined(USE_ICAP_FSL)
 extern int labx_is_golden_fpga(void);
-#else
-#error ICAP support required for Lab X pre-boot procedures (USE_ICAP_FSL not defined).
-#endif
 #endif
 
 #if defined(CONFIG_GPIO_INIT)
