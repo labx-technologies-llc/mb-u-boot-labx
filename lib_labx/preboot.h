@@ -6,12 +6,10 @@
 #ifndef LABXLIB_PREBOOT_H
 #define LABXLIB_PREBOOT_H
 
-#ifdef USE_ICAP_FSL
+#ifdef CONFIG_LABX_PREBOOT
 int labx_is_fallback_fpga(void);
 int labx_is_golden_fpga(void);
-#endif
 
-#ifdef CONFIG_LABX_PREBOOT
 int check_runtime_crcs(void);
 int check_golden_crcs(void);
 #endif
