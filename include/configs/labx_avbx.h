@@ -61,6 +61,7 @@
 #define CONFIG_CMD_PING
 #define CONFIG_NET_MULTI
 #define CONFIG_CMD_NET
+#define CONFIG_CMD_MAC_PROG
 
 #undef ET_DEBUG
 

@@ -28,14 +28,16 @@
 #include <fdt.h>
 #include <libfdt.h>
 
+#include "../drivers/mtd/spi/spi_flash_internal.h"
+
 #define MAC_ADDR_BYTES 6
 #define MAX_MAC_STRING_CHAR 17
 
 #ifdef CONFIG_SPI_OTP
-#define OTP_BASE_ADDR 0x114
+static uint16_t OTP_BASE_ADDR;
+static uint16_t MAC_REGION_OFFSET;
+static uint16_t OTP_LOCK_REGION_BASE;
 #define MAC_REGION_INSET 0x02
-#define MAC_REGION_OFFSET 0x10
-#define OTP_LOCK_REGION_BASE 0x112
 #define OTP_MAX_MAC_ADDR_OFFSET 32
 #define OTP_OFFSET_PARAM "base_otp_reg"
 #else
@@ -55,6 +57,39 @@
 #ifdef CONFIG_SPI_FLASH
   static struct spi_flash *spiflash = NULL;
 #endif
+
+static int initialized = FALSE;
+
+int read_identification(void)
+{
+#ifdef CONFIG_SPI_OTP
+    int ret;
+    uint8_t id[6];
+    uint8_t cmd = 0x9F; // RDIO
+
+    // Probe for flash device.
+    if(!spiflash) {
+        if(!(spiflash = spi_flash_probe(0, 0, 40000000, 3))) {
+            puts("Failed to initialize SPI flash device at 0:0.\n");
+            return 0;
+        }
+    }
+
+    ret = spi_flash_read_common(spiflash, &cmd, 1, (void*)id, 6);
+
+    if(id[5] == 0x80){ // S25FL128S and S25FL256S
+        OTP_BASE_ADDR        = 0x0000;
+        MAC_REGION_OFFSET    = 0x0020; // 32 byte blocks
+        OTP_LOCK_REGION_BASE = 0x0010;
+    }else{ // S25FL129P
+        OTP_BASE_ADDR        = 0x0114;
+        MAC_REGION_OFFSET    = 0x0010; // 16 byte blocks
+        OTP_LOCK_REGION_BASE = 0x0112;
+    }
+
+#endif
+    initialized = TRUE;
+}
 
 int char_to_hex(char ch) 
 {
@@ -147,21 +182,25 @@ getFdtBootCmdProperty_err:
 int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {
 	int i = 0;
-        int j = 0; 
-        int ret = 0;
+    int j = 0; 
+    int ret = 0;
 	const char *ethintf = argv[1];
 	const char *mac = argv[2];
 	uint8_t macbyte[8];
 	uint8_t stored_macbyte[8];
 	int skip_colon = TRUE;
 #ifdef CONFIG_SPI_OTP
-        char otpMacOffsetStr[16];
+    char otpMacOffsetStr[16];
 	uint8_t lockbits;
-        int idx = 2;
+    int idx = 2;
 #else
-        int idx = 0;
+    int idx = 0;
 #endif
-        int ethnum = char_to_hex(ethintf[3]);
+    int ethnum = char_to_hex(ethintf[3]);
+
+    if(!initialized){
+        read_identification();
+    }
 
 	if (argc < 3)
 		goto usage;
@@ -238,7 +277,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 
 	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * MAC_REGION_OFFSET));
 	ulong otp_lock_addr = (ulong)OTP_LOCK_REGION_BASE + ((i + ethnum) >> 3);
-	uint8_t lockmask = 0x01 << ethnum;
+	uint8_t lockmask = 0x01 << (ethnum + (i%8));
 
 	ret = spi_flash_read_otp(spiflash, otp_lock_addr, 1, (void*)&lockbits);
 
@@ -258,6 +297,7 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
 		}
 
+
 		// Read MAC written and verify
 #ifdef CONFIG_SPI_OTP
 		ret = spi_flash_read_otp(spiflash, otp_addr, (MAC_ADDR_BYTES+MAC_REGION_INSET), (void*)stored_macbyte);
@@ -266,7 +306,10 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #endif
 
 		for(i = 0; i < (MAC_ADDR_BYTES+MAC_REGION_INSET); i++) {
-			if(stored_macbyte[i] != macbyte[i]) goto fail;			
+			if(stored_macbyte[i] != macbyte[i]){ 
+                printf("stored macbyte not equal to macbyte, going to fail\n");
+                goto fail;			
+            }
 		}
 
 #ifdef CONFIG_SPI_OTP
@@ -305,6 +348,10 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 #ifdef CONFIG_SPI_OTP
         char otpMacOffsetStr[16];
 #endif
+
+    if(!initialized){
+        read_identification();
+    }
 	if (argc < 2)
 		goto usage;
 
@@ -343,7 +390,7 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset 0\n");
 	}
 
-	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * MAC_REGION_OFFSET) + OTP_REGION_INSET);
+	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * MAC_REGION_OFFSET) + MAC_REGION_INSET);
 	ret = spi_flash_read_otp(spiflash, otp_addr, MAC_ADDR_BYTES, (void*)macbyte); 
 #else
 	ulong flash_addr = (ulong)(LABX_MAC_ADDR_FLASH_LOC + (ethnum * MAC_REGION_OFFSET));
@@ -376,6 +423,10 @@ int do_eraseconfig(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 {     
   int ret = 0;
 
+    if(!initialized){
+        read_identification();
+    }
+
 #ifdef CONFIG_SPI_FLASH
   // Probe for flash device.
   if(!spiflash) {
@@ -386,6 +437,7 @@ int do_eraseconfig(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
   }
 #endif
  
+#ifndef CONFIG_SPI_OTP
   printf("Erasing persistent storage flash partition...\n");
   ret = spi_flash_erase(spiflash, LABX_MAC_ADDR_FLASH_LOC, PLATFORM_CONFIG_SIZE);
 
@@ -393,7 +445,7 @@ int do_eraseconfig(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
     printf("SPI erase %s failed\n", argv[0]);
     return 1;
   }
-
+#endif
   return 0;
 }
 
