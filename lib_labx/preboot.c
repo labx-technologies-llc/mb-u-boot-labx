@@ -23,9 +23,6 @@
 #endif
 
 #ifdef CONFIG_LABX_PREBOOT
-#ifndef USE_ICAP_FSL
-#error "Support for the ICAP module is required for Lab X pre-boot procedures (USE_ICAP_FSL not defined)"
-#endif
 
 /* Arrays for variables that hold the locations
  * of all of the images to check CRCs for. These
@@ -133,7 +130,9 @@ int labx_preboot(int bootdelay) {
 void labx_print_cmdhelp(void) {
 	puts("Available commands:\n");
 	puts("  'checkc', 'checkg', 'checkp', to check all, golden, and production CRCs.\n");
+#ifdef CONFIG_ICAP_FSL
 	puts("  'reconf 1' to reconfigure to the production FPGA (no arg for golden).\n");
+#endif
 	puts("  'run bootglnx' to boot golden linux.\n");
 }
 
@@ -318,5 +317,9 @@ int labx_is_golden_fpga(void) {
 
   return is_golden || labx_is_fallback_fpga();
 }
+
+#else
+int labx_is_fallback_fpga(void) { return 0; }
+int labx_is_golden_fpga(void) { return 0; }
 #endif /* USE_ICAP_FSL */
 
