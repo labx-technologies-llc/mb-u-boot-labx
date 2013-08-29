@@ -136,10 +136,12 @@ AvbDefs__ErrorCode sendDataPacket(FirmwareUpdate__FwData *data)
 int doCrcCheck(void) {
   int returnValue = 0;
 
-  if(image_check_type((image_header_t *)fwUpdateCtxt.fwImageBase, IH_TYPE_KERNEL)) {
+  // Look for the u-boot magic header
+  if(ntohl(*(uint32_t*)fwUpdateCtxt.fwImageBase) == IH_MAGIC) { 
     printf("   Verifying Checksum ... ");
     setenv("crcreturn", "0");
-    if (!image_check_dcrc ((image_header_t *)fwUpdateCtxt.fwImageBase)) {
+    // Check the image CRC, on failure set "crcreturn" back to 1 to indicate a corrupt image
+    if(!image_check_hcrc((image_header_t*)fwUpdateCtxt.fwImageBase) || !image_check_dcrc((image_header_t *)fwUpdateCtxt.fwImageBase)) {
       printf("Bad Data CRC - please retry\n");
       setenv("crcreturn", "1");
       goto end;
