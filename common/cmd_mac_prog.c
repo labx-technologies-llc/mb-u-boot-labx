@@ -37,6 +37,7 @@
 static uint16_t OTP_BASE_ADDR;
 static uint16_t MAC_REGION_OFFSET;
 static uint16_t OTP_LOCK_REGION_BASE;
+static uint16_t OTP_DEFAULT_OFFSET;
 #define MAC_REGION_INSET 0x02
 #define OTP_MAX_MAC_ADDR_OFFSET 32
 #define OTP_OFFSET_PARAM "base_otp_reg"
@@ -81,10 +82,12 @@ int read_identification(void)
         OTP_BASE_ADDR        = 0x0000;
         MAC_REGION_OFFSET    = 0x0020; // 32 byte blocks
         OTP_LOCK_REGION_BASE = 0x0010;
+        OTP_DEFAULT_OFFSET   = 1;
     }else{ // S25FL129P
         OTP_BASE_ADDR        = 0x0114;
         MAC_REGION_OFFSET    = 0x0010; // 16 byte blocks
         OTP_LOCK_REGION_BASE = 0x0112;
+        OTP_DEFAULT_OFFSET   = 0;
     }
 
 #endif
@@ -266,13 +269,16 @@ int do_setmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		i = (int)simple_strtoul(otpMacOffsetStr, NULL, 0);
 		if (i < 0 || i > OTP_MAX_MAC_ADDR_OFFSET) {
 			printf(OTP_OFFSET_PARAM " (%d) exceeds max value %d\n", i, OTP_MAX_MAC_ADDR_OFFSET);
-			i = 0;
+			i = OTP_DEFAULT_OFFSET;
+		} else if(i < OTP_DEFAULT_OFFSET){
+            printf("Boot command string " OTP_OFFSET_PARAM " less than minimum %d - using default\n", OTP_DEFAULT_OFFSET);
+            i = OTP_DEFAULT_OFFSET;
 		} else {
 			printf("Boot command string " OTP_OFFSET_PARAM "=%d\n", i);
 		}
 	} else {
-		i = 0;
-		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset 0\n");
+		i = OTP_DEFAULT_OFFSET;
+		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset %d\n", OTP_DEFAULT_OFFSET);
 	}
 
 	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * MAC_REGION_OFFSET));
@@ -381,13 +387,16 @@ int do_getmac(cmd_tbl_t *cmdtp, int flag, int argc, char *argv[])
 		i = (int)simple_strtoul(otpMacOffsetStr, NULL, 0);
 		if (i < 0 || i > OTP_MAX_MAC_ADDR_OFFSET) {
 			printf(OTP_OFFSET_PARAM " (%d) exceeds max value %d\n", i, OTP_MAX_MAC_ADDR_OFFSET);
-			i = 0;
-		} else {
+			i = OTP_DEFAULT_OFFSET;
+		} else if(i < OTP_DEFAULT_OFFSET){
+            printf("Boot command string " OTP_OFFSET_PARAM " less than minimum %d - using default\n", OTP_DEFAULT_OFFSET);
+            i = OTP_DEFAULT_OFFSET;
+        }else{
 			printf("Boot command string " OTP_OFFSET_PARAM "=%d\n", i);
 		}
 	} else {
-		i = 0;
-		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset 0\n");
+		i = OTP_DEFAULT_OFFSET;
+		printf("Boot command string " OTP_OFFSET_PARAM " not found - using offset %d\n", OTP_DEFAULT_OFFSET);
 	}
 
 	ulong otp_addr = (ulong)(OTP_BASE_ADDR + ((i + ethnum) * MAC_REGION_OFFSET) + MAC_REGION_INSET);
