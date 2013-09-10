@@ -511,7 +511,7 @@
 			xlnx,has-tdm-slave-manager = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,is-ext-dma-shared = <0x1>;
-			xlnx,local-osc-ratio = <0x400>;
+			xlnx,local-osc-ratio = <0x200>;
 			xlnx,max-num-streams = <0x40>;
 			xlnx,mclk-ratio = <0x400>;
 			xlnx,package = "csg324";
