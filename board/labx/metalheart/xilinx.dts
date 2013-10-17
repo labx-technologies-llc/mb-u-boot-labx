@@ -399,7 +399,7 @@
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82070000 0x10000 >;
 			xlnx,has-mdio = <0x0>;
-			xlnx,phy-addr = <0x2>;
+			xlnx,phy-addr = <0x1>;
 			xlnx,phy-mask = <0xffff>;
 			xlnx,phy-type = <0x1>;
 			xlnx,rxcsum = <0x0>;
