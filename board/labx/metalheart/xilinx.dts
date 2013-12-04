@@ -351,7 +351,7 @@
 			compatible = "xlnx,labx-ethernet-1.03.b";
 			device_type = "network";
 			interrupt-parent = <&irq_control>;
-			interrupts = < 3 2 2 2 14 2 >;
+			interrupts = < 3 2 2 2 >;
 			local-mac-address = [ 00 0a 35 a5 5f 00 ];
 			phy-mdio-controller = <&eth0>;
 			reg = < 0x82050000 0x10000 >;
@@ -554,6 +554,21 @@
 			xlnx,one-timer-only = <0x0>;
 			xlnx,trig0-assert = <0x1>;
 			xlnx,trig1-assert = <0x1>;
+		} ;
+		xps_gpio_0: gpio@820f0000 {
+			compatible = "xlnx,xps-gpio-2.00.a", "xlnx,xps-gpio-1.00.a";
+			reg = < 0x820f0000 0x10000 >;
+			xlnx,all-inputs = <0x0>;
+			xlnx,all-inputs-2 = <0x0>;
+			xlnx,dout-default = <0x0>;
+			xlnx,dout-default-2 = <0x0>;
+			xlnx,family = "spartan6";
+			xlnx,gpio-width = <0x6>;
+			xlnx,gpio2-width = <0x20>;
+			xlnx,interrupt-present = <0x0>;
+			xlnx,is-dual = <0x0>;
+			xlnx,tri-default = <0xffffffff>;
+			xlnx,tri-default-2 = <0xffffffff>;
 		} ;
 	} ;
 }  ;
