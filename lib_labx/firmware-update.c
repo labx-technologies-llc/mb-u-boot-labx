@@ -99,7 +99,7 @@ AvbDefs__ErrorCode startFirmwareUpdate(string_t cmd,
 
 /**
  * Accept a Data packet for a firmware update. Must be called while we are in the process 
- * of a firmware update (i.e. startFirmwareUpdate() called first. 
+ * of a firmware update (i.e. startFirmwareUpdate() called first). 
  *
  * data - Data that contains the datapacket. 
  */

@@ -496,6 +496,7 @@
 			xlnx,has-dynamic-sample-rates = <0x1>;
 			xlnx,has-tdm-analyzer = <0x1>;
 			xlnx,has-tdm-loopback = <0x0>;
+			xlnx,has-pin-loopback = <0x1>;
 			xlnx,has-tdm-slave-manager = <0x0>;
 			xlnx,include-dphase-timer = <0x0>;
 			xlnx,local-osc-ratio = <0x200>;
